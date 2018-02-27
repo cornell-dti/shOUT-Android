@@ -1,7 +1,11 @@
 package com.android.shout;
 
+import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,9 +17,14 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 import static com.android.shout.R.id.mapView;
 
@@ -29,10 +38,10 @@ public class GoOutFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.goout_fragment, container, false);
-        mMapView = (MapView) rootView.findViewById(mapView);
+        mMapView = rootView.findViewById(mapView);
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume(); // needed to get the map to display immediately
         try {
@@ -42,7 +51,7 @@ public class GoOutFragment extends Fragment {
         }
         mMapView.getMapAsync(new OnMapReadyCallback() {
             @Override
-            public void onMapReady(GoogleMap googleMap) {
+            public void onMapReady(final GoogleMap googleMap) {
                 Location location = ((MainActivity) getActivity()).getCurLocation();
 //                Location location = null;
                 try {
@@ -69,6 +78,24 @@ public class GoOutFragment extends Fragment {
                         .tilt(40)                   // Sets the tilt of the camera to 30 degrees
                         .build();                   // Creates a CameraPosition from the builder
                 googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+                googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+                    // todo move to sep thread?
+                    @Override
+                    public void onMapLongClick(LatLng latLng) {
+                        // todo check getContext() call won't fail under lollipop
+
+                        googleMap.addMarker(new MarkerOptions()
+                                .position(latLng)
+                                .title("Incident @ " + latLng.toString())); // todo is line 0 correct?
+                        Intent i = new Intent(getContext(), ReportIncident.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putDoubleArray("location", new double[]{latLng.latitude, latLng.longitude});
+                        i.putExtras(bundle);
+                        startActivity(i);
+                    }
+                });
+
                 //add markers
                 map = googleMap;
             }

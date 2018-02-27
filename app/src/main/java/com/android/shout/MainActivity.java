@@ -23,8 +23,7 @@ import com.google.android.gms.location.LocationServices;
 
 public class MainActivity extends AppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener
-{
+        GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     MenuItem prevMenuItem;
 
@@ -40,6 +39,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setContentView(R.layout.activity_main);
 
         mLocationRequest = LocationRequest.create()
@@ -56,11 +57,10 @@ public class MainActivity extends AppCompatActivity
         }
         mGoogleApiClient.connect();
 
-        bottomNavigationView = (BottomNavigationView)
-                findViewById(R.id.bottom_navigation);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager(), 4);
+        mViewPager = findViewById(R.id.pager);
+        final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager(), 3); // todo make constant, not magic
         mViewPager.setAdapter(adapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -72,9 +72,7 @@ public class MainActivity extends AppCompatActivity
             public void onPageSelected(int position) {
                 if (prevMenuItem != null) {
                     prevMenuItem.setChecked(false);
-                }
-                else
-                {
+                } else {
                     bottomNavigationView.getMenu().getItem(0).setChecked(false);
                 }
 
@@ -92,30 +90,32 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                         switch (item.getItemId()) {
-                            case R.id.findout:
+                            // case R.id.findout:
+                            //     mViewPager.setCurrentItem(0);
+                            //     break;
+                            case R.id.goout:
                                 mViewPager.setCurrentItem(0);
                                 break;
-                            case R.id.goout:
+                            case R.id.speakout:
                                 mViewPager.setCurrentItem(1);
                                 break;
-                            case R.id.speakout:
-                                mViewPager.setCurrentItem(2);
-                                break;
                             case R.id.reachout:
-                                mViewPager.setCurrentItem(3);
+                                mViewPager.setCurrentItem(2); // todo create static/enum constants instead of magic numbers
                                 break;
                         }
                         return true;
                     }
                 });
-        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-        getSupportActionBar().setCustomView(R.layout.actionbar_layout);
+
+        // todo, action bar removed
+        // getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        // getSupportActionBar().setCustomView(R.layout.actionbar_layout);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        // getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -135,8 +135,9 @@ public class MainActivity extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
+
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         mGoogleApiClient.connect();
     }
@@ -151,14 +152,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onConnected(Bundle bundle){
-        try{
+    public void onConnected(Bundle bundle) {
+        try {
             curLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if (curLocation == null) {
                 LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
             }
             Log.i("SOKLSjkl", "skljdiowjfkjwkl");
-        }catch(SecurityException e){
+        } catch (SecurityException e) {
             Toast.makeText(this, "Unable to access location information", Toast.LENGTH_LONG).show();
         }
     }
@@ -173,7 +174,7 @@ public class MainActivity extends AppCompatActivity
         if (connectionResult.hasResolution()) {
             try {
                 // Start an Activity that tries to resolve the error
-                connectionResult.startResolutionForResult(this,9000);
+                connectionResult.startResolutionForResult(this, 9000);
             } catch (IntentSender.SendIntentException e) {
                 e.printStackTrace();
             }
@@ -182,9 +183,10 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public Location getCurLocation(){
+    public Location getCurLocation() {
         return curLocation;
     }
+
     @Override
     public void onLocationChanged(Location location) {
         curLocation = location;

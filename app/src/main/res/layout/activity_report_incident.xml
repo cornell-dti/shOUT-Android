@@ -1,112 +1,180 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.android.shout.ReportIncident">
 
-    <EditText
-        android:id="@+id/postTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="10dp"
-        android:paddingBottom="20dp"
-        android:ems="10"
-        android:textSize="25dp"
-        android:hint="Title of Post"
-        android:gravity="center_horizontal"
-        android:inputType="textPersonName"
-        android:background="#668a83"
-        android:text=""
-        android:textColor="@android:color/white"
-        android:textColorHint="@android:color/white"
-        tools:layout_editor_absoluteX="84dp"
-        tools:layout_editor_absoluteY="200dp"
-        android:layout_marginTop="24dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
-    <EditText
-        android:id="@+id/postText"
-        android:hint="Share your own story..."
-        android:layout_width="wrap_content"
-        android:layout_height="250dp"
-        android:ems="10"
-        android:paddingLeft="10dp"
-        android:inputType="textMultiLine"
-        android:background="@drawable/edittext_background"
-        tools:layout_editor_absoluteX="84dp"
-        tools:layout_editor_absoluteY="156dp"
-        android:layout_above="@+id/postButton"
-        android:layout_marginBottom="18dp"
-        android:layout_alignRight="@+id/postTitle"
-        android:layout_alignEnd="@+id/postTitle"
-        android:layout_alignLeft="@+id/postTitle"
-        android:layout_alignStart="@+id/postTitle" />
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="20dp">
 
-    <Button
-        android:id="@+id/postButton"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Post"
-        android:onClick="post"
-        tools:layout_editor_absoluteX="84dp"
-        tools:layout_editor_absoluteY="310dp"
-        android:layout_marginLeft="26dp"
-        android:layout_marginStart="26dp"
-        android:layout_marginBottom="20dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignLeft="@+id/postTitle"
-        android:layout_alignStart="@+id/postTitle" />
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"> <!-- todo better theming, this is temporary -->
 
-    <Button
-        android:id="@+id/cancel"
-        style = "@android:style/Widget.Material.Button.Colored"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Cancel"
-        android:onClick="cancel"
-        tools:layout_editor_absoluteX="211dp"
-        tools:layout_editor_absoluteY="310dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_alignBaseline="@+id/postButton"
-        android:layout_alignBottom="@+id/postButton"
-        android:layout_alignRight="@+id/postTitle"
-        android:layout_alignEnd="@+id/postTitle" />
+            <EditText
+                android:id="@+id/postTitle"
+                android:layout_width="264dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:background="@android:color/transparent"
+                android:ems="10"
+                android:hint="Title of Post"
+                android:inputType="textPersonName"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"
+                android:singleLine="true"
+                android:text=""
+                android:textColor="@android:color/primary_text_light"
+                android:textColorHint="@android:color/primary_text_light"
+                android:textSize="25dp"
+                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageButton
-        android:id="@+id/setDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="setDate"
-        app:srcCompat="@drawable/calendar"
-        android:background="@null"
-        android:layout_marginTop="25dp"
-        android:layout_below="@+id/postTitle"
-        android:layout_centerHorizontal="true" />
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toStartOf="@+id/guideline"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/me" />
 
-    <ImageButton
-        android:id="@+id/setLocation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/location"
-        android:background="@null"
-        android:layout_alignTop="@+id/setDate"
-        android:onClick="setLocation"
-        android:layout_alignRight="@+id/cancel"
-        android:layout_alignEnd="@+id/cancel" />
+            <EditText
+                android:id="@+id/postText"
+                android:layout_width="0dp"
+                android:layout_height="250dp"
+                android:layout_margin="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/edittext_background"
+                android:ems="10"
+                android:hint="Share your own story..."
+                android:inputType="textMultiLine"
+                android:paddingLeft="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/setLocation" />
 
-    <ImageButton
-        android:id="@+id/setTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@null"
-        app:srcCompat="@drawable/clock"
-        android:onClick="setTime"
-        android:layout_alignTop="@+id/setDate"
-        android:layout_alignLeft="@+id/postButton"
-        android:layout_alignStart="@+id/postButton" />
+            <Button
+                android:id="@+id/postButton"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="post"
+                android:text="Post"
+                app:layout_constraintBaseline_toBaselineOf="@+id/cancel"
+                app:layout_constraintBottom_toBottomOf="@+id/cancel"
+                app:layout_constraintEnd_toEndOf="@+id/postText"
+                tools:layout_editor_absoluteX="84dp"
+                tools:layout_editor_absoluteY="310dp" />
 
-</RelativeLayout>
+            <Button
+                android:id="@+id/cancel"
+                style="@android:style/Widget.Material.Button.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:onClick="cancel"
+                android:text="Cancel"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/postText"
+                tools:layout_editor_absoluteX="211dp"
+                tools:layout_editor_absoluteY="310dp" />
+
+            <ImageButton
+                android:id="@+id/setDate"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:background="@null"
+                android:onClick="setDate"
+                android:scaleType="centerCrop"
+                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintTop_toBottomOf="@+id/setTime"
+                app:srcCompat="@drawable/calendar" />
+
+            <ImageButton
+                android:id="@+id/setLocation"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:background="@null"
+                android:onClick="setLocation"
+                android:scaleType="centerCrop"
+                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintTop_toBottomOf="@+id/setDate"
+                app:srcCompat="@drawable/location" />
+
+            <ImageButton
+                android:id="@+id/setTime"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:background="@null"
+                android:cropToPadding="false"
+                android:onClick="setTime"
+                android:scaleType="centerCrop"
+                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintTop_toBottomOf="@+id/postTitle"
+                app:srcCompat="@drawable/clock" />
+
+            <TextView
+                android:id="@+id/timeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="TextView"
+                app:layout_constraintBottom_toBottomOf="@+id/setTime"
+                app:layout_constraintStart_toEndOf="@+id/setTime"
+                app:layout_constraintTop_toTopOf="@+id/setTime" />
+
+            <TextView
+                android:id="@+id/dateText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="TextView"
+                app:layout_constraintBottom_toBottomOf="@+id/setDate"
+                app:layout_constraintStart_toEndOf="@+id/setDate"
+                app:layout_constraintTop_toTopOf="@+id/setDate" />
+
+            <TextView
+                android:id="@+id/locationText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="TextView"
+                app:layout_constraintBottom_toBottomOf="@+id/setLocation"
+                app:layout_constraintStart_toEndOf="@+id/setLocation"
+                app:layout_constraintTop_toTopOf="@+id/setLocation" />
+
+            <android.support.constraint.Guideline
+                android:id="@+id/guideline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_begin="137dp" />
+
+        </android.support.constraint.ConstraintLayout>
+    </android.support.v7.widget.CardView>
+</android.support.constraint.ConstraintLayout>

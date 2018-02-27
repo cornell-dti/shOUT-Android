@@ -12,8 +12,7 @@ public class Message {
     private String title;
     private String ID;
 
-    public Message()
-    {
+    public Message() {
         // NO ARGUMENT CONSTRUCTOR
     }
 
@@ -23,25 +22,28 @@ public class Message {
         this.title = title;
         this.time = time;
     }
-    public void setID(String ID)
-    {
+
+    public void setID(String ID) {
         this.ID = ID;
     }
-    public String getID()
-    {
+
+    public String getID() {
         return ID;
     }
-    public String getBody()
-    {
+
+    public String getBody() {
         return body;
     }
-    public String getDate()
-    {
+
+    public String getDate() {
         return date;
     }
-    public String getTitle()
-    {
+
+    public String getTitle() {
         return title;
     }
-    public String getTime() {return time;}
+
+    public String getTime() {
+        return time;
+    }
 }

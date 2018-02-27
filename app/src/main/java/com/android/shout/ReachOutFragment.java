@@ -41,7 +41,7 @@ public class ReachOutFragment extends Fragment {
                 List<String> listDataHeader = new ArrayList<String>();
                 HashMap<String, List<String>> listDataChild = new HashMap<String, List<String>>();
 
-                for(DataSnapshot d: dataSnapshot.getChildren()){
+                for (DataSnapshot d : dataSnapshot.getChildren()) {
                     listDataHeader.add(d.getKey().toString());
                     ArrayList<String> childList = new ArrayList<String>();
                     childList.add(d.child("number").getValue().toString());

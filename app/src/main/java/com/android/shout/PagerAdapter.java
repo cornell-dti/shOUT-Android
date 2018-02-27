@@ -21,15 +21,12 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
 
         switch (position) {
             case 0:
-                FindOutFragment findout = new FindOutFragment();
-                return findout;
-            case 1:
                 GoOutFragment goout = new GoOutFragment();
                 return goout;
-            case 2:
+            case 1:
                 SpeakOutFragment speakout = new SpeakOutFragment();
                 return speakout;
-            case 3:
+            case 2:
                 ReachOutFragment reachout = new ReachOutFragment();
                 return reachout;
             default:

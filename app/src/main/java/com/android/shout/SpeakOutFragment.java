@@ -20,7 +20,8 @@ import java.util.ArrayList;
 
 public class SpeakOutFragment extends Fragment {
 
-    Button makeblogpost;
+    //Button
+    View makeBlogPost; // Find an alt. to a card view.
 
     public SpeakOutFragment() {
     }
@@ -32,16 +33,16 @@ public class SpeakOutFragment extends Fragment {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference firebase = database.getReference("messages");
         final View view = inflater.inflate(R.layout.speakout_fragment, container, false);
-        final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        final RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
         firebase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                ArrayList<String> titleList = new ArrayList<String>();
-                ArrayList<String> bodyList = new ArrayList<String>();
-                ArrayList<String> dateList = new ArrayList<String>();
-                ArrayList<String> timeList = new ArrayList<String>();
+                ArrayList<String> titleList = new ArrayList<>();
+                ArrayList<String> bodyList = new ArrayList<>();
+                ArrayList<String> dateList = new ArrayList<>();
+                ArrayList<String> timeList = new ArrayList<>();
                 for (DataSnapshot d : dataSnapshot.getChildren()) {
                     Message m = d.getValue(Message.class);
                     bodyList.add(m.getBody().toString());
@@ -59,8 +60,8 @@ public class SpeakOutFragment extends Fragment {
             }
         });
 
-        makeblogpost = (Button) view.findViewById(R.id.makeblogpost);
-        makeblogpost.setOnClickListener(new View.OnClickListener() {
+        makeBlogPost = view.findViewById(R.id.makeblogpost);
+        makeBlogPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getActivity(), ReportIncident.class));
