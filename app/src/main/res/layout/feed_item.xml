@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    >
+    android:orientation="vertical">
 
     <!-- A CardView that contains a TextView -->
 
@@ -25,6 +24,7 @@
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="10dp"
                 android:text="Title"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textSize="20dp" />
@@ -36,6 +36,8 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:layout_below="@+id/time"
+                android:layout_marginEnd="10dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginTop="13dp"
                 android:text="Body"
                 android:textAppearance="?android:attr/textAppearanceMedium"
@@ -45,25 +47,25 @@
                 android:id="@+id/date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/title"
-                android:layout_alignBottom="@+id/title"
+                android:layout_alignStart="@+id/title"
+                android:layout_below="@+id/title"
                 android:text="Date"
                 android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/place_autocomplete_search_hint"
                 android:textSize="15dp"
-                android:layout_alignLeft="@+id/time"
-                android:layout_alignStart="@+id/time"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true" />
+                android:textStyle="italic" />
 
             <TextView
                 android:id="@+id/time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_below="@+id/date"
+                android:layout_alignBaseline="@+id/date"
+                android:layout_alignBottom="@+id/date"
+                android:layout_toEndOf="@+id/title"
                 android:text="Time"
-                android:textSize="15dp" />
+                android:textColor="@color/place_autocomplete_search_hint"
+                android:textSize="15dp"
+                android:textStyle="italic" />
         </RelativeLayout>
     </android.support.v7.widget.CardView>
 </LinearLayout>

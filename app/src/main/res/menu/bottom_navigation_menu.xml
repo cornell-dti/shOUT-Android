@@ -2,16 +2,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/goout"
-        android:checked="true"
-        android:icon="@drawable/goout"
-        android:title="@string/goout"
-        app:showAsAction="withText" />
-    <item
         android:id="@+id/speakout"
         android:checked="true"
         android:icon="@drawable/speakout"
         android:title="@string/speakout"
+        app:showAsAction="withText" />
+    <item
+        android:id="@+id/goout"
+        android:checked="true"
+        android:icon="@drawable/goout"
+        android:title="@string/goout"
         app:showAsAction="withText" />
     <item
         android:id="@+id/reachout"

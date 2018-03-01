@@ -26,8 +26,6 @@ import com.google.android.gms.location.LocationServices;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
-    private SuggestionHandler suggestions;
-
     MenuItem prevMenuItem;
 
     BottomNavigationView bottomNavigationView;
@@ -70,6 +68,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager(), 3); // todo make constant, not magic
 
         mViewPager.setAdapter(adapter);
+
+        // TODO double check that this is the correct way to set the default page
+        mViewPager.setCurrentItem(PagerAdapter.Pages.GO_OUT);
+        bottomNavigationView.getMenu().getItem(PagerAdapter.Pages.GO_OUT).setChecked(true);
+
+
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -81,7 +85,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 if (prevMenuItem != null) {
                     prevMenuItem.setChecked(false);
                 } else {
-                    bottomNavigationView.getMenu().getItem(0).setChecked(false);
+                    // TODO magic number as index is not great
+                    bottomNavigationView.getMenu().getItem(PagerAdapter.Pages.GO_OUT).setChecked(false);
+                    bottomNavigationView.getMenu().getItem(PagerAdapter.Pages.REACH_OUT).setChecked(false);
+                    bottomNavigationView.getMenu().getItem(PagerAdapter.Pages.SPEAK_OUT).setChecked(false);
                 }
 
                 bottomNavigationView.getMenu().getItem(position).setChecked(true);
@@ -99,13 +106,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.goout:
-                                mViewPager.setCurrentItem(0);
+                                mViewPager.setCurrentItem(PagerAdapter.Pages.GO_OUT);
                                 break;
                             case R.id.speakout:
-                                mViewPager.setCurrentItem(1);
+                                mViewPager.setCurrentItem(PagerAdapter.Pages.SPEAK_OUT);
                                 break;
                             case R.id.reachout:
-                                mViewPager.setCurrentItem(2); // todo create static/enum constants instead of magic numbers
+                                mViewPager.setCurrentItem(PagerAdapter.Pages.REACH_OUT);
                                 break;
                         }
                         return true;
@@ -137,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             if (curLocation == null) {
                 LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
             }
-            Log.i("SOKLSjkl", "skljdiowjfkjwkl");
+            Log.i("SOKLSjkl", "skljdiowjfkjwkl"); // TODO ?
         } catch (SecurityException e) {
             Toast.makeText(this, "Unable to access location information", Toast.LENGTH_LONG).show();
         }

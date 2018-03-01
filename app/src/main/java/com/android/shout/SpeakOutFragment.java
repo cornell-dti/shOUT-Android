@@ -1,15 +1,15 @@
 package com.android.shout;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 public class SpeakOutFragment extends Fragment {
 
-    //Button
+    /* FAB */
     View makeBlogPost; // Find an alt. to a card view.
 
     public SpeakOutFragment() {
@@ -61,7 +61,14 @@ public class SpeakOutFragment extends Fragment {
             }
         });
 
-        makeBlogPost = view.findViewById(R.id.makeblogpost);
+
+        final Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+
+
+        CollapsingToolbarLayout collapsingToolbar = view.findViewById(R.id.collapsing_toolbar);
+        //   collapsingToolbar.setTitle("shOUT");
+
+        makeBlogPost = view.findViewById(R.id.startReportButton);
         makeBlogPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

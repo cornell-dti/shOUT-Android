@@ -16,46 +16,36 @@ import java.util.ArrayList;
 
 public class SpeakAdapter extends RecyclerView.Adapter<SpeakAdapter.ViewHolder> {
 
-    private ArrayList<String> titleList;
+    private ArrayList<String> titleList, bodyList, dateList, timeList;
 
-    private ArrayList<String> bodyList;
+    private Context mContext;
 
-    private ArrayList<String> dateList;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView title, body, date, time;
 
-    private ArrayList<String> timeList;
-
-    private Context c;
-
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView title;
-        TextView body;
-        TextView date;
-        TextView time;
-
-        public ViewHolder(View v) {
+        ViewHolder(View v) {
             super(v);
-            title = (TextView) v.findViewById(R.id.title);
-            body = (TextView) v.findViewById(R.id.body);
-            date = (TextView) v.findViewById(R.id.date);
-            time = (TextView) v.findViewById(R.id.time);
+            title = v.findViewById(R.id.title);
+            body = v.findViewById(R.id.body);
+            date = v.findViewById(R.id.date);
+            time = v.findViewById(R.id.time);
         }
     }
 
-    public SpeakAdapter(ArrayList<String> titleList, ArrayList<String> bodyList, ArrayList<String> dateList, ArrayList<String> timeList, Context c) {
+    SpeakAdapter(ArrayList<String> titleList, ArrayList<String> bodyList, ArrayList<String> dateList, ArrayList<String> timeList, Context context) {
         this.titleList = titleList;
         this.bodyList = bodyList;
         this.dateList = dateList;
         this.timeList = timeList;
-        this.c = c;
+        this.mContext = context;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.newsfeeditem, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_item, parent, false);
         // set the view's size, margins, paddings and layout parameters
-        ViewHolder vh = new ViewHolder(v);
-        return vh;
+        return new ViewHolder(v);
     }
 
     @Override

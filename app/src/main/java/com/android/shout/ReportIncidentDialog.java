@@ -19,6 +19,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -51,7 +53,7 @@ import java.util.Locale;
 
 public class ReportIncidentDialog extends AppCompatDialogFragment implements PlaceSelectionListener {
 
-    private MultiAutoCompleteTextView locationEdit;
+    private AutoCompleteTextView locationEdit;
     private TextView dateSelector, timeSelector;
     private EditText editPostTitle, editPostText;
 
@@ -93,7 +95,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment implements Pla
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.report_incident_dialog, container, false);
+        View v = inflater.inflate(R.layout.report_dialog, container, false);
 
         AppBarLayout toolbar = v.findViewById(R.id.dialogToolbar);
 
@@ -108,6 +110,11 @@ public class ReportIncidentDialog extends AppCompatDialogFragment implements Pla
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // TODO catch any errors while doing this
+                /* Manually hide the keyboard to ensure it doesn't stick around */
+                InputMethodManager manager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                manager.hideSoftInputFromWindow(editPostText.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+
                 dismiss();
             }
         });
@@ -235,7 +242,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment implements Pla
             String ID = database.push().getKey();
             m.setID(ID);
             database.child(ID).setValue(m);
-            startActivity(new Intent(getContext(), SuggestionHandler.class));
+            startActivity(new Intent(getContext(), MainActivity.class));
         }
     }
 
