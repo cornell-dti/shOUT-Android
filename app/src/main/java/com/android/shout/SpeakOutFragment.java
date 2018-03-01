@@ -3,6 +3,7 @@ package com.android.shout;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -64,7 +65,13 @@ public class SpeakOutFragment extends Fragment {
         makeBlogPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getActivity(), ReportIncident.class));
+                //  startActivity(new Intent(getActivity(), ReportIncident.class));
+
+                ReportIncidentDialog dialog = ReportIncidentDialog.newInstance();
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                transaction.add(android.R.id.content, dialog)
+                        .addToBackStack(null).commit();
             }
         });
 

@@ -1,6 +1,7 @@
 package com.android.shout;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,15 +25,14 @@ public class ReachOutFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, final ViewGroup container,
-                             Bundle savedInstanceState) {
-
+    public View onCreateView(@NonNull LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference firebase = database.getReference("resources");
+
         final View view = inflater.inflate(R.layout.reachout_fragment, container, false);
         final ExpandableListView listView = (ExpandableListView) view.findViewById(R.id.expand);
 
-        // ADD CODE HERE THAT PROGRAMATICALLY ADDS RESOURCES TO DB! TODO
+        // TODO ADD CODE HERE THAT PROGRAMATICALLY ADDS RESOURCES TO DB!
 
         firebase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -42,12 +42,12 @@ public class ReachOutFragment extends Fragment {
                 HashMap<String, List<String>> listDataChild = new HashMap<String, List<String>>();
 
                 for (DataSnapshot d : dataSnapshot.getChildren()) {
-                    listDataHeader.add(d.getKey().toString());
+                    listDataHeader.add(d.getKey());
                     ArrayList<String> childList = new ArrayList<String>();
                     childList.add(d.child("number").getValue().toString());
                     childList.add(d.child("website").getValue().toString());
                     childList.add(d.child("description").getValue().toString());
-                    listDataChild.put(d.getKey().toString(), childList);
+                    listDataChild.put(d.getKey(), childList);
                 }
 
                 ExpandableListAdapter listAdapter = new com.android.shout.ExpandableListAdapter(view.getContext(), listDataHeader, listDataChild);

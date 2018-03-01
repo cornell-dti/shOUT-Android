@@ -19,6 +19,7 @@
 
             <EditText
                 android:id="@+id/postTitle"
+                style="@style/Widget.AppCompat.EditText"
                 android:layout_width="264dp"
                 android:layout_height="50dp"
                 android:layout_marginStart="8dp"
@@ -30,11 +31,11 @@
                 android:paddingBottom="10dp"
                 android:paddingTop="10dp"
                 android:singleLine="true"
-                android:text=""
+                android:text="Set the title..."
                 android:textColor="@android:color/primary_text_light"
                 android:textColorHint="@android:color/primary_text_light"
                 android:textSize="25dp"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
@@ -42,23 +43,22 @@
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:layout_marginEnd="8dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                app:layout_constraintEnd_toStartOf="@+id/guideline"
-                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/me" />
 
             <EditText
                 android:id="@+id/postText"
+                style="@style/Widget.AppCompat.EditText"
                 android:layout_width="0dp"
                 android:layout_height="250dp"
                 android:layout_margin="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/edittext_background"
                 android:ems="10"
+                android:gravity="top|start"
                 android:hint="Share your own story..."
                 android:inputType="textMultiLine"
                 android:paddingLeft="10dp"
@@ -68,69 +68,63 @@
 
             <Button
                 android:id="@+id/postButton"
-                style="@style/Widget.AppCompat.Button.Colored"
+                style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="post"
                 android:text="Post"
                 app:layout_constraintBaseline_toBaselineOf="@+id/cancel"
                 app:layout_constraintBottom_toBottomOf="@+id/cancel"
-                app:layout_constraintEnd_toEndOf="@+id/postText"
-                tools:layout_editor_absoluteX="84dp"
-                tools:layout_editor_absoluteY="310dp" />
+                app:layout_constraintEnd_toEndOf="@+id/postText" />
 
             <Button
                 android:id="@+id/cancel"
-                style="@android:style/Widget.Material.Button.Colored"
+                style="@android:style/Widget.Material.Light.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:onClick="cancel"
                 android:text="Cancel"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/postText"
-                tools:layout_editor_absoluteX="211dp"
-                tools:layout_editor_absoluteY="310dp" />
+                app:layout_constraintStart_toStartOf="@+id/postText" />
 
             <ImageButton
                 android:id="@+id/setDate"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginStart="8dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_marginTop="8dp"
                 android:background="@null"
-                android:onClick="setDate"
+                android:onClick="onDateControlClicked"
                 android:scaleType="centerCrop"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
                 app:layout_constraintTop_toBottomOf="@+id/setTime"
-                app:srcCompat="@drawable/calendar" />
+                app:srcCompat="@drawable/calendar"
+                tools:layout_editor_absoluteX="8dp" />
 
             <ImageButton
                 android:id="@+id/setLocation"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:background="@null"
-                android:onClick="setLocation"
+                android:onClick="onLocationControlClicked"
                 android:scaleType="centerCrop"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/setDate"
                 app:srcCompat="@drawable/location" />
 
             <ImageButton
                 android:id="@+id/setTime"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
                 android:background="@null"
                 android:cropToPadding="false"
-                android:onClick="setTime"
+                android:onClick="onTimeControlClicked"
                 android:scaleType="centerCrop"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/postTitle"
-                app:srcCompat="@drawable/clock" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:srcCompat="@drawable/clock"
+                tools:layout_editor_absoluteY="66dp" />
 
             <TextView
                 android:id="@+id/timeText"
@@ -139,7 +133,7 @@
                 android:layout_marginBottom="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:text="TextView"
+                android:text="Set the time..."
                 app:layout_constraintBottom_toBottomOf="@+id/setTime"
                 app:layout_constraintStart_toEndOf="@+id/setTime"
                 app:layout_constraintTop_toTopOf="@+id/setTime" />
@@ -151,7 +145,7 @@
                 android:layout_marginBottom="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:text="TextView"
+                android:text="Set the date..."
                 app:layout_constraintBottom_toBottomOf="@+id/setDate"
                 app:layout_constraintStart_toEndOf="@+id/setDate"
                 app:layout_constraintTop_toTopOf="@+id/setDate" />
@@ -163,7 +157,7 @@
                 android:layout_marginBottom="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:text="TextView"
+                android:text="Set the location..."
                 app:layout_constraintBottom_toBottomOf="@+id/setLocation"
                 app:layout_constraintStart_toEndOf="@+id/setLocation"
                 app:layout_constraintTop_toTopOf="@+id/setLocation" />

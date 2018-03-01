@@ -8,4 +8,5 @@
     <string name="title_activity_find_out">FindOut</string>
     <string name="title_activity_go_out">GoOut</string>
     <string name="title_activity_main2">Main2Activity</string>
+    <string name="location_search_hint">Search...</string>
 </resources>

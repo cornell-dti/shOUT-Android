@@ -1,6 +1,5 @@
 package com.android.shout;
 
-import android.app.ActionBar;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
@@ -9,6 +8,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -16,6 +16,13 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.android.shout.util.LocationUtil;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -26,15 +33,13 @@ import java.util.List;
 import java.util.Locale;
 
 
-public class ReportIncident extends AppCompatActivity {
-
-    EditText postTitle;
-    EditText postText;
-
+public class ReportIncident extends AppCompatActivity implements PlaceSelectionListener {
+    
     private TextView locationText, dateText, timeText;
+    private EditText postTitle, postText;
 
     private LatLng location;
-    private boolean locationLocked; // todo prevent user changes...?
+    private boolean locationLocked; // TODO Ask design. See onCreate...
 
     private static Address getAddressForLocation(Context context, LatLng latLng) {
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
@@ -45,7 +50,6 @@ public class ReportIncident extends AppCompatActivity {
                 address = addresses.get(0);
             }
         } catch (IOException e) {
-            // todo handle
             e.printStackTrace();
         }
         return address;
@@ -64,6 +68,14 @@ public class ReportIncident extends AppCompatActivity {
         dateText = findViewById(R.id.dateText);
         timeText = findViewById(R.id.timeText);
 
+        locationText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO Ask design whether location should be locked if "pin-opened" from map.
+                ReportIncident.this.onLocationControlClicked(v);
+            }
+        });
+
         if (getIntent().hasExtra("location")) {
             Bundle bundle = getIntent().getExtras();
 
@@ -77,16 +89,13 @@ public class ReportIncident extends AppCompatActivity {
 
         if (this.location != null) {
             Address address = getAddressForLocation(getApplicationContext(), this.location);
+
             if (address != null) {
                 locationText.setText(address.getAddressLine(0));
             } else {
                 locationText.setText(this.location.toString());
             }
         }
-
-
-        //getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-        // getSupportActionBar().setCustomView(R.layout.actionbar_layout);
     }
 
     public void post(View v) {
@@ -99,21 +108,30 @@ public class ReportIncident extends AppCompatActivity {
             String ID = database.push().getKey();
             m.setID(ID);
             database.child(ID).setValue(m);
-            startActivity(new Intent(ReportIncident.this, MainActivity.class));
+            startActivity(new Intent(ReportIncident.this, SuggestionHandler.class));
         }
     }
 
     public void cancel(View v) {
-        // startActivity(new Intent(ReportIncident.this, MainActivity.class));
         finish();
-        // todo set custom animations
+        // TODO set custom in/out animations
     }
 
-    public void setLocation(View v) {
-
+    public void onLocationControlClicked(View v) {
+        Intent intent = null;
+        try {
+            intent = new PlaceAutocomplete.IntentBuilder
+                    (PlaceAutocomplete.MODE_FULLSCREEN)
+                    .setBoundsBias(LocationUtil.getIthacaBounds())
+                    .build(ReportIncident.this);
+            startActivityForResult(intent, 1000);
+        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
+            Toast.makeText(ReportIncident.this, "Could not start the location search.", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
     }
 
-    public void setDate(View v) {
+    public void onDateControlClicked(View v) {
         // Get Current Date
         final Calendar c = Calendar.getInstance();
         int mYear = c.get(Calendar.YEAR);
@@ -127,14 +145,19 @@ public class ReportIncident extends AppCompatActivity {
                     @Override
                     public void onDateSet(DatePicker view, int year,
                                           int monthOfYear, int dayOfMonth) {
-                        // todo use locale
-                        dateText.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
+                        java.text.DateFormat format = DateFormat.getDateFormat(ReportIncident.this);
+                        Calendar cal = Calendar.getInstance();
+                        cal.clear(); // TODO is this necessary?
+                        cal.set(year, monthOfYear, dayOfMonth); // NOTE: these months are 0-based
+                        String formattedDate = format.format(cal.getTime());
+
+                        dateText.setText(formattedDate);
                     }
                 }, mYear, mMonth, mDay);
         datePickerDialog.show();
     }
 
-    public void setTime(View v) {
+    public void onTimeControlClicked(View v) {
         // Get Current Time
         final Calendar c = Calendar.getInstance();
         int mHour = c.get(Calendar.HOUR_OF_DAY);
@@ -147,13 +170,35 @@ public class ReportIncident extends AppCompatActivity {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay,
                                           int minute) {
-                        if (hourOfDay > 12) {
-                            timeText.setText((hourOfDay - 12) + ":" + minute + "pm");
-                        }
-                        // todo use locale format and resource
-                        timeText.setText(hourOfDay + ":" + minute);
+                        java.text.DateFormat format = DateFormat.getTimeFormat(ReportIncident.this);
+                        Calendar cal = Calendar.getInstance();
+                        cal.clear(); // TODO is this necessary?
+                        cal.set(0, 0, 0, hourOfDay, minute); // TODO merge calendar usage between two fields?
+                        String formattedDate = format.format(cal.getTime());
+
+                        dateText.setText(formattedDate);
                     }
-                }, mHour, mMinute, false);
+                }, mHour, mMinute, DateFormat.is24HourFormat(ReportIncident.this));
         timePickerDialog.show();
+    }
+
+    /* PlaceSelectionListener Implementation */
+
+    @Override
+    public void onPlaceSelected(Place place) {
+        if (this.location != null) {
+            CharSequence name = place.getName();
+
+            if (name != null) {
+                locationText.setText(name);
+            } else {
+                locationText.setText(place.getAddress()); // TODO is a null check necessary?
+            }
+        }
+    }
+
+    @Override
+    public void onError(Status status) {
+        // TODO handle errors.
     }
 }
