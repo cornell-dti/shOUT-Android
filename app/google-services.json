@@ -10,10 +10,18 @@
       "client_info": {
         "mobilesdk_app_id": "1:974596235185:android:04bbf9b696e4c5a2",
         "android_client_info": {
-          "package_name": "org.cornelldti.shout"
+          "package_name": "com.android.shout.shout"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "974596235185-u0nn2sqbolp05fueui6n9shuoe4vkcoj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.android.shout.shout",
+            "certificate_hash": "47c912a08a1345bae76619acb0abcc8d261686e7"
+          }
+        },
         {
           "client_id": "974596235185-oj1a29frp66gs5jt3s0k8bv3j3r22tmq.apps.googleusercontent.com",
           "client_type": 3
@@ -29,8 +37,71 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "974596235185-33ukp2kpggl7kpri51dbe2pt17gckv2p.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.shOUT.iOS"
+              }
+            },
+            {
+              "client_id": "974596235185-oj1a29frp66gs5jt3s0k8bv3j3r22tmq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:974596235185:android:4accb6b4254a5739",
+        "android_client_info": {
+          "package_name": "org.cornelldti.shout"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "974596235185-lptglhhfp44m6291747onk5he1ef0cmt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.cornelldti.shout",
+            "certificate_hash": "47c912a08a1345bae76619acb0abcc8d261686e7"
+          }
+        },
+        {
+          "client_id": "974596235185-oj1a29frp66gs5jt3s0k8bv3j3r22tmq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPVowHmVdNiNHQJDhyAZy7MTZvjZJJvYs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "974596235185-33ukp2kpggl7kpri51dbe2pt17gckv2p.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.shOUT.iOS"
+              }
+            },
+            {
+              "client_id": "974596235185-oj1a29frp66gs5jt3s0k8bv3j3r22tmq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2
