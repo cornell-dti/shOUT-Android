@@ -1,4 +1,4 @@
-package org.cornelldti.shout;
+package org.cornelldti.shout.speakout;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -9,14 +9,13 @@ import com.google.android.gms.maps.model.LatLng;
  * Updated by Evan Welsh on 2/28/18
  */
 
-@SuppressWarnings("unused")
-public class UnapprovedMessage {
+public class UnapprovedReport {
 
     private double locationLong, locationLat;
     private String body, title, uid, locationLabel;
     private long timestamp;
 
-    UnapprovedMessage(String body, String title, String uid, String locationLabel, LatLng latLng, long timestamp) {
+    UnapprovedReport(String body, String title, String uid, String locationLabel, LatLng latLng, long timestamp) {
         this.body = body;
         this.title = title;
         this.uid = uid;

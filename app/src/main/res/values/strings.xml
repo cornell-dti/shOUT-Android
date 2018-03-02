@@ -1,12 +1,18 @@
 <resources>
     <string name="app_name">shOUT</string>
-    <string name="action_settings">Settings</string>
-    <string name="findout">Find Out</string>
     <string name="goout">Go Out</string>
     <string name="speakout">Speak Out</string>
     <string name="reachout">Reach Out</string>
-    <string name="title_activity_find_out">FindOut</string>
-    <string name="title_activity_go_out">GoOut</string>
-    <string name="title_activity_main2">Main2Activity</string>
-    <string name="location_search_hint">Search...</string>
+    <string name="location_search_hint">Search…</string>
+    <string name="unknown_location">Unknown Location</string>
+    <string name="save">Save</string>
+    <string name="report_title">Report</string>
+    <string name="date_time_label"><![CDATA[Date & Time]]></string>
+    <string name="date_hint">Set the date…</string>
+    <string name="time_hint">Set the time…</string>
+    <string name="location_hint">Location</string>
+    <string name="details_hint">Details</string>
+    <string name="summary_hint">Summary</string>
+    <string name="preferences_button_description">preferences button</string>
+    <string name="close_button_description">close button</string>
 </resources>

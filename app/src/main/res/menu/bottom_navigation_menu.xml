@@ -2,19 +2,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/speakout"
+        android:id="@+id/speak_out"
         android:checked="true"
         android:icon="@drawable/speakout"
         android:title="@string/speakout"
         app:showAsAction="withText" />
     <item
-        android:id="@+id/goout"
+        android:id="@+id/go_out"
         android:checked="true"
         android:icon="@drawable/goout"
         android:title="@string/goout"
         app:showAsAction="withText" />
     <item
-        android:id="@+id/reachout"
+        android:id="@+id/reach_out"
         android:checked="true"
         android:icon="@drawable/reachout"
         android:title="@string/reachout"

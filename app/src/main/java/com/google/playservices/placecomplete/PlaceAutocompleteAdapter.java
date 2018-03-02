@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.cornelldti.shout.places;
+package com.google.playservices.placecomplete;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -79,8 +79,7 @@ public class PlaceAutocompleteAdapter extends ArrayAdapter<AutocompletePredictio
      *
      * @see android.widget.ArrayAdapter#ArrayAdapter(android.content.Context, int)
      */
-    public PlaceAutocompleteAdapter(Context context, GeoDataClient geoDataClient,
-                                    LatLngBounds bounds, AutocompleteFilter filter) {
+    public PlaceAutocompleteAdapter(Context context, GeoDataClient geoDataClient, LatLngBounds bounds, AutocompleteFilter filter) {
         super(context, android.R.layout.simple_expandable_list_item_2, android.R.id.text1);
         mGeoDataClient = geoDataClient;
         mBounds = bounds;

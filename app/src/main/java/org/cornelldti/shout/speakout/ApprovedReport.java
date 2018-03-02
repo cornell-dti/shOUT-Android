@@ -1,4 +1,4 @@
-package org.cornelldti.shout;
+package org.cornelldti.shout.speakout;
 
 /**
  * Representation of a message in the Firebase database.
@@ -7,20 +7,19 @@ package org.cornelldti.shout;
  * Updated by Evan Welsh on 2/28/18
  */
 
-public class ApprovedMessage {
+public class ApprovedReport {
 
     private String body, title, location;
     private long timestamp;
 
-    ApprovedMessage(String body, String title, String location, long timestamp) {
+    ApprovedReport(String body, String title, String location, long timestamp) {
         this.body = body;
         this.title = title;
         this.timestamp = timestamp;
         this.location = location;
     }
 
-    public ApprovedMessage() {
-        // NO ARGUMENT CONSTRUCTOR
+    public ApprovedReport() {
     }
 
     public String getBody() {

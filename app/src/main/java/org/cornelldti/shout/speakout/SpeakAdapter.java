@@ -1,4 +1,4 @@
-package org.cornelldti.shout;
+package org.cornelldti.shout.speakout;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import org.cornelldti.shout.R;
 
 import java.util.Date;
 import java.util.List;
@@ -21,8 +23,6 @@ public class SpeakAdapter extends RecyclerView.Adapter<SpeakAdapter.ViewHolder> 
     private List<String> titleList, bodyList, locationList;
     private List<Date> dateList;
 
-    private Context mContext;
-
     private final java.text.DateFormat dateFormatter;
     private final java.text.DateFormat timeFormatter;
 
@@ -31,11 +31,11 @@ public class SpeakAdapter extends RecyclerView.Adapter<SpeakAdapter.ViewHolder> 
 
         ViewHolder(View v) {
             super(v);
-            title = v.findViewById(R.id.title);
-            body = v.findViewById(R.id.body);
-            date = v.findViewById(R.id.date);
-            time = v.findViewById(R.id.time);
-            location = v.findViewById(R.id.location);
+            title = v.findViewById(R.id.feed_item_title);
+            body = v.findViewById(R.id.feed_item_body);
+            date = v.findViewById(R.id.feed_item_date);
+            time = v.findViewById(R.id.feed_item_time);
+            location = v.findViewById(R.id.feed_item_location);
         }
     }
 
@@ -47,7 +47,6 @@ public class SpeakAdapter extends RecyclerView.Adapter<SpeakAdapter.ViewHolder> 
         this.bodyList = bodyList;
         this.dateList = dateList;
         this.locationList = locationList;
-        this.mContext = context;
     }
 
     @Override

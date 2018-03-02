@@ -5,6 +5,10 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.util.Log;
 
+import org.cornelldti.shout.goout.GoOutFragment;
+import org.cornelldti.shout.reachout.ReachOutFragment;
+import org.cornelldti.shout.speakout.SpeakOutFragment;
+
 /**
  * Created by melody on 1/31/2017.
  * Updated by Evan Welsh on 3/1/18

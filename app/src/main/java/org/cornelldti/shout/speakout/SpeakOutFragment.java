@@ -1,4 +1,4 @@
-package org.cornelldti.shout;
+package org.cornelldti.shout.speakout;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,6 +17,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import org.cornelldti.shout.R;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -46,7 +48,7 @@ public class SpeakOutFragment extends Fragment {
 
 
                 for (DataSnapshot d : dataSnapshot.getChildren()) {
-                    ApprovedMessage m = d.getValue(ApprovedMessage.class);
+                    ApprovedReport m = d.getValue(ApprovedReport.class);
 
                     if (m != null) {
                         bodyList.add(m.getBody());

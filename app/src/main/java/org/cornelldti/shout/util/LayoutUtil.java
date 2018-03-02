@@ -12,7 +12,15 @@ import android.util.TypedValue;
 
 public class LayoutUtil {
 
-    // todo no magic strings
+    // TODO no magic strings
+
+    /**
+     * Calculates the height of the status bar.
+     * Used to add padding for views that draw behind the status bar.
+     *
+     * @param context - The context to calculate within
+     * @return int - the resulting height in pixels.
+     */
     public static int getStatusBarHeight(Context context) {
         int result = -1;
 
@@ -27,7 +35,14 @@ public class LayoutUtil {
         return result;
     }
 
-    public static int getPixelsFromDp(Resources res, int i) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, i, res.getDisplayMetrics());
+    /**
+     * Converts dp units to pixels.
+     *
+     * @param resources - The resources object to pull dimension sizes from.
+     * @param dp        - The dp dimension
+     * @return int - The resulting pixels dimension
+     */
+    public static int getPixelsFromDp(Resources resources, int dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, resources.getDisplayMetrics());
     }
 }

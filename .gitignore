@@ -17,3 +17,4 @@ app/app.iml
 app/.settings
 app/.settings/*.prefs
 app/.classpath
+*.log

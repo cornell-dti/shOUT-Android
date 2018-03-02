@@ -1,4 +1,4 @@
-package org.cornelldti.shout;
+package org.cornelldti.shout.speakout;
 
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
@@ -31,9 +31,12 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import org.cornelldti.shout.places.PlaceAutocompleteAdapter;
+import com.google.playservices.placecomplete.PlaceAutocompleteAdapter;
+
+import org.cornelldti.shout.R;
 import org.cornelldti.shout.util.LayoutUtil;
 import org.cornelldti.shout.util.LocationUtil;
+
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.AutocompletePrediction;
@@ -62,7 +65,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
     private static final String TAG = "ReportIncident";
     private AutoCompleteTextView locationEdit;
     private TextView dateSelector, timeSelector;
-    private EditText editPostTitle, editPostText;
+    private EditText editReportTitle, editReportDetails;
 
     private Calendar calendar = Calendar.getInstance();
 
@@ -77,7 +80,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
 
         // Supply num input as an argument.
         Bundle args = new Bundle();
-        args.putDoubleArray("location", new double[]{latLng.latitude, latLng.longitude});
+        args.putDoubleArray("website", new double[]{latLng.latitude, latLng.longitude});
         dialog.setArguments(args);
 
         return dialog;
@@ -87,18 +90,38 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
         return new ReportIncidentDialog();
     }
 
-    private static Address getAddressForLocation(Context context, LatLng latLng) {
-        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-        Address address = null;
-        try {
-            List<Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1); // todo 1 may not be enough ;)
-            if (addresses.size() > 0) {
-                address = addresses.get(0);
+    /**
+     * Saves the current report data to the database.
+     *
+     * @param listener - A listener to perform actions when the data has been written.
+     */
+    public void saveReport(OnCompleteListener<Void> listener) {
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference("unapproved_reports");
+        if (editReportTitle.getText().toString().isEmpty() || editReportDetails.getText().toString().isEmpty()) {
+            Toast.makeText(getContext(), "Make sure to fill in post title and message", Toast.LENGTH_LONG).show();
+        } else {
+            if (editReportTitle.getText() != null) {
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                if (user != null) {
+                    UnapprovedReport m = new UnapprovedReport(
+                            editReportDetails.getText().toString(),
+                            editReportTitle.getText().toString(),
+                            user.getUid(),
+                            locationEdit.getText().toString(),
+                            location,
+                            calendar.getTimeInMillis());
+                    String id = FirebaseDatabase.getInstance().getReference("approved_reports").push().getKey();
+                    database.child(id).setValue(m).addOnCompleteListener(listener);
+                } else {
+                    Toast.makeText(getContext(), "Cannot connect to shOUT.", Toast.LENGTH_SHORT).show();
+                    dismiss();
+                }
+            } else {
+                Toast.makeText(getContext(), "Please enter a summary.", Toast.LENGTH_SHORT).show();
+                dismiss();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        return address;
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -106,7 +129,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.report_dialog, container, false);
 
-        AppBarLayout toolbar = v.findViewById(R.id.dialogToolbar);
+        AppBarLayout toolbar = v.findViewById(R.id.report_toolbar);
 
         /* Ensure we don't overlap with the status bar. */
 
@@ -114,7 +137,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
 
        /* Setup toolbar buttons */
 
-        ImageButton closeButton = v.findViewById(R.id.button_close);
+        ImageButton closeButton = v.findViewById(R.id.report_button_close);
 
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,13 +145,16 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
                 // TODO catch any errors while doing this
                 /* Manually hide the keyboard to ensure it doesn't stick around */
                 InputMethodManager manager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                manager.hideSoftInputFromWindow(editPostText.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+
+                if (manager != null) {
+                    manager.hideSoftInputFromWindow(editReportDetails.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                }
 
                 dismiss();
             }
         });
 
-        final Button saveButton = v.findViewById(R.id.button_save);
+        final Button saveButton = v.findViewById(R.id.report_button_save);
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,7 +163,9 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         InputMethodManager manager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                        manager.hideSoftInputFromWindow(editPostText.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                        if (manager != null) {
+                            manager.hideSoftInputFromWindow(editReportDetails.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                        }
 
                         dismiss(); // todo
                     }
@@ -147,13 +175,13 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
 
         setHasOptionsMenu(false);
 
-        editPostTitle = v.findViewById(R.id.editPostTitle);
-        editPostText = v.findViewById(R.id.editPostText);
+        editReportTitle = v.findViewById(R.id.report_title_edit_text);
+        editReportDetails = v.findViewById(R.id.report_details_edit_text);
+        dateSelector = v.findViewById(R.id.report_date_spinner_text_view);
+        timeSelector = v.findViewById(R.id.report_time_spinner_text_view);
 
-        dateSelector = v.findViewById(R.id.dateSpinner);
-        timeSelector = v.findViewById(R.id.timeSpinner);
-
-        // TODO remove onKey?
+        // TODO Can we remove the onKey listeners?
+        // TODO Test the app with a physical keyboard to be sure.
 
         /* Catch all interaction with the date selector TextView */
 
@@ -200,11 +228,11 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
         String formattedTime = format.format(cal.getTime());
         timeSelector.setText(formattedTime);
 
-        /* Setup location editing... */
+        /* Setup website editing... */
 
-        locationEdit = v.findViewById(R.id.locationEdit);
+        locationEdit = v.findViewById(R.id.report_location_edit_text);
 
-        /* Setup location selection to autocomplete... */
+        /* Setup website selection to autocomplete... */
         // TODO fix this
 
         GeoDataClient client = Places.getGeoDataClient(getActivity(), null);
@@ -214,26 +242,29 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final AutocompletePrediction item = adapter.getItem(position);
-                final String placeId = item.getPlaceId();
-                final CharSequence primaryText = item.getPrimaryText(null);
+                final String placeId;
+                if (item != null) {
+                    placeId = item.getPlaceId();
 
-                Log.i(TAG, "Autocomplete item selected: " + primaryText);
+                    final CharSequence primaryText = item.getPrimaryText(null);
 
-                // TODO store this client
-                GeoDataClient mGeoDataClient = Places.getGeoDataClient(getContext(), null);
-                Task<PlaceBufferResponse> placeResult = mGeoDataClient.getPlaceById(placeId);
-                placeResult.addOnCompleteListener(mUpdatePlaceDetailsCallback);
+                    Log.i(TAG, "Autocomplete item selected: " + primaryText);
 
-                Toast.makeText(getContext(), "Clicked: " + primaryText, Toast.LENGTH_SHORT).show();
-                Log.i(TAG, "Getting details for: " + placeId);
+                    // TODO store this client
+                    GeoDataClient mGeoDataClient = Places.getGeoDataClient(getContext(), null);
+                    Task<PlaceBufferResponse> placeResult = mGeoDataClient.getPlaceById(placeId);
+                    placeResult.addOnCompleteListener(mUpdatePlaceDetailsCallback);
+                } else {
+                    Log.e(TAG, "No autocomplete item found at position: " + position);
+                }
             }
         });
 
 
-        /* Setup the location selector if a location was passed to the dialog... */
+        /* Setup the website selector if a website was passed to the dialog... */
 
         if (this.location != null) {
-            Address address = getAddressForLocation(getContext(), this.location);
+            Address address = LocationUtil.getAddressForLocation(getContext(), this.location);
 
             if (address != null) {
                 locationEdit.setText(address.getAddressLine(0));
@@ -249,12 +280,12 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /* Get passed location from bundle */
+        /* Get passed website from bundle */
 
         Bundle bundle = getArguments();
 
         if (bundle != null) {
-            double[] loc = bundle.getDoubleArray("location");
+            double[] loc = bundle.getDoubleArray("website");
 
             if (loc != null) {
                 this.location = new LatLng(loc[0], loc[1]);
@@ -267,6 +298,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
         setStyle(DialogFragment.STYLE_NO_TITLE, R.style.FullScreenDialog);
     }
 
+    /* Handles setting the report location after place selection from the autofill list */
     private OnCompleteListener<PlaceBufferResponse> mUpdatePlaceDetailsCallback = new OnCompleteListener<PlaceBufferResponse>() {
         @Override
         public void onComplete(Task<PlaceBufferResponse> task) {
@@ -278,7 +310,8 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
                 // Format details of the place for display and show it in a TextView.
                 location = place.getLatLng();
 
-                // TODO locationEdit.setText(place.getName());
+                // TODO ensure this is no longer needed.
+                // locationEdit.setText(place.getName());
 
                 places.release();
             } catch (RuntimeRemoteException e) {
@@ -288,67 +321,22 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
         }
     };
 
-    // TODO utilize
-    public void saveReport(OnCompleteListener<Void> listener) {
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference("unapproved_reports");
-        if (editPostTitle.getText().toString().isEmpty() || editPostText.getText().toString().isEmpty()) {
-            Toast.makeText(getContext(), "Make sure to fill in post title and message", Toast.LENGTH_LONG).show();
-        } else {
-            if (editPostTitle.getText() != null) {
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-                if (user != null) {
-                    UnapprovedMessage m = new UnapprovedMessage(
-                            editPostText.getText().toString(),
-                            editPostTitle.getText().toString(),
-                            user.getUid(),
-                            locationEdit.getText().toString(),
-                            location,
-                            calendar.getTimeInMillis());
-                    String id = FirebaseDatabase.getInstance().getReference("approved_reports").push().getKey();
-                    database.child(id).setValue(m).addOnCompleteListener(listener);
-                } else {
-                    Toast.makeText(getContext(), "Cannot connect to shOUT.", Toast.LENGTH_SHORT).show();
-                    dismiss();
-                }
-            } else {
-                Toast.makeText(getContext(), "Please enter a summary.", Toast.LENGTH_SHORT).show();
-                dismiss();
-            }
-        }
-    }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
-
+        /* This ensures the dialog fills the entire screen... */
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         return dialog;
     }
 
-    @Deprecated
-    public void onLocationControlClicked(View v) {
-        Intent intent = null;
-        try {
-            intent = new PlaceAutocomplete.IntentBuilder
-                    (PlaceAutocomplete.MODE_FULLSCREEN)
-                    .setBoundsBias(LocationUtil.getIthacaBounds())
-                    .build(getActivity());
-            startActivityForResult(intent, 1000);
-        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
-            Toast.makeText(getContext(), "Could not start the location search.", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-    }
-
     private void onDateControlClicked(View v) {
-        // Get Current Date
+        /* Get current date/time */
         final Calendar c = Calendar.getInstance();
         int mYear = c.get(Calendar.YEAR);
         int mMonth = c.get(Calendar.MONTH);
         int mDay = c.get(Calendar.DAY_OF_MONTH);
-
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(),
                 new DatePickerDialog.OnDateSetListener() {
@@ -371,12 +359,11 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
 
 
     private void onTimeControlClicked(View v) {
-        // Get Current Time
+        /* Get current date/time */
         final Calendar c = Calendar.getInstance();
         int mHour = c.get(Calendar.HOUR_OF_DAY);
         int mMinute = c.get(Calendar.MINUTE);
 
-        // Launch Time Picker Dialog
         TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(),
                 new TimePickerDialog.OnTimeSetListener() {
                     @Override

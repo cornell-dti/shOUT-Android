@@ -63,5 +63,6 @@
         android:layout_margin="16dp"
         android:clickable="true"
         android:src="@drawable/ic_edit"
-        app:fabSize="normal" />
+        app:fabSize="normal"
+        tools:ignore="KeyboardInaccessibleWidget" />
 </android.support.design.widget.CoordinatorLayout>

@@ -1,4 +1,4 @@
-package org.cornelldti.shout;
+package org.cornelldti.shout.goout;
 
 import android.annotation.SuppressLint;
 import android.location.Location;
@@ -13,8 +13,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.cornelldti.shout.MainActivity;
+import org.cornelldti.shout.R;
+import org.cornelldti.shout.speakout.ReportIncidentDialog;
 import org.cornelldti.shout.util.LayoutUtil;
 import org.cornelldti.shout.util.LocationUtil;
+
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
@@ -42,7 +46,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.cornelldti.shout.R.id.mapView;
+import static org.cornelldti.shout.R.id.map_view;
 
 /**
  * Class which handles/constructs the "Go Out" view.
@@ -101,7 +105,7 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
             constraintSet.applyTo(constraintLayout);
         }
 
-        mMapView = rootView.findViewById(mapView);
+        mMapView = rootView.findViewById(map_view);
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume(); // needed to get the map to display immediately
 
@@ -134,7 +138,7 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
                 }
 
                 CameraPosition cameraPosition = new CameraPosition.Builder()
-                        .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Sets the center of the map to location user
+                        .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Sets the center of the map to website user
                         .zoom(17)                   // Sets the zoom
                         .bearing(90)                // Sets the orientation of the camera to east
                         .tilt(40)                   // Sets the tilt of the camera to 30 degrees
