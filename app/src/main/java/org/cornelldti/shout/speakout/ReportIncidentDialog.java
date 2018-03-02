@@ -5,9 +5,7 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
@@ -31,20 +29,11 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.google.playservices.placecomplete.PlaceAutocompleteAdapter;
-
-import org.cornelldti.shout.R;
-import org.cornelldti.shout.util.LayoutUtil;
-import org.cornelldti.shout.util.LocationUtil;
-
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBufferResponse;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.RuntimeRemoteException;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -53,11 +42,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.playservices.placecomplete.PlaceAutocompleteAdapter;
 
-import java.io.IOException;
+import org.cornelldti.shout.R;
+import org.cornelldti.shout.util.LayoutUtil;
+import org.cornelldti.shout.util.LocationUtil;
+
 import java.util.Calendar;
-import java.util.List;
-import java.util.Locale;
 
 
 public class ReportIncidentDialog extends AppCompatDialogFragment {
@@ -265,7 +256,6 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
 
         if (this.location != null) {
             Address address = LocationUtil.getAddressForLocation(getContext(), this.location);
-
             if (address != null) {
                 locationEdit.setText(address.getAddressLine(0));
             } else {

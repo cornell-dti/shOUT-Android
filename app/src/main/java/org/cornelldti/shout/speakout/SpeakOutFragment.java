@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -29,17 +30,62 @@ public class SpeakOutFragment extends Fragment {
     /* FAB */
     View makeBlogPost; // Find an alt. to a card view.
 
+    SwipeRefreshLayout mSwipeRefreshLayout;
+
+    FirebaseDatabase database;
+
+    DatabaseReference firebase;
+
+    RecyclerView recyclerView;
+
+    View view;
+
     public SpeakOutFragment() {
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference firebase = database.getReference("approved_reports");
-        final View view = inflater.inflate(R.layout.speakout_fragment, container, false);
-        final RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
+        database = FirebaseDatabase.getInstance();
+        firebase = database.getReference("approved_reports");
+        view = inflater.inflate(R.layout.speakout_fragment, container, false);
+        recyclerView = view.findViewById(R.id.recycler_view);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
+        refreshItems();
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Refresh items
+                refreshItems();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
+        final Toolbar toolbar = view.findViewById(R.id.toolbar);
+
+
+        CollapsingToolbarLayout collapsingToolbar = view.findViewById(R.id.collapsing_toolbar);
+        //   collapsingToolbar.setTitle("shOUT");
+
+        makeBlogPost = view.findViewById(R.id.startReportButton);
+        makeBlogPost.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //  startActivity(new Intent(getActivity(), ReportIncident.class));
+
+                ReportIncidentDialog dialog = ReportIncidentDialog.newInstance();
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                transaction.add(android.R.id.content, dialog)
+                        .addToBackStack(null).commit();
+            }
+        });
+
+        return view;
+    }
+
+    void refreshItems() {
         firebase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -67,29 +113,6 @@ public class SpeakOutFragment extends Fragment {
 
             }
         });
-
-
-        final Toolbar toolbar = view.findViewById(R.id.toolbar);
-
-
-        CollapsingToolbarLayout collapsingToolbar = view.findViewById(R.id.collapsing_toolbar);
-        //   collapsingToolbar.setTitle("shOUT");
-
-        makeBlogPost = view.findViewById(R.id.startReportButton);
-        makeBlogPost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //  startActivity(new Intent(getActivity(), ReportIncident.class));
-
-                ReportIncidentDialog dialog = ReportIncidentDialog.newInstance();
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                transaction.add(android.R.id.content, dialog)
-                        .addToBackStack(null).commit();
-            }
-        });
-
-        return view;
     }
 
 }
