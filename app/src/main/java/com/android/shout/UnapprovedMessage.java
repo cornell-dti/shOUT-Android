@@ -9,25 +9,18 @@ package com.android.shout;
 
 public class Message {
 
-    private String body, date, time, title, ID;
+    private String body, date, title;
+    private long timestamp;
 
-    Message(String body, String date, String time, String title) {
+    Message(String body, String date, long timestamp) {
         this.body = body;
         this.date = date;
         this.title = title;
-        this.time = time;
+        this.timestamp = timestamp;
     }
 
     public Message() {
         // NO ARGUMENT CONSTRUCTOR
-    }
-
-    public void setID(String ID) {
-        this.ID = ID;
-    }
-
-    public String getID() {
-        return ID;
     }
 
     public String getBody() {
@@ -42,7 +35,7 @@ public class Message {
         return title;
     }
 
-    public String getTime() {
-        return time;
+    public long getTime() {
+        return timestamp;
     }
 }
