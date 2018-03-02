@@ -1,8 +1,6 @@
-package com.android.shout;
+package org.cornelldti.shout;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,11 +12,15 @@ import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
-import com.android.shout.util.LayoutUtil;
-import com.android.shout.util.LocationUtil;
+import org.cornelldti.shout.util.LayoutUtil;
+import org.cornelldti.shout.util.LocationUtil;
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.location.places.ui.SupportPlaceAutocompleteFragment;
@@ -27,11 +29,20 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
-import static com.android.shout.R.id.mapView;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.cornelldti.shout.R.id.mapView;
 
 /**
  * Class which handles/constructs the "Go Out" view.
@@ -39,10 +50,16 @@ import static com.android.shout.R.id.mapView;
  * Updated by Evan Welsh on 2/28/18
  */
 
-public class GoOutFragment extends Fragment implements PlaceSelectionListener {
+public class GoOutFragment extends Fragment implements PlaceSelectionListener, LocationListener {
 
     private MapView mMapView;
     private GoogleMap map;
+
+    private Map<String, Marker> markers = new HashMap<>();
+
+    private GeoQuery geoQuery;
+    private Marker currentLocationMarker;
+
 
     /* PlaceSelectionListener Implementation */
 
@@ -109,24 +126,12 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
                 googleMap.getUiSettings().setCompassEnabled(false);
                 googleMap.setLatLngBoundsForCameraTarget(LocationUtil.getIthacaBounds());
 
-                Location location = null;
 
-                if (getActivity().checkCallingOrSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    try {
-                        location = ((MainActivity) getActivity()).getCurLocation();
-                    } catch (SecurityException ignored) {
-                    }
+                Location location = LocationUtil.latLngToLocation(LocationUtil.CORNELL_CENTER);
+
+                if (!((MainActivity) getActivity()).setLocationUpdateListener(GoOutFragment.this)) {
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 14));
                 }
-
-                if (location == null) {
-                    Toast.makeText(getActivity(), "please enable location service", Toast.LENGTH_LONG).show();
-                    location = LocationUtil.latLngToLocation(LocationUtil.CORNELL_CENTER);
-                }
-
-                googleMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(location.getLatitude(), location.getLongitude()))
-                        .title("You"));
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 14));
 
                 CameraPosition cameraPosition = new CameraPosition.Builder()
                         .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Sets the center of the map to location user
@@ -140,16 +145,6 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
                     // TODO this may need to be moved into a separate thread.
                     @Override
                     public void onMapLongClick(LatLng latLng) {
-                        googleMap.addMarker(new MarkerOptions()
-                                .position(latLng)
-                                // TODO make this a string resource and use String.format
-                                .title("Incident @ " + latLng.toString())); // TODO attempt to get the place name
-                       /* Intent i = new Intent(getActivity(), ReportIncident.class);
-                        Bundle bundle = new Bundle();
-                        bundle.putDoubleArray("location", new double[]{latLng.latitude, latLng.longitude});
-                        i.putExtras(bundle);
-                        startActivity(i);*/
-
                         ReportIncidentDialog dialog = ReportIncidentDialog.newInstance(latLng);
 
                         FragmentTransaction transaction = getFragmentManager().beginTransaction();
@@ -158,6 +153,70 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
                                 .addToBackStack(null).commit();
 
 
+                    }
+                });
+
+                googleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+                    @Override
+                    public void onCameraIdle() {
+                        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+                        LatLng a = bounds.northeast;
+                        LatLng b = bounds.southwest;
+                        float[] results = new float[4];
+
+                        Location.distanceBetween(a.latitude, a.longitude, b.latitude, b.longitude, results);
+
+                        LatLng center = map.getCameraPosition().target;
+
+                        double radius = results[0] / 1000.0 + 1.0;
+
+                        geoQuery.setLocation(new GeoLocation(center.latitude, center.longitude), radius);
+
+                    }
+                });
+
+                LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+                LatLng a = bounds.northeast;
+                LatLng b = bounds.southwest;
+                float[] results = new float[4];
+
+                Location.distanceBetween(a.latitude, a.longitude, b.latitude, b.longitude, results);
+
+                LatLng center = map.getCameraPosition().target;
+
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("report_locations");
+
+                double radius = results[0] / 1000.0 + 1.0;
+                GeoFire geoFire = new GeoFire(ref);
+                geoQuery = geoFire.queryAtLocation(new GeoLocation(center.latitude, center.longitude), radius);
+                geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+                    @Override
+                    public void onKeyEntered(String key, GeoLocation location) {
+                        markers.put(key, map.addMarker(new MarkerOptions()
+                                .position(new LatLng(location.latitude, location.longitude))
+                                .title("Incident"))); // TODO label w/ title of post
+                    }
+
+                    @Override
+                    public void onKeyExited(String key) {
+                        Marker marker = markers.get(key);
+
+                        if (marker != null) {
+                            marker.remove();
+                        }
+                    }
+
+                    @Override
+                    public void onKeyMoved(String key, GeoLocation location) {
+                    }
+
+                    @Override
+                    public void onGeoQueryReady() {
+                        // TODO display loading progress?
+                    }
+
+                    @Override
+                    public void onGeoQueryError(DatabaseError error) {
                     }
                 });
             }
@@ -191,4 +250,21 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
         mMapView.onLowMemory();
     }
 
+    @Override
+    public void onLocationChanged(Location location) {
+        if (currentLocationMarker != null) {
+            currentLocationMarker.remove();
+        } else if (map != null) {
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 14));
+        }
+
+        if (map != null) {
+            currentLocationMarker = map.addMarker(new MarkerOptions()
+                    .position(new LatLng(location.getLatitude(), location.getLongitude()))
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                    .title("Current Location"));
+
+        }
+
+    }
 }

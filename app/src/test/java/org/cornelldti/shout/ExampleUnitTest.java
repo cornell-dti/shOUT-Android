@@ -1,4 +1,4 @@
-package com.android.shout.shout;
+package org.cornelldti.shout;
 
 import org.junit.Test;
 

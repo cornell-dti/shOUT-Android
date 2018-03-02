@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.android.shout.places;
+package org.cornelldti.shout.places;
 
 import android.content.Context;
 import android.graphics.Typeface;

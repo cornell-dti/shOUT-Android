@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:974596235185:android:04bbf9b696e4c5a2",
         "android_client_info": {
-          "package_name": "com.android.shout.shout"
+          "package_name": "org.cornelldti.shout"
         }
       },
       "oauth_client": [

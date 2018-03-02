@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.shout">
+    package="org.cornelldti.shout">
 
-    <uses-sdk
-        android:minSdkVersion="19"
-        android:targetSdkVersion="26" />
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -27,6 +24,7 @@
         <!--
              The API key for Google Maps-based APIs.
         -->
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCGjqOwOqSTtrVYIAG-lC-vGYeNVXQqpXM" />
@@ -42,9 +40,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ReportIncident"
-            android:theme="@style/AppTheme.Transparent" />
         <!--android:screenOrientation="portrait" todo request elsewhere-->
     </application>
 

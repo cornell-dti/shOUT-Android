@@ -1,4 +1,4 @@
-package com.android.shout;
+package org.cornelldti.shout;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -50,7 +50,7 @@ public class ReachOutFragment extends Fragment {
                     listDataChild.put(d.getKey(), childList);
                 }
 
-                ExpandableListAdapter listAdapter = new com.android.shout.ExpandableListAdapter(view.getContext(), listDataHeader, listDataChild);
+                ExpandableListAdapter listAdapter = new org.cornelldti.shout.ExpandableListAdapter(view.getContext(), listDataHeader, listDataChild);
                 listView.setAdapter(listAdapter);
             }
 

@@ -1,4 +1,4 @@
-package com.android.shout;
+package org.cornelldti.shout;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

@@ -1,6 +1,7 @@
-package com.android.shout;
+package org.cornelldti.shout;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -18,6 +19,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class SpeakOutFragment extends Fragment {
 
@@ -28,11 +31,9 @@ public class SpeakOutFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference firebase = database.getReference("messages");
+        DatabaseReference firebase = database.getReference("approved_reports");
         final View view = inflater.inflate(R.layout.speakout_fragment, container, false);
         final RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
@@ -40,18 +41,22 @@ public class SpeakOutFragment extends Fragment {
         firebase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                ArrayList<String> titleList = new ArrayList<>();
-                ArrayList<String> bodyList = new ArrayList<>();
-                ArrayList<String> dateList = new ArrayList<>();
-                ArrayList<String> timeList = new ArrayList<>();
+                List<String> titleList = new ArrayList<>(), bodyList = new ArrayList<>(), locationList = new ArrayList<>();
+                List<Date> timeList = new ArrayList<>();
+
+
                 for (DataSnapshot d : dataSnapshot.getChildren()) {
-                    Message m = d.getValue(Message.class);
-                    bodyList.add(m.getBody().toString());
-                    dateList.add(m.getDate().toString());
-                    titleList.add(m.getTitle().toString());
-                    timeList.add(m.getTime().toString());
+                    ApprovedMessage m = d.getValue(ApprovedMessage.class);
+
+                    if (m != null) {
+                        bodyList.add(m.getBody());
+                        titleList.add(m.getTitle());
+                        timeList.add(new Date(m.getTime()));
+                        locationList.add(m.getLocation());
+                    }
                 }
-                SpeakAdapter adapter = new SpeakAdapter(titleList, bodyList, dateList, timeList, view.getContext());
+
+                SpeakAdapter adapter = new SpeakAdapter(titleList, bodyList, timeList, locationList, view.getContext());
                 recyclerView.setAdapter(adapter);
             }
 
@@ -62,7 +67,7 @@ public class SpeakOutFragment extends Fragment {
         });
 
 
-        final Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        final Toolbar toolbar = view.findViewById(R.id.toolbar);
 
 
         CollapsingToolbarLayout collapsingToolbar = view.findViewById(R.id.collapsing_toolbar);

@@ -1,4 +1,4 @@
-package com.android.shout;
+package org.cornelldti.shout;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
-import com.android.shout.R;
+import org.cornelldti.shout.R;
 
 import java.util.HashMap;
 import java.util.List;

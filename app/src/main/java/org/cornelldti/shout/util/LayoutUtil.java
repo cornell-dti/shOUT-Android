@@ -1,4 +1,4 @@
-package com.android.shout.util;
+package org.cornelldti.shout.util;
 
 import android.content.Context;
 import android.content.res.Resources;

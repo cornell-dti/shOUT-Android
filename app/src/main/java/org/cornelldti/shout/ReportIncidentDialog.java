@@ -1,4 +1,4 @@
-package com.android.shout;
+package org.cornelldti.shout;
 
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
@@ -14,34 +14,40 @@ import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.android.shout.places.PlaceAutocompleteAdapter;
-import com.android.shout.util.LayoutUtil;
-import com.android.shout.util.LocationUtil;
+import org.cornelldti.shout.places.PlaceAutocompleteAdapter;
+import org.cornelldti.shout.util.LayoutUtil;
+import org.cornelldti.shout.util.LocationUtil;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBufferResponse;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
-import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.RuntimeRemoteException;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -51,11 +57,14 @@ import java.util.List;
 import java.util.Locale;
 
 
-public class ReportIncidentDialog extends AppCompatDialogFragment implements PlaceSelectionListener {
+public class ReportIncidentDialog extends AppCompatDialogFragment {
 
+    private static final String TAG = "ReportIncident";
     private AutoCompleteTextView locationEdit;
     private TextView dateSelector, timeSelector;
     private EditText editPostTitle, editPostText;
+
+    private Calendar calendar = Calendar.getInstance();
 
     private LatLng location;
     private boolean locationLocked; // TODO Ask design. See onCreate...
@@ -119,13 +128,20 @@ public class ReportIncidentDialog extends AppCompatDialogFragment implements Pla
             }
         });
 
-        Button saveButton = v.findViewById(R.id.button_save);
+        final Button saveButton = v.findViewById(R.id.button_save);
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO save report
-                dismiss();
+                saveReport(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        InputMethodManager manager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        manager.hideSoftInputFromWindow(editPostText.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+
+                        dismiss(); // todo
+                    }
+                });
             }
         });
 
@@ -192,7 +208,27 @@ public class ReportIncidentDialog extends AppCompatDialogFragment implements Pla
         // TODO fix this
 
         GeoDataClient client = Places.getGeoDataClient(getActivity(), null);
-        locationEdit.setAdapter(new PlaceAutocompleteAdapter(getActivity(), client, LocationUtil.getIthacaBounds(), null));
+        final PlaceAutocompleteAdapter adapter = new PlaceAutocompleteAdapter(getActivity(), client, LocationUtil.getIthacaBounds(), null);
+        locationEdit.setAdapter(adapter);
+        locationEdit.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final AutocompletePrediction item = adapter.getItem(position);
+                final String placeId = item.getPlaceId();
+                final CharSequence primaryText = item.getPrimaryText(null);
+
+                Log.i(TAG, "Autocomplete item selected: " + primaryText);
+
+                // TODO store this client
+                GeoDataClient mGeoDataClient = Places.getGeoDataClient(getContext(), null);
+                Task<PlaceBufferResponse> placeResult = mGeoDataClient.getPlaceById(placeId);
+                placeResult.addOnCompleteListener(mUpdatePlaceDetailsCallback);
+
+                Toast.makeText(getContext(), "Clicked: " + primaryText, Toast.LENGTH_SHORT).show();
+                Log.i(TAG, "Getting details for: " + placeId);
+            }
+        });
+
 
         /* Setup the location selector if a location was passed to the dialog... */
 
@@ -231,18 +267,54 @@ public class ReportIncidentDialog extends AppCompatDialogFragment implements Pla
         setStyle(DialogFragment.STYLE_NO_TITLE, R.style.FullScreenDialog);
     }
 
+    private OnCompleteListener<PlaceBufferResponse> mUpdatePlaceDetailsCallback = new OnCompleteListener<PlaceBufferResponse>() {
+        @Override
+        public void onComplete(Task<PlaceBufferResponse> task) {
+            try {
+                PlaceBufferResponse places = task.getResult();
+
+                final Place place = places.get(0);
+
+                // Format details of the place for display and show it in a TextView.
+                location = place.getLatLng();
+
+                // TODO locationEdit.setText(place.getName());
+
+                places.release();
+            } catch (RuntimeRemoteException e) {
+                // Request did not complete successfully
+                Log.e(TAG, "Place query did not complete.", e);
+            }
+        }
+    };
+
     // TODO utilize
-    public void saveReport() {
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference("messages");
+    public void saveReport(OnCompleteListener<Void> listener) {
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference("unapproved_reports");
         if (editPostTitle.getText().toString().isEmpty() || editPostText.getText().toString().isEmpty()) {
             Toast.makeText(getContext(), "Make sure to fill in post title and message", Toast.LENGTH_LONG).show();
         } else {
-            // todo validate getText()
-            Message m = new Message(editPostText.getText().toString(), dateSelector.getText().toString(), timeSelector.getText().toString(), editPostTitle.getText().toString());
-            String ID = database.push().getKey();
-            m.setID(ID);
-            database.child(ID).setValue(m);
-            startActivity(new Intent(getContext(), MainActivity.class));
+            if (editPostTitle.getText() != null) {
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                if (user != null) {
+                    UnapprovedMessage m = new UnapprovedMessage(
+                            editPostText.getText().toString(),
+                            editPostTitle.getText().toString(),
+                            user.getUid(),
+                            locationEdit.getText().toString(),
+                            location,
+                            calendar.getTimeInMillis());
+                    String id = FirebaseDatabase.getInstance().getReference("approved_reports").push().getKey();
+                    database.child(id).setValue(m).addOnCompleteListener(listener);
+                } else {
+                    Toast.makeText(getContext(), "Cannot connect to shOUT.", Toast.LENGTH_SHORT).show();
+                    dismiss();
+                }
+            } else {
+                Toast.makeText(getContext(), "Please enter a summary.", Toast.LENGTH_SHORT).show();
+                dismiss();
+            }
         }
     }
 
@@ -291,6 +363,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment implements Pla
                         String formattedDate = format.format(cal.getTime());
 
                         dateSelector.setText(formattedDate);
+                        calendar.set(year, monthOfYear, dayOfMonth);
                     }
                 }, mYear, mMonth, mDay);
         datePickerDialog.show();
@@ -306,7 +379,6 @@ public class ReportIncidentDialog extends AppCompatDialogFragment implements Pla
         // Launch Time Picker Dialog
         TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(),
                 new TimePickerDialog.OnTimeSetListener() {
-
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay,
                                           int minute) {
@@ -317,31 +389,11 @@ public class ReportIncidentDialog extends AppCompatDialogFragment implements Pla
                         String formattedDate = format.format(cal.getTime());
 
                         timeSelector.setText(formattedDate);
+                        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                        calendar.set(Calendar.MINUTE, minute);
                     }
                 }, mHour, mMinute, DateFormat.is24HourFormat(getActivity()));
         timePickerDialog.show();
     }
-
-    /* PlaceSelectionListener Implementation */
-    // TODO currently unutilized...
-
-    @Override
-    public void onPlaceSelected(Place place) {
-        if (this.location != null) {
-            CharSequence name = place.getName();
-
-            if (name != null) {
-                locationEdit.setText(name);
-            } else {
-                locationEdit.setText(place.getAddress()); // TODO is a null check necessary?
-            }
-        }
-    }
-
-    @Override
-    public void onError(Status status) {
-        // TODO handle errors.
-    }
-
 
 }

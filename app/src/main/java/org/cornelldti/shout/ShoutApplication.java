@@ -1,4 +1,4 @@
-package com.android.shout;
+package org.cornelldti.shout;
 
 import android.app.Application;
 

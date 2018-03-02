@@ -1,13 +1,15 @@
-package com.android.shout;
+package org.cornelldti.shout;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -16,12 +18,16 @@ import java.util.ArrayList;
 
 public class SpeakAdapter extends RecyclerView.Adapter<SpeakAdapter.ViewHolder> {
 
-    private ArrayList<String> titleList, bodyList, dateList, timeList;
+    private List<String> titleList, bodyList, locationList;
+    private List<Date> dateList;
 
     private Context mContext;
 
+    private final java.text.DateFormat dateFormatter;
+    private final java.text.DateFormat timeFormatter;
+
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView title, body, date, time;
+        TextView title, body, date, time, location;
 
         ViewHolder(View v) {
             super(v);
@@ -29,14 +35,18 @@ public class SpeakAdapter extends RecyclerView.Adapter<SpeakAdapter.ViewHolder> 
             body = v.findViewById(R.id.body);
             date = v.findViewById(R.id.date);
             time = v.findViewById(R.id.time);
+            location = v.findViewById(R.id.location);
         }
     }
 
-    SpeakAdapter(ArrayList<String> titleList, ArrayList<String> bodyList, ArrayList<String> dateList, ArrayList<String> timeList, Context context) {
+    SpeakAdapter(List<String> titleList, List<String> bodyList, List<Date> dateList, List<String> locationList, Context context) {
+        this.dateFormatter = DateFormat.getDateFormat(context);
+        this.timeFormatter = DateFormat.getTimeFormat(context);
+
         this.titleList = titleList;
         this.bodyList = bodyList;
         this.dateList = dateList;
-        this.timeList = timeList;
+        this.locationList = locationList;
         this.mContext = context;
     }
 
@@ -52,8 +62,9 @@ public class SpeakAdapter extends RecyclerView.Adapter<SpeakAdapter.ViewHolder> 
     public void onBindViewHolder(ViewHolder holder, final int position) {
         holder.title.setText(titleList.get(position));
         holder.body.setText(bodyList.get(position));
-        holder.date.setText(dateList.get(position));
-        holder.time.setText(timeList.get(position));
+        holder.location.setText(locationList.get(position));
+        holder.date.setText(dateFormatter.format(dateList.get(position)));
+        holder.time.setText(timeFormatter.format(dateList.get(position)));
     }
 
     @Override

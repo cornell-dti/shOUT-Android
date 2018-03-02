@@ -1,4 +1,4 @@
-package com.android.shout.shout;
+package org.cornelldti.shout;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.android.shout.shout", appContext.getPackageName());
+        assertEquals("org.cornelldti.shout", appContext.getPackageName());
     }
 }
