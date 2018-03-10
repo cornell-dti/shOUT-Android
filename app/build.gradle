@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
     buildToolsVersion '26.0.0'
     defaultConfig {
         applicationId "org.cornelldti.shout"
@@ -54,6 +54,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:27.0.2'
     compile 'com.android.support:mediarouter-v7:27.0.2'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.google.maps.android:android-maps-utils:0.5+'
 }
 
 

@@ -100,8 +100,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
                             editReportTitle.getText().toString(),
                             user.getUid(),
                             locationEdit.getText().toString(),
-                            location,
-                            calendar.getTimeInMillis());
+                            location, calendar.getTimeInMillis());
                     String id = FirebaseDatabase.getInstance().getReference("approved_reports").push().getKey();
                     database.child(id).setValue(m).addOnCompleteListener(listener);
                 } else {

@@ -21,9 +21,13 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.cornelldti.shout.R;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 public class SpeakOutFragment extends Fragment {
 
@@ -47,6 +51,7 @@ public class SpeakOutFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         database = FirebaseDatabase.getInstance();
         firebase = database.getReference("approved_reports");
+        firebase.orderByChild("timestamp");
         view = inflater.inflate(R.layout.speakout_fragment, container, false);
         recyclerView = view.findViewById(R.id.recycler_view);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
@@ -99,11 +104,11 @@ public class SpeakOutFragment extends Fragment {
                     if (m != null) {
                         bodyList.add(m.getBody());
                         titleList.add(m.getTitle());
+
                         timeList.add(new Date(m.getTime()));
                         locationList.add(m.getLocation());
                     }
                 }
-
                 SpeakAdapter adapter = new SpeakAdapter(titleList, bodyList, timeList, locationList, view.getContext());
                 recyclerView.setAdapter(adapter);
             }
@@ -113,6 +118,22 @@ public class SpeakOutFragment extends Fragment {
 
             }
         });
+    }
+
+    // TODO FIGURE OUT HOW TO PROPERLY GET RIGHT DATE FROM TIMESTAMP`
+    private Date getDate(long time) {
+        Calendar cal = Calendar.getInstance();
+        TimeZone tz = cal.getTimeZone();//get your local time zone.
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+        sdf.setTimeZone(tz);//set time zone.
+        String localTime = sdf.format(new Date(time * 1000));
+        Date date = new Date();
+        try {
+            date = sdf.parse(localTime);//get local date
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
     }
 
 }
