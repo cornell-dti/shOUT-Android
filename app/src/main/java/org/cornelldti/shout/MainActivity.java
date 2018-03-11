@@ -1,20 +1,26 @@
 package org.cornelldti.shout;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.BottomNavigationView.OnNavigationItemSelectedListener;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -141,12 +147,13 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         /* Set the default page to "Go Out" */
 
         // TODO double check that this is the correct way to set the default page
-        mViewPager.setCurrentItem(PagerAdapter.Pages.GO_OUT);
-        bottomNavigationView.getMenu().getItem(PagerAdapter.Pages.GO_OUT).setChecked(true);
+        mViewPager.setCurrentItem(PagerAdapter.Pages.SPEAK_OUT);
+        bottomNavigationView.getMenu().getItem(PagerAdapter.Pages.SPEAK_OUT).setChecked(true);
+        setStatusBarColor(PagerAdapter.Pages.SPEAK_OUT);
 
         /* Register page change listeners... */
 
-        mViewPager.addOnPageChangeListener(mOnPageChangeListener);
+        mViewPager.addOnPageChangeListener(new MainOnPageChangeListener());
         bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavItemSelectedListener);
     }
 
@@ -264,14 +271,18 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         }
     };
 
-    private OnPageChangeListener mOnPageChangeListener = new OnPageChangeListener() {
+    private class MainOnPageChangeListener implements OnPageChangeListener {
+
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
         }
 
         @Override
         public void onPageSelected(int position) {
+            /* Fix status bar styling on Speak Out page... */
+            setStatusBarColor(position);
+
+
             if (prevMenuItem != null) {
                 prevMenuItem.setChecked(false);
             } else {
@@ -290,7 +301,41 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         public void onPageScrollStateChanged(int state) {
 
         }
-    };
+    }
 
+    public void setStatusBarColor(int position) {
+        Window window = getWindow();
+        if (window != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (position != PagerAdapter.Pages.SPEAK_OUT) {
+                    window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                    window.setStatusBarColor(Color.TRANSPARENT);
 
+                    window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+                } else {
+                    window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
+                    window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
+
+                    window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                }
+            } else {
+                // TODO test compatibility code
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    if (position != PagerAdapter.Pages.SPEAK_OUT) {
+                        window.setStatusBarColor(Color.TRANSPARENT);
+                    } else {
+                        window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorAccent));
+                    }
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    if (position == PagerAdapter.Pages.SPEAK_OUT) {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                    } else {
+                        window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                    }
+
+                }
+            }
+        }
+    }
 }

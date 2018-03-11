@@ -56,116 +56,159 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="10dp"
         android:orientation="vertical">
 
 
-        <android.support.design.widget.TextInputLayout
+        <!-- <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
-            <EditText
-                android:id="@+id/report_title_edit_text"
-                style="@style/Widget.AppCompat.EditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:ems="10"
-                android:hint="@string/summary_hint"
-                android:inputType="textPersonName"
-                android:paddingBottom="10dp"
-                android:paddingTop="10dp"
-                android:singleLine="true" />
-        </android.support.design.widget.TextInputLayout>
+-->
+        <EditText
+            android:id="@+id/report_title_edit_text"
+            style="@style/EnhancedEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:background="@android:color/transparent"
+            android:ems="10"
+            android:hint="@string/summary_hint"
+            android:inputType="textPersonName"
+            android:singleLine="true" />
+        <!-- </android.support.design.widget.TextInputLayout>
+-->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/edit_text_separator" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="0"
             android:orientation="vertical">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="10dp"
-                android:text="@string/date_time_label"
-                android:textAlignment="viewStart"
-                android:textColor="?android:attr/textColorHint" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/report_date_spinner_text_view"
-                    style="@style/Widget.AppCompat.Spinner"
+                <LinearLayout
+                    android:id="@+id/report_date_spinner_click_area"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
                     android:layout_weight="1"
-                    android:padding="0dp"
-                    android:spinnerMode="dialog"
-                    android:text="@string/date_hint" />
+                    android:clickable="true"
+                    android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/report_time_spinner_text_view"
+                    <TextView
+                        style="@style/EnhancedEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:clickable="false"
+                        android:hint="Date"
+                        android:spinnerMode="dialog" />
 
-                    style="@style/Widget.AppCompat.Spinner"
-                    android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/report_date_spinner_text_view"
+                        style="@style/EnhancedEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:clickable="false"
+
+                        android:spinnerMode="dialog" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/edit_text_separator" />
+
+
+                <LinearLayout
+                    android:id="@+id/report_time_spinner_click_area"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-
                     android:layout_weight="1"
-                    android:minWidth="200dp"
-                    android:padding="0dp"
-                    android:spinnerMode="dialog"
-                    android:text="@string/time_hint" />
+                    android:clickable="true"
+                    android:minWidth="250dp"
+                    android:orientation="horizontal">
 
+                    <TextView
+                        style="@style/EnhancedEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:clickable="false"
+
+                        android:hint="Time"
+
+                        android:spinnerMode="dialog" />
+
+                    <TextView
+                        android:id="@+id/report_time_spinner_text_view"
+                        style="@style/EnhancedEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:clickable="false"
+
+                        android:spinnerMode="dialog" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
 
-        <android.support.design.widget.TextInputLayout
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/edit_text_separator" />
+
+
+        <!-- <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="15dp"> -->
 
-            <AutoCompleteTextView
-                android:id="@+id/report_location_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="@string/location_hint" />
-        </android.support.design.widget.TextInputLayout>
+        <AutoCompleteTextView
+            android:id="@+id/report_location_edit_text"
+            style="@style/EnhancedEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:hint="@string/location_hint"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp" />
+        <!--  </android.support.design.widget.TextInputLayout> -->
 
-        <android.support.design.widget.TextInputLayout
+        <!-- <android.support.design.widget.TextInputLayout
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:layout_marginTop="15dp">-->
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/edit_text_separator" />
+
+
+        <EditText
+            android:id="@+id/report_details_edit_text"
+            style="@style/EnhancedEditText"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="10dp">
+            android:layout_weight="1"
+            android:ems="10"
+            android:gravity="top|start"
+            android:hint="@string/details_hint"
+            android:inputType="textMultiLine"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp"
 
-            <EditText
-                android:id="@+id/report_details_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_weight="1"
-                android:ems="10"
-                android:gravity="top|start"
-                android:hint="@string/details_hint"
-                android:inputType="textMultiLine"
-                android:paddingStart="10dp"
-                tools:ignore="RtlSymmetry" />
+            tools:ignore="RtlSymmetry" />
 
-        </android.support.design.widget.TextInputLayout>
-
+        <!--  </android.support.design.widget.TextInputLayout>
+ -->
     </LinearLayout>
 </LinearLayout>

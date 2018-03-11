@@ -155,8 +155,6 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
                         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                         transaction.add(android.R.id.content, dialog)
                                 .addToBackStack(null).commit();
-
-
                     }
                 });
 
@@ -175,7 +173,6 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
                         double radius = results[0] / 1000.0 + 1.0;
 
                         geoQuery.setLocation(new GeoLocation(center.latitude, center.longitude), radius);
-
                     }
                 });
 

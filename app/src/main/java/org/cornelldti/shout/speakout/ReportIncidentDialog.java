@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -65,6 +66,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
     private static final String TAG = "ReportIncident";
     private AutoCompleteTextView locationEdit;
     private TextView dateSelector, timeSelector;
+    private LinearLayout dateSelectorClickArea, timeSelectorClickArea;
     private EditText editReportTitle, editReportDetails;
 
     private Calendar calendar = Calendar.getInstance();
@@ -97,8 +99,8 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
      */
     public void saveReport(OnCompleteListener<Void> listener) {
         DatabaseReference database = FirebaseDatabase.getInstance().getReference("unapproved_reports");
-        if (editReportTitle.getText().toString().isEmpty() || editReportDetails.getText().toString().isEmpty()) {
-            Toast.makeText(getContext(), "Make sure to fill in post title and message", Toast.LENGTH_LONG).show();
+        if (editReportTitle.getText().toString().isEmpty()) {
+            Toast.makeText(getContext(), "Make sure to fill in post title", Toast.LENGTH_LONG).show();
         } else {
             if (editReportTitle.getText() != null) {
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -177,15 +179,19 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
 
         editReportTitle = v.findViewById(R.id.report_title_edit_text);
         editReportDetails = v.findViewById(R.id.report_details_edit_text);
+
         dateSelector = v.findViewById(R.id.report_date_spinner_text_view);
         timeSelector = v.findViewById(R.id.report_time_spinner_text_view);
+
+        dateSelectorClickArea = v.findViewById(R.id.report_date_spinner_click_area);
+        timeSelectorClickArea = v.findViewById(R.id.report_time_spinner_click_area);
 
         // TODO Can we remove the onKey listeners?
         // TODO Test the app with a physical keyboard to be sure.
 
         /* Catch all interaction with the date selector TextView */
 
-        dateSelector.setOnClickListener(new View.OnClickListener() {
+        dateSelectorClickArea.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onDateControlClicked(v);
@@ -193,7 +199,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
 
         });
 
-        dateSelector.setOnKeyListener(new View.OnKeyListener() {
+        dateSelectorClickArea.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 onDateControlClicked(v);
@@ -203,14 +209,14 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
 
         /* Catch all interaction with the time selector TextView */
 
-        timeSelector.setOnClickListener(new View.OnClickListener() {
+        timeSelectorClickArea.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onTimeControlClicked(v);
             }
         });
 
-        timeSelector.setOnKeyListener(new View.OnKeyListener() {
+        timeSelectorClickArea.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 onTimeControlClicked(v);
