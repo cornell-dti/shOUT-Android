@@ -154,6 +154,7 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
                 googleMap.setOnCameraIdleListener(mClusterManager);
                 googleMap.setOnMarkerClickListener(mClusterManager);
                 googleMap.setOnInfoWindowClickListener(mClusterManager);
+
                 googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
                     // TODO this may need to be moved into a separate thread.
                     @Override
@@ -288,6 +289,8 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
 
     @Override
     public void onLocationChanged(Location location) {
+        // TODO don't continuously update? Check UX.
+
         if (currentLocationMarker != null) {
             currentLocationMarker.remove();
         } else if (map != null) {

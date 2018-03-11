@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -73,6 +74,13 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
         } else {
             if (mGoogleApiClient.isConnected()) {
+                // TODO don't wait for the first location update.
+                Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
+                if (lastLocation != null) {
+                    locationUpdateListener.onLocationChanged(lastLocation);
+                }
+
                 LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, locationUpdateListener);
                 return true;
             }
