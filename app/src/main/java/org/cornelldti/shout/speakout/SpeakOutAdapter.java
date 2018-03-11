@@ -32,7 +32,7 @@ import java.util.Map;
  * <p>
  * Created by Evan on 3/10/18
  */
-
+@Deprecated
 public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.ReportViewHolder> {
 
     private final FirebaseRecyclerAdapter<ApprovedReport, ReportViewHolder> adapter;
@@ -148,7 +148,7 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
                 for (int i = 0; i < adapter.getItemCount(); i++) {
                     ApprovedReport report = adapter.getItem(i);
 
-                    if (report.getHas_Body()) {
+                    if (report.getHasBody()) {
                         stories.put(numberOfStories, report);
                         numberOfStories++;
                     }

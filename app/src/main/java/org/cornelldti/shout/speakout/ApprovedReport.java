@@ -11,14 +11,14 @@ public class ApprovedReport {
 
     private String body, title, location;
     private long timestamp;
-    private boolean has_body;
+    private boolean hasbody;
 
-    ApprovedReport(String body, String title, String location, long timestamp, boolean has_body) {
+    ApprovedReport(String body, String title, String location, long timestamp, boolean hasbody) {
         this.body = body;
         this.title = title;
         this.timestamp = timestamp;
         this.location = location;
-        this.has_body = has_body;
+        this.hasbody = hasbody;
     }
 
     public ApprovedReport() {
@@ -40,12 +40,8 @@ public class ApprovedReport {
         return location;
     }
 
-    public boolean hasBody() {
-        return getHas_Body();
+    public boolean getHasBody() {
+        return hasbody;
     }
 
-    // TODO Cleanup the backend or use a custom parser... ?
-    public boolean getHas_Body() {
-        return has_body;
-    }
 }

@@ -19,6 +19,8 @@ import android.widget.LinearLayout;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.cornelldti.shout.MainActivity;
 import org.cornelldti.shout.R;
@@ -40,15 +42,23 @@ public class SpeakOutFragment extends Fragment {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference firebase = database.getReference("approved_reports");
 
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        CollectionReference ref = firestore.collection("reports");
+
         final View view = inflater.inflate(R.layout.speakout_fragment, container, false);
         final RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
 
-        Query allReports = firebase.orderByChild("timestamp").limitToFirst(100); // TODO
+        // Query allReports = firebase.orderByChild("timestamp").limitToFirst(100); // TODO
 
-        final SpeakOutAdapter adapter = SpeakOutAdapter.construct(view.getContext(), this, allReports);
+        com.google.firebase.firestore.Query stories = ref.whereEqualTo("hasbody", true).orderBy("timestamp").limit(100);
+        com.google.firebase.firestore.Query all = ref.orderBy("timestamp").limit(100);
+
+        // final SpeakOutAdapter adapter = SpeakOutAdapter.construct(view.getContext(), this, allReports);
+
+        final SpeakOutAdapterV2 adapter = SpeakOutAdapterV2.construct(this, stories, all, view.getContext());
         recyclerView.setAdapter(adapter);
 
 
@@ -64,10 +74,10 @@ public class SpeakOutFragment extends Fragment {
 
         // TODO Investigate better implementations.
 
-        final long loadedCheckDelay = 500L, maximumCheckDelay = 5000L;
-        final int[] iteration = new int[]{0};
+        // final long loadedCheckDelay = 500L, maximumCheckDelay = 5000L;
+        // final int[] iteration = new int[]{0};
 
-        /* Handle loading... */
+        /* Handle loading... *
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             private Runnable anonThis = this;
@@ -140,7 +150,7 @@ public class SpeakOutFragment extends Fragment {
                 buttonHighlight.setVisibility(View.VISIBLE);
                 storiesHighlight.setVisibility(View.INVISIBLE);
 
-                adapter.filter(false);
+                adapter.filter(SpeakOutAdapterV2.FILTER_NONE);
 
             }
         });
@@ -153,7 +163,7 @@ public class SpeakOutFragment extends Fragment {
                 storiesHighlight.setVisibility(View.VISIBLE);
                 buttonHighlight.setVisibility(View.INVISIBLE);
 
-                adapter.filter(true);
+                adapter.filter(SpeakOutAdapterV2.FILTER_STORIES);
             }
         });
 
