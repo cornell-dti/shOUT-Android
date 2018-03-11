@@ -41,10 +41,13 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
     /* The adapter currently wrapped by this class. */
     private RecyclerView.Adapter<SpeakOutAdapter.ReportViewHolder> currentAdapter;
 
+    private boolean loading, canStopLoading;
 
     private final java.text.DateFormat dateFormatter, timeFormatter;
 
-    private SpeakOutAdapter(Context context, FirebaseRecyclerOptions<ApprovedReport> options) {
+    private SpeakOutAdapter(Context context, FirebaseRecyclerOptions<ApprovedReport> options, boolean isLoading) {
+        this.loading = isLoading;
+
         this.adapter = construct(options);
         this.currentAdapter = this.adapter;
 
@@ -65,6 +68,26 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
         }
 
         notifyDataSetChanged();
+    }
+
+    /**
+     * Refreshes the currently displayed reports.
+     * NOTE: The data is already local... it is just being displayed.
+     */
+    public void refreshItems() {
+        notifyDataSetChanged();
+    }
+
+    public void setIsLoading(boolean loading) {
+        this.loading = loading;
+    }
+
+    public boolean isLoading() {
+        return loading;
+    }
+
+    public boolean canStopLoading() {
+        return canStopLoading;
     }
 
     /* ViewHolder Implementation */
@@ -186,7 +209,8 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
                 .setQuery(query, ApprovedReport.class)
                 .setLifecycleOwner(fragment)
                 .build();
-        return new SpeakOutAdapter(context, options);
+        // TODO Don't hard code isLoading
+        return new SpeakOutAdapter(context, options, true);
     }
 
     /* WRAPPER METHODS */
@@ -242,26 +266,43 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
                                        int oldIndex) {
                 super.onChildChanged(type, snapshot, newIndex, oldIndex);
 
+                if (loading) {
+                    switch (type) {
+                        case ADDED:
+                            // TODO Decide whether pull or auto is better UX
+                            // TODO Also, switching tabs will auto-refresh right now
+                            SpeakOutAdapter.this.notifyItemInserted(newIndex);
+                            canStopLoading = true;
+                            break;
+                        case CHANGED:
+                            SpeakOutAdapter.this.notifyItemChanged(newIndex);
+                            canStopLoading = true;
+                            break;
+                        case REMOVED:
+                            SpeakOutAdapter.this.notifyItemRemoved(newIndex);
+                            canStopLoading = true;
+                            break;
+                        case MOVED:
+                            SpeakOutAdapter.this.notifyItemMoved(oldIndex, newIndex);
+                            canStopLoading = true;
+                            break;
+                        default:
+                            throw new IllegalStateException("Incomplete case statement");
+                    }
+                }
+
                 switch (type) {
                     case ADDED:
                         storiesAdapter.wrap_notifyItemInserted(newIndex);
-                        SpeakOutAdapter.this.notifyItemInserted(newIndex);
-
                         break;
                     case CHANGED:
                         storiesAdapter.wrap_notifyItemChanged(newIndex);
-                        SpeakOutAdapter.this.notifyItemChanged(newIndex);
-
                         break;
                     case REMOVED:
                         storiesAdapter.wrap_notifyItemRemoved(newIndex);
-                        SpeakOutAdapter.this.notifyItemRemoved(newIndex);
-
                         break;
                     case MOVED:
-
                         storiesAdapter.wrap_notifyItemMoved(oldIndex, newIndex);
-                        SpeakOutAdapter.this.notifyItemMoved(oldIndex, newIndex);
                         break;
                     default:
                         throw new IllegalStateException("Incomplete case statement");

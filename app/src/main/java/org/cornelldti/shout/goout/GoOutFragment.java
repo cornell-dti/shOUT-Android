@@ -62,9 +62,8 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
     private MapView mMapView;
     private GoogleMap map;
 
-    //    private Map<String, Marker> markers = new HashMap<>();
     private Map<String, MarkerClusterItem> markerClusterItems = new HashMap<>();
-    private MarkerClusterManager<MarkerClusterItem> mClusterManager;
+    private MarkerClusterManager mClusterManager;
 
     private GeoQuery geoQuery;
     private Marker currentLocationMarker;
@@ -150,10 +149,8 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
                 googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
                 /// Cluster Manager setup
-                mClusterManager = new MarkerClusterManager<MarkerClusterItem>(getActivity(), googleMap);
-                if (mClusterManager.equals(null)) {
-                    Log.i("Null", "ClusterManager");
-                }
+                mClusterManager = new MarkerClusterManager(getActivity(), googleMap);
+
                 googleMap.setOnCameraIdleListener(mClusterManager);
                 googleMap.setOnMarkerClickListener(mClusterManager);
                 googleMap.setOnInfoWindowClickListener(mClusterManager);
@@ -308,13 +305,12 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
 
     /**
      * Super class to extend implementation of onCameraIdle method for ClusterManager class.
-     * @param <MarkerClusterItem>
      */
-    class MarkerClusterManager<MarkerClusterItem> extends ClusterManager implements GoogleMap.OnCameraIdleListener {
-        public MarkerClusterManager(Context c, GoogleMap map)
-        {
+    class MarkerClusterManager extends ClusterManager<MarkerClusterItem> implements GoogleMap.OnCameraIdleListener {
+        MarkerClusterManager(Context c, GoogleMap map) {
             super(c, map);
         }
+
         @Override
         public void onCameraIdle() {
             super.onCameraIdle();
