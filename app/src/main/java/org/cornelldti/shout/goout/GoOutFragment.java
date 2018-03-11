@@ -1,6 +1,7 @@
 package org.cornelldti.shout.goout;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -9,15 +10,10 @@ import android.support.constraint.ConstraintSet;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import org.cornelldti.shout.MainActivity;
-import org.cornelldti.shout.R;
-import org.cornelldti.shout.speakout.ReportIncidentDialog;
-import org.cornelldti.shout.util.LayoutUtil;
-import org.cornelldti.shout.util.LocationUtil;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -42,6 +38,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.maps.android.clustering.ClusterManager;
+
+import org.cornelldti.shout.MainActivity;
+import org.cornelldti.shout.R;
+import org.cornelldti.shout.speakout.ReportIncidentDialog;
+import org.cornelldti.shout.util.LayoutUtil;
+import org.cornelldti.shout.util.LocationUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,11 +62,12 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
     private MapView mMapView;
     private GoogleMap map;
 
-    private Map<String, Marker> markers = new HashMap<>();
+    //    private Map<String, Marker> markers = new HashMap<>();
+    private Map<String, MarkerClusterItem> markerClusterItems = new HashMap<>();
+    private MarkerClusterManager<MarkerClusterItem> mClusterManager;
 
     private GeoQuery geoQuery;
     private Marker currentLocationMarker;
-
 
     /* PlaceSelectionListener Implementation */
 
@@ -145,6 +149,14 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
                         .build();                   // Creates a CameraPosition from the builder
                 googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
+                /// Cluster Manager setup
+                mClusterManager = new MarkerClusterManager<MarkerClusterItem>(getActivity(), googleMap);
+                if (mClusterManager.equals(null)) {
+                    Log.i("Null", "ClusterManager");
+                }
+                googleMap.setOnCameraIdleListener(mClusterManager);
+                googleMap.setOnMarkerClickListener(mClusterManager);
+                googleMap.setOnInfoWindowClickListener(mClusterManager);
                 googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
                     // TODO this may need to be moved into a separate thread.
                     @Override
@@ -176,50 +188,8 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
                     }
                 });
 
-                LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-                LatLng a = bounds.northeast;
-                LatLng b = bounds.southwest;
-                float[] results = new float[4];
-
-                Location.distanceBetween(a.latitude, a.longitude, b.latitude, b.longitude, results);
-
-                LatLng center = map.getCameraPosition().target;
-
-                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("report_locations");
-
-                double radius = results[0] / 1000.0 + 1.0;
-                GeoFire geoFire = new GeoFire(ref);
-                geoQuery = geoFire.queryAtLocation(new GeoLocation(center.latitude, center.longitude), radius);
-                geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-                    @Override
-                    public void onKeyEntered(String key, GeoLocation location) {
-                        markers.put(key, map.addMarker(new MarkerOptions()
-                                .position(new LatLng(location.latitude, location.longitude))
-                                .title("Incident"))); // TODO label w/ title of post
-                    }
-
-                    @Override
-                    public void onKeyExited(String key) {
-                        Marker marker = markers.get(key);
-
-                        if (marker != null) {
-                            marker.remove();
-                        }
-                    }
-
-                    @Override
-                    public void onKeyMoved(String key, GeoLocation location) {
-                    }
-
-                    @Override
-                    public void onGeoQueryReady() {
-                        // TODO display loading progress?
-                    }
-
-                    @Override
-                    public void onGeoQueryError(DatabaseError error) {
-                    }
-                });
+                // Adds markers organized into clusters
+                addMarkers();
             }
         });
 
@@ -251,6 +221,74 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
         mMapView.onLowMemory();
     }
 
+    private void addMarkers() {
+        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+        LatLng a = bounds.northeast;
+        LatLng b = bounds.southwest;
+        float[] results = new float[4];
+
+        Location.distanceBetween(a.latitude, a.longitude, b.latitude, b.longitude, results);
+
+        LatLng center = map.getCameraPosition().target;
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("report_locations");
+
+        double radius = results[0] / 1000.0 + 1.0;
+        GeoFire geoFire = new GeoFire(ref);
+        geoQuery = geoFire.queryAtLocation(new GeoLocation(center.latitude, center.longitude), radius);
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+//                ApprovedReport mReport = getReport(key);
+                MarkerClusterItem item = new MarkerClusterItem(location.latitude, location.longitude, "Incident", "This is what happened");
+                markerClusterItems.put(key, item);
+                mClusterManager.addItem(item);
+                mClusterManager.cluster();
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+                MarkerClusterItem item = markerClusterItems.get(key);
+                if (item != null) {
+                    mClusterManager.removeItem(item);
+                }
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+                // TODO display loading progress?
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+            }
+        });
+    }
+
+//    private ApprovedReport getReport(final String key)
+//    {
+//        FirebaseDatabase.getInstance().getReference("approved_reports").addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                report = dataSnapshot.child(key).getValue(ApprovedReport.class);
+//                if(report.equals(null))
+//                {
+//                    Toast.makeText(getActivity(), "NULL", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
+//        return report;
+//    }
+
     @Override
     public void onLocationChanged(Location location) {
         if (currentLocationMarker != null) {
@@ -262,10 +300,38 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
         if (map != null) {
             currentLocationMarker = map.addMarker(new MarkerOptions()
                     .position(new LatLng(location.getLatitude(), location.getLongitude()))
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.mee))
                     .title("Current Location"));
 
         }
-
     }
+
+    /**
+     * Super class to extend implementation of onCameraIdle method for ClusterManager class.
+     * @param <MarkerClusterItem>
+     */
+    class MarkerClusterManager<MarkerClusterItem> extends ClusterManager implements GoogleMap.OnCameraIdleListener {
+        public MarkerClusterManager(Context c, GoogleMap map)
+        {
+            super(c, map);
+        }
+        @Override
+        public void onCameraIdle() {
+            super.onCameraIdle();
+            LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+            LatLng a = bounds.northeast;
+            LatLng b = bounds.southwest;
+            float[] results = new float[4];
+
+            Location.distanceBetween(a.latitude, a.longitude, b.latitude, b.longitude, results);
+
+            LatLng center = map.getCameraPosition().target;
+
+            double radius = results[0] / 1000.0 + 1.0;
+
+            geoQuery.setLocation(new GeoLocation(center.latitude, center.longitude), radius);
+
+        }
+    }
+
 }
