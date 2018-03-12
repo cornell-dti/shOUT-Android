@@ -40,6 +40,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.maps.android.clustering.ClusterManager;
 
 import org.cornelldti.shout.MainActivity;
+import org.cornelldti.shout.PagerAdapter;
 import org.cornelldti.shout.R;
 import org.cornelldti.shout.speakout.ReportIncidentDialog;
 import org.cornelldti.shout.util.AndroidUtil;
@@ -156,35 +157,28 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
             googleMap.setOnMarkerClickListener(mClusterManager);
             googleMap.setOnInfoWindowClickListener(mClusterManager);
 
-            googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-                // TODO this may need to be moved into a separate thread.
-                @Override
-                public void onMapLongClick(LatLng latLng) {
-                    ReportIncidentDialog dialog = ReportIncidentDialog.newInstance(latLng);
+            // TODO this may need to be moved into a separate thread.
+            googleMap.setOnMapLongClickListener(latLng -> {
+                ReportIncidentDialog dialog = ReportIncidentDialog.newInstance(latLng, PagerAdapter.Pages.GO_OUT);
 
-                    FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                    transaction.add(android.R.id.content, dialog)
-                            .addToBackStack(null).commit();
-                }
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
             });
 
-            googleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
-                @Override
-                public void onCameraIdle() {
-                    LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-                    LatLng a = bounds.northeast;
-                    LatLng b = bounds.southwest;
-                    float[] results = new float[4];
+            googleMap.setOnCameraIdleListener(() -> {
+                LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+                LatLng a = bounds.northeast;
+                LatLng b = bounds.southwest;
+                float[] results = new float[4];
 
-                    Location.distanceBetween(a.latitude, a.longitude, b.latitude, b.longitude, results);
+                Location.distanceBetween(a.latitude, a.longitude, b.latitude, b.longitude, results);
 
-                    LatLng center = map.getCameraPosition().target;
+                LatLng center = map.getCameraPosition().target;
 
-                    double radius = results[0] / 1000.0 + 1.0;
+                double radius = results[0] / 1000.0 + 1.0;
 
-                    geoQuery.setLocation(new GeoLocation(center.latitude, center.longitude), radius);
-                }
+                geoQuery.setLocation(new GeoLocation(center.latitude, center.longitude), radius);
             });
 
             // Adds markers organized into clusters

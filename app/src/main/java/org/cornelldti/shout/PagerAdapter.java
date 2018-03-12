@@ -46,7 +46,7 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
         return mNumOfTabs;
     }
 
-    interface Pages {
+    public interface Pages {
         int SPEAK_OUT = 0;
         int GO_OUT = 1;
         int REACH_OUT = 2;

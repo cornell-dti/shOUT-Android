@@ -40,6 +40,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.playservices.placecomplete.PlaceAutocompleteAdapter;
 
+import org.cornelldti.shout.MainActivity;
+import org.cornelldti.shout.PagerAdapter;
 import org.cornelldti.shout.R;
 import org.cornelldti.shout.util.AndroidUtil;
 import org.cornelldti.shout.util.LayoutUtil;
@@ -58,22 +60,32 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
     private Calendar calendar = Calendar.getInstance();
     private LatLng location;
 
+    private int returnPage;
+
     public ReportIncidentDialog() {
     }
 
-    public static ReportIncidentDialog newInstance(LatLng latLng) {
+    public static ReportIncidentDialog newInstance(LatLng latLng, int returnPage) {
         ReportIncidentDialog dialog = new ReportIncidentDialog();
 
         // Supply num input as an argument.
         Bundle args = new Bundle();
         args.putDoubleArray("location", new double[]{latLng.latitude, latLng.longitude});
+        args.putInt("returnPage", returnPage);
         dialog.setArguments(args);
 
         return dialog;
     }
 
-    public static ReportIncidentDialog newInstance() {
-        return new ReportIncidentDialog();
+    public static ReportIncidentDialog newInstance(int returnPage) {
+        ReportIncidentDialog dialog = new ReportIncidentDialog();
+
+        // Supply num input as an argument.
+        Bundle args = new Bundle();
+        args.putInt("returnPage", returnPage);
+        dialog.setArguments(args);
+
+        return dialog;
     }
 
     /**
@@ -247,6 +259,8 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
             if (loc != null) {
                 this.location = new LatLng(loc[0], loc[1]);
             }
+
+            this.returnPage = bundle.getInt("returnPage");
         }
 
         /* Set the style of this dialog. */
@@ -274,6 +288,18 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
         }
     };
 
+    @Override
+    public void dismiss() {
+        // TODO find less hacky solution
+
+        Context context = getContext();
+
+        if (context instanceof MainActivity) {
+            ((MainActivity) context).setStatusBarColor(returnPage);
+        }
+
+        super.dismiss();
+    }
 
     @NonNull
     @Override

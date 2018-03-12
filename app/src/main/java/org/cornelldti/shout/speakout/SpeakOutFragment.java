@@ -20,6 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import org.cornelldti.shout.MainActivity;
+import org.cornelldti.shout.PagerAdapter;
 import org.cornelldti.shout.R;
 import org.cornelldti.shout.util.LayoutUtil;
 
@@ -112,7 +113,7 @@ public class SpeakOutFragment extends Fragment {
                 ((MainActivity) context).setStatusBarColor(-1); // TODO add constant for "unknown" page
             }
 
-            ReportIncidentDialog dialog = ReportIncidentDialog.newInstance();
+            ReportIncidentDialog dialog = ReportIncidentDialog.newInstance(PagerAdapter.Pages.SPEAK_OUT);
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
@@ -120,5 +121,6 @@ public class SpeakOutFragment extends Fragment {
 
         return speakoutFragment;
     }
+
 
 }
