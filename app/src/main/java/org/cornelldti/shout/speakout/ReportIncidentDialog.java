@@ -57,13 +57,10 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
     private static final String TAG = "ReportIncident";
     private AutoCompleteTextView locationEdit;
     private TextView dateSelector, timeSelector;
-    private LinearLayout dateSelectorClickArea, timeSelectorClickArea;
     private EditText editReportTitle, editReportDetails;
 
     private Calendar calendar = Calendar.getInstance();
-
     private LatLng location;
-    private boolean locationLocked; // TODO Ask design. See onCreate...
 
     public ReportIncidentDialog() {
     }
@@ -73,7 +70,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
 
         // Supply num input as an argument.
         Bundle args = new Bundle();
-        args.putDoubleArray("website", new double[]{latLng.latitude, latLng.longitude});
+        args.putDoubleArray("location", new double[]{latLng.latitude, latLng.longitude});
         dialog.setArguments(args);
 
         return dialog;
@@ -173,8 +170,8 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
         dateSelector = v.findViewById(R.id.report_date_spinner_text_view);
         timeSelector = v.findViewById(R.id.report_time_spinner_text_view);
 
-        dateSelectorClickArea = v.findViewById(R.id.report_date_spinner_click_area);
-        timeSelectorClickArea = v.findViewById(R.id.report_time_spinner_click_area);
+        LinearLayout dateSelectorClickArea = v.findViewById(R.id.report_date_spinner_click_area);
+        LinearLayout timeSelectorClickArea = v.findViewById(R.id.report_time_spinner_click_area);
 
         // TODO Can we remove the onKey listeners?
         // TODO Test the app with a physical keyboard to be sure.
@@ -224,11 +221,11 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
         String formattedTime = format.format(cal.getTime());
         timeSelector.setText(formattedTime);
 
-        /* Setup website editing... */
+        /* Setup location editing... */
 
         locationEdit = v.findViewById(R.id.report_location_edit_text);
 
-        /* Setup website selection to autocomplete... */
+        /* Setup location selection to autocomplete... */
         // TODO fix this
 
         GeoDataClient client = Places.getGeoDataClient(getActivity(), null);
@@ -257,7 +254,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
         });
 
 
-        /* Setup the website selector if a website was passed to the dialog... */
+        /* Setup the location selector if a location was passed to the dialog... */
 
         if (this.location != null) {
             Address address = LocationUtil.getAddressForLocation(getContext(), this.location);
@@ -275,16 +272,15 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /* Get passed website from bundle */
+        /* Get passed location from bundle */
 
         Bundle bundle = getArguments();
 
         if (bundle != null) {
-            double[] loc = bundle.getDoubleArray("website");
+            double[] loc = bundle.getDoubleArray("location");
 
             if (loc != null) {
                 this.location = new LatLng(loc[0], loc[1]);
-                this.locationLocked = true; // TODO
             }
         }
 
@@ -302,11 +298,8 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
 
                 final Place place = places.get(0);
 
-                // Format details of the place for display and show it in a TextView.
+                /* Format details of the place for display and show it in a TextView. */
                 location = place.getLatLng();
-
-                // TODO ensure this is no longer needed.
-                // locationEdit.setText(place.getName());
 
                 places.release();
             } catch (RuntimeRemoteException e) {
