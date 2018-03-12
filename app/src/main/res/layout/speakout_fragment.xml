@@ -27,18 +27,29 @@
                 app:title="shOUT"
                 app:titleTextColor="@color/colorAccent">
 
-                <EditText
-                    android:id="@+id/search_reports"
-                    android:layout_width="match_parent"
+                <!-- TODO  <EditText
+                      android:id="@+id/search_reports"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_weight="1"
+                      android:ems="10"
+                      android:hint="Search..."
+                      android:inputType="textPersonName"
+                      android:selectAllOnFocus="true"
+                      android:singleLine="true"
+                      android:visibility="gone" /> -->
+
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ems="10"
-                    android:hint="Search..."
-                    android:inputType="textPersonName"
-                    android:selectAllOnFocus="true"
-                    android:singleLine="true"
-                    android:visibility="gone" />
+                    android:layout_margin="10dp"
+                    android:adjustViewBounds="true"
+                    android:cropToPadding="false"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@mipmap/shout_logo" />
             </android.support.v7.widget.Toolbar>
+
 
         </android.support.design.widget.CollapsingToolbarLayout>
 

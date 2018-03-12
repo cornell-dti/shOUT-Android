@@ -52,6 +52,7 @@ public class SpeakOutAdapterV2 extends RecyclerView.Adapter<SpeakOutAdapter.Repo
     }
 
     public void refreshItems() {
+        adapter().startListening();
         notifyDataSetChanged();
     }
 

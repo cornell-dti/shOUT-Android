@@ -18,9 +18,9 @@ import android.widget.LinearLayout;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import org.cornelldti.shout.MainActivity;
 import org.cornelldti.shout.R;
@@ -51,12 +51,8 @@ public class SpeakOutFragment extends Fragment {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
 
-        // Query allReports = firebase.orderByChild("timestamp").limitToFirst(100); // TODO
-
-        com.google.firebase.firestore.Query stories = ref.whereEqualTo("hasbody", true).orderBy("timestamp").limit(100);
-        com.google.firebase.firestore.Query all = ref.orderBy("timestamp").limit(100);
-
-        // final SpeakOutAdapter adapter = SpeakOutAdapter.construct(view.getContext(), this, allReports);
+        Query stories = ref.whereEqualTo("hasbody", true).orderBy("timestamp").limit(100);
+        Query all = ref.orderBy("timestamp").limit(100);
 
         final SpeakOutAdapterV2 adapter = SpeakOutAdapterV2.construct(this, stories, all, view.getContext());
         recyclerView.setAdapter(adapter);
@@ -72,43 +68,6 @@ public class SpeakOutFragment extends Fragment {
         //         function that essentially checks if any data has been receive and once it has it stops auto
         //         population.
 
-        // TODO Investigate better implementations.
-
-        // final long loadedCheckDelay = 500L, maximumCheckDelay = 5000L;
-        // final int[] iteration = new int[]{0};
-
-        /* Handle loading... *
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            private Runnable anonThis = this;
-
-            @Override
-            public void run() {
-                if (adapter.canStopLoading()) {
-                    adapter.setIsLoading(false);
-                } else {
-                    runAgain();
-                }
-            }
-
-            private void runAgain() {
-                if (iteration[0]++ * loadedCheckDelay > maximumCheckDelay) {
-                    return;
-                }
-
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (adapter.canStopLoading()) {
-                            adapter.setIsLoading(false);
-                        } else {
-                            anonThis.run();
-                        }
-                    }
-                }, loadedCheckDelay);
-            }
-        }, loadedCheckDelay);
-
         /* Fix padding issues w/ the status bar positioning */
 
         final int statusbarSize = LayoutUtil.getStatusBarHeight(getActivity());
@@ -123,9 +82,7 @@ public class SpeakOutFragment extends Fragment {
 
 
         mSwipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
-
-        {
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 // Refresh items
