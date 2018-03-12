@@ -45,6 +45,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
                     android:adjustViewBounds="true"
+                    android:contentDescription="@string/logo_description"
                     android:cropToPadding="false"
                     android:scaleType="fitCenter"
                     app:srcCompat="@mipmap/shout_logo" />
@@ -77,14 +78,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="All"
+                    android:text="@string/all_tab_label"
                     android:textColor="@color/colorAccent" />
 
                 <LinearLayout
                     android:id="@+id/all_reports_highlight"
                     android:layout_width="match_parent"
                     android:layout_height="3dp"
-                    android:background="@color/colorAccent" />
+                    android:background="@color/colorAccent"
+                    tools:ignore="Orientation" />
             </LinearLayout>
 
             <LinearLayout
@@ -101,7 +103,7 @@
                     android:layout_height="match_parent"
 
                     android:gravity="center"
-                    android:text="Stories"
+                    android:text="@string/stories_tab_title"
                     android:textColor="@color/colorAccent" />
 
                 <LinearLayout
@@ -109,7 +111,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="3dp"
                     android:background="@color/colorAccent"
-                    android:visibility="invisible" />
+                    android:visibility="invisible"
+                    tools:ignore="Orientation" />
             </LinearLayout>
 
         </LinearLayout>

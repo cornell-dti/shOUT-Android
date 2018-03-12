@@ -8,7 +8,7 @@ import com.google.android.gms.maps.model.LatLng;
  * Created by kaushikr on 2/1/18.
  * Updated by Evan Welsh on 2/28/18
  */
-
+@SuppressWarnings("unused")
 public class UnapprovedReport {
 
     private double locationLong, locationLat;

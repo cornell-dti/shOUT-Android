@@ -32,8 +32,8 @@ public class LocationUtil {
     /**
      * Converts latitude and longitude to a location object.
      *
-     * @param latLng
-     * @return
+     * @param latLng - The LatLng object to convert
+     * @return - A Location object with the appropriate latitude and longitude
      */
     public static Location latLngToLocation(LatLng latLng) {
         Location location = new Location("");
@@ -45,9 +45,9 @@ public class LocationUtil {
     /**
      * Converts latitude and longitude to an address object.
      *
-     * @param context
-     * @param latLng
-     * @return
+     * @param context - The context to get addresses, formatting, etc. within
+     * @param latLng  - The lat and lng of the goal address
+     * @return - And address from lat and lng.
      */
     public static Address getAddressForLocation(Context context, LatLng latLng) {
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());

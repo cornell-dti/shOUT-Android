@@ -2,7 +2,6 @@ package org.cornelldti.shout.speakout;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
@@ -16,8 +15,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -28,9 +25,7 @@ import org.cornelldti.shout.util.LayoutUtil;
 
 public class SpeakOutFragment extends Fragment {
 
-    /* FAB */
-    View makeBlogPost; // Find an alt. to a card view.
-    SwipeRefreshLayout mSwipeRefreshLayout;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     public SpeakOutFragment() {
     }
@@ -39,14 +34,11 @@ public class SpeakOutFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         /* Setup reports recycler view... */
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference firebase = database.getReference("approved_reports");
-
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         CollectionReference ref = firestore.collection("reports");
 
-        final View view = inflater.inflate(R.layout.speakout_fragment, container, false);
-        final RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
+        final View speakoutFragment = inflater.inflate(R.layout.speakout_fragment, container, false);
+        final RecyclerView recyclerView = speakoutFragment.findViewById(R.id.recycler_view);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
@@ -54,7 +46,7 @@ public class SpeakOutFragment extends Fragment {
         Query stories = ref.whereEqualTo("hasbody", true).orderBy("timestamp").limit(100);
         Query all = ref.orderBy("timestamp").limit(100);
 
-        final SpeakOutAdapterV2 adapter = SpeakOutAdapterV2.construct(this, stories, all, view.getContext());
+        final SpeakOutAdapterV2 adapter = SpeakOutAdapterV2.construct(this, stories, all, speakoutFragment.getContext());
         recyclerView.setAdapter(adapter);
 
 
@@ -75,76 +67,58 @@ public class SpeakOutFragment extends Fragment {
         if (statusbarSize > 0)
 
         {
-            AppBarLayout toolbar = view.findViewById(R.id.appbar);
+            AppBarLayout toolbar = speakoutFragment.findViewById(R.id.appbar);
 
             toolbar.setPadding(0, statusbarSize, 0, 0);
         }
 
 
-        mSwipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                // Refresh items
-                adapter.refreshItems();
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
+        mSwipeRefreshLayout = speakoutFragment.findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout.setOnRefreshListener(() -> {
+            // Refresh items
+            adapter.refreshItems();
+            mSwipeRefreshLayout.setRefreshing(false);
         });
 
         /* Setup filtering tabs... */ // TODO Discuss UX with design
 
-        final Button button = view.findViewById(R.id.all_reports_button);
-        final Button stories_button = view.findViewById(R.id.stories_button);
+        final Button button = speakoutFragment.findViewById(R.id.all_reports_button);
+        final Button stories_button = speakoutFragment.findViewById(R.id.stories_button);
 
-        final LinearLayout buttonHighlight = view.findViewById(R.id.all_reports_highlight);
-        final LinearLayout storiesHighlight = view.findViewById(R.id.stories_highlight);
+        final LinearLayout buttonHighlight = speakoutFragment.findViewById(R.id.all_reports_highlight);
+        final LinearLayout storiesHighlight = speakoutFragment.findViewById(R.id.stories_highlight);
 
-        button.setOnClickListener(new View.OnClickListener()
+        button.setOnClickListener(v -> {
+            buttonHighlight.setVisibility(View.VISIBLE);
+            storiesHighlight.setVisibility(View.INVISIBLE);
 
-        {
-            @Override
-            public void onClick(View v) {
-                buttonHighlight.setVisibility(View.VISIBLE);
-                storiesHighlight.setVisibility(View.INVISIBLE);
+            adapter.filter(SpeakOutAdapterV2.FILTER_NONE);
 
-                adapter.filter(SpeakOutAdapterV2.FILTER_NONE);
-
-            }
         });
 
-        stories_button.setOnClickListener(new View.OnClickListener()
+        stories_button.setOnClickListener(v -> {
+            storiesHighlight.setVisibility(View.VISIBLE);
+            buttonHighlight.setVisibility(View.INVISIBLE);
 
-        {
-            @Override
-            public void onClick(View v) {
-                storiesHighlight.setVisibility(View.VISIBLE);
-                buttonHighlight.setVisibility(View.INVISIBLE);
-
-                adapter.filter(SpeakOutAdapterV2.FILTER_STORIES);
-            }
+            adapter.filter(SpeakOutAdapterV2.FILTER_STORIES);
         });
 
 
-        makeBlogPost = view.findViewById(R.id.startReportButton);
-        makeBlogPost.setOnClickListener(new View.OnClickListener()
+        View makeBlogPost = speakoutFragment.findViewById(R.id.startReportButton);
+        makeBlogPost.setOnClickListener(view -> {
+            Context context = getContext();
 
-        {
-            @Override
-            public void onClick(View v) {
-                Context context = getContext();
-
-                if (context instanceof MainActivity) {
-                    ((MainActivity) context).setStatusBarColor(-1); // TODO add constant for "unknown" page
-                }
-
-                ReportIncidentDialog dialog = ReportIncidentDialog.newInstance();
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+            if (context instanceof MainActivity) {
+                ((MainActivity) context).setStatusBarColor(-1); // TODO add constant for "unknown" page
             }
+
+            ReportIncidentDialog dialog = ReportIncidentDialog.newInstance();
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
         });
 
-        return view;
+        return speakoutFragment;
     }
 
 }

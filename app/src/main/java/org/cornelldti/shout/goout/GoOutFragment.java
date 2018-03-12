@@ -10,7 +10,6 @@ import android.support.constraint.ConstraintSet;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.CardView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +42,7 @@ import com.google.maps.android.clustering.ClusterManager;
 import org.cornelldti.shout.MainActivity;
 import org.cornelldti.shout.R;
 import org.cornelldti.shout.speakout.ReportIncidentDialog;
+import org.cornelldti.shout.util.AndroidUtil;
 import org.cornelldti.shout.util.LayoutUtil;
 import org.cornelldti.shout.util.LocationUtil;
 
@@ -112,83 +112,83 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume(); // needed to get the map to display immediately
 
-        try {
-            MapsInitializer.initialize(getActivity().getApplicationContext());
-        } catch (Exception e) {
-            e.printStackTrace();
+        Context context = AndroidUtil.getContext(rootView, this);
+
+        if (context != null) {
+            try {
+                MapsInitializer.initialize(context); // TODO Was application context necessary?
+            } catch (Exception e) {
+                e.printStackTrace(); // TODO Log appropriately
+            }
         }
 
-        mMapView.getMapAsync(new OnMapReadyCallback() {
-            @SuppressLint("MissingPermission")
-            @Override
-            public void onMapReady(final GoogleMap googleMap) {
-                map = googleMap;
+        mMapView.getMapAsync(googleMap -> {
+            map = googleMap;
 
-                // moves all "map drawn" ui elements (buttons, etc)
-                // 55 = margins + size of searchbar
-                googleMap.setPadding(0, statusbarSize + LayoutUtil.getPixelsFromDp(getResources(), 55), 0, 0);
+            // moves all "map drawn" ui elements (buttons, etc)
+            // 55 = margins + size of searchbar
+            googleMap.setPadding(0, statusbarSize + LayoutUtil.getPixelsFromDp(getResources(), 55), 0, 0);
 
-                googleMap.setMinZoomPreference(14.5f);
-                googleMap.setMyLocationEnabled(false);
-                googleMap.getUiSettings().setCompassEnabled(false);
-                googleMap.setLatLngBoundsForCameraTarget(LocationUtil.getIthacaBounds());
+            googleMap.setMinZoomPreference(14.5f);
+            googleMap.setMyLocationEnabled(false);
+            googleMap.getUiSettings().setCompassEnabled(false);
+            googleMap.setLatLngBoundsForCameraTarget(LocationUtil.getIthacaBounds());
 
 
-                Location location = LocationUtil.latLngToLocation(LocationUtil.CORNELL_CENTER);
+            Location location = LocationUtil.latLngToLocation(LocationUtil.CORNELL_CENTER);
 
-                if (!((MainActivity) getActivity()).setLocationUpdateListener(GoOutFragment.this)) {
-                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 14));
-                }
-
-                CameraPosition cameraPosition = new CameraPosition.Builder()
-                        .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Sets the center of the map to website user
-                        .zoom(17)                   // Sets the zoom
-                        .bearing(90)                // Sets the orientation of the camera to east
-                        .tilt(40)                   // Sets the tilt of the camera to 30 degrees
-                        .build();                   // Creates a CameraPosition from the builder
-                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
-                /// Cluster Manager setup
-                mClusterManager = new MarkerClusterManager(getActivity(), googleMap);
-
-                googleMap.setOnCameraIdleListener(mClusterManager);
-                googleMap.setOnMarkerClickListener(mClusterManager);
-                googleMap.setOnInfoWindowClickListener(mClusterManager);
-
-                googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-                    // TODO this may need to be moved into a separate thread.
-                    @Override
-                    public void onMapLongClick(LatLng latLng) {
-                        ReportIncidentDialog dialog = ReportIncidentDialog.newInstance(latLng);
-
-                        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                        transaction.add(android.R.id.content, dialog)
-                                .addToBackStack(null).commit();
-                    }
-                });
-
-                googleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
-                    @Override
-                    public void onCameraIdle() {
-                        LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
-                        LatLng a = bounds.northeast;
-                        LatLng b = bounds.southwest;
-                        float[] results = new float[4];
-
-                        Location.distanceBetween(a.latitude, a.longitude, b.latitude, b.longitude, results);
-
-                        LatLng center = map.getCameraPosition().target;
-
-                        double radius = results[0] / 1000.0 + 1.0;
-
-                        geoQuery.setLocation(new GeoLocation(center.latitude, center.longitude), radius);
-                    }
-                });
-
-                // Adds markers organized into clusters
-                addMarkers();
+            if (!((MainActivity) getActivity()).setLocationUpdateListener(GoOutFragment.this)) {
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 14));
             }
+
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Sets the center of the map to website user
+                    .zoom(17)                   // Sets the zoom
+                    .bearing(90)                // Sets the orientation of the camera to east
+                    .tilt(40)                   // Sets the tilt of the camera to 30 degrees
+                    .build();                   // Creates a CameraPosition from the builder
+            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+            /// Cluster Manager setup
+            mClusterManager = new MarkerClusterManager(getActivity(), googleMap);
+
+            googleMap.setOnCameraIdleListener(mClusterManager);
+            googleMap.setOnMarkerClickListener(mClusterManager);
+            googleMap.setOnInfoWindowClickListener(mClusterManager);
+
+            googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+                // TODO this may need to be moved into a separate thread.
+                @Override
+                public void onMapLongClick(LatLng latLng) {
+                    ReportIncidentDialog dialog = ReportIncidentDialog.newInstance(latLng);
+
+                    FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    transaction.add(android.R.id.content, dialog)
+                            .addToBackStack(null).commit();
+                }
+            });
+
+            googleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+                @Override
+                public void onCameraIdle() {
+                    LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+                    LatLng a = bounds.northeast;
+                    LatLng b = bounds.southwest;
+                    float[] results = new float[4];
+
+                    Location.distanceBetween(a.latitude, a.longitude, b.latitude, b.longitude, results);
+
+                    LatLng center = map.getCameraPosition().target;
+
+                    double radius = results[0] / 1000.0 + 1.0;
+
+                    geoQuery.setLocation(new GeoLocation(center.latitude, center.longitude), radius);
+                }
+            });
+
+            // Adds markers organized into clusters
+            addMarkers();
         });
 
         return rootView;

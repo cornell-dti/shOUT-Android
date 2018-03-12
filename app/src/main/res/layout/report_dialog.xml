@@ -98,15 +98,15 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:clickable="true"
+                    android:focusable="true"
                     android:orientation="horizontal">
 
                     <TextView
                         style="@style/EnhancedEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:clickable="false"
-                        android:hint="Date"
+                        android:hint="@string/date_hint"
                         android:spinnerMode="dialog" />
 
                     <TextView
@@ -114,9 +114,7 @@
                         style="@style/EnhancedEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:clickable="false"
-
                         android:spinnerMode="dialog" />
                 </LinearLayout>
 
@@ -133,17 +131,15 @@
                     android:layout_weight="1"
                     android:clickable="true"
                     android:minWidth="250dp"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    tools:ignore="KeyboardInaccessibleWidget">
 
                     <TextView
                         style="@style/EnhancedEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:clickable="false"
-
-                        android:hint="Time"
-
+                        android:hint="@string/time_hint"
                         android:spinnerMode="dialog" />
 
                     <TextView
@@ -151,9 +147,7 @@
                         style="@style/EnhancedEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:clickable="false"
-
                         android:spinnerMode="dialog" />
                 </LinearLayout>
             </LinearLayout>

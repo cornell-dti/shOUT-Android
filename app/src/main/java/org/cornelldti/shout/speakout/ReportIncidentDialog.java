@@ -13,21 +13,16 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.gms.location.places.AutocompletePrediction;
@@ -46,6 +41,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.playservices.placecomplete.PlaceAutocompleteAdapter;
 
 import org.cornelldti.shout.R;
+import org.cornelldti.shout.util.AndroidUtil;
 import org.cornelldti.shout.util.LayoutUtil;
 import org.cornelldti.shout.util.LocationUtil;
 
@@ -116,9 +112,9 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.report_dialog, container, false);
+        View reportDialogView = inflater.inflate(R.layout.report_dialog, container, false);
 
-        AppBarLayout toolbar = v.findViewById(R.id.report_toolbar);
+        AppBarLayout toolbar = reportDialogView.findViewById(R.id.report_toolbar);
 
         /* Ensure we don't overlap with the status bar. */
 
@@ -126,132 +122,101 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
 
        /* Setup toolbar buttons */
 
-        ImageButton closeButton = v.findViewById(R.id.report_button_close);
+        ImageButton closeButton = reportDialogView.findViewById(R.id.report_button_close);
 
-        closeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // TODO catch any errors while doing this
-                /* Manually hide the keyboard to ensure it doesn't stick around */
-                InputMethodManager manager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-
-                if (manager != null) {
-                    manager.hideSoftInputFromWindow(editReportDetails.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-                }
-
-                dismiss();
-            }
+        closeButton.setOnClickListener(view -> {
+            /* Manually hide the keyboard to ensure it doesn't stick around */
+            AndroidUtil.hideSoftKeyboard(getActivity(), editReportDetails.getWindowToken());
+            dismiss();
         });
 
-        final Button saveButton = v.findViewById(R.id.report_button_save);
+        final Button saveButton = reportDialogView.findViewById(R.id.report_button_save);
 
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveReport(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        InputMethodManager manager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                        if (manager != null) {
-                            manager.hideSoftInputFromWindow(editReportDetails.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-                        }
+        saveButton.setOnClickListener(view -> saveReport(task -> {
+            AndroidUtil.hideSoftKeyboard(getActivity(), editReportDetails.getWindowToken());
+            dismiss();
+        }));
 
-                        dismiss(); // todo
-                    }
-                });
-            }
-        });
+        /* Disable options menu (we don't use it) */
 
         setHasOptionsMenu(false);
 
-        editReportTitle = v.findViewById(R.id.report_title_edit_text);
-        editReportDetails = v.findViewById(R.id.report_details_edit_text);
+        /* Retrieve miscellaneous views... */
 
-        dateSelector = v.findViewById(R.id.report_date_spinner_text_view);
-        timeSelector = v.findViewById(R.id.report_time_spinner_text_view);
+        editReportTitle = reportDialogView.findViewById(R.id.report_title_edit_text);
+        editReportDetails = reportDialogView.findViewById(R.id.report_details_edit_text);
 
-        LinearLayout dateSelectorClickArea = v.findViewById(R.id.report_date_spinner_click_area);
-        LinearLayout timeSelectorClickArea = v.findViewById(R.id.report_time_spinner_click_area);
+        dateSelector = reportDialogView.findViewById(R.id.report_date_spinner_text_view);
+        timeSelector = reportDialogView.findViewById(R.id.report_time_spinner_text_view);
+
+        LinearLayout dateSelectorClickArea = reportDialogView.findViewById(R.id.report_date_spinner_click_area);
+        LinearLayout timeSelectorClickArea = reportDialogView.findViewById(R.id.report_time_spinner_click_area);
 
         // TODO Can we remove the onKey listeners?
         // TODO Test the app with a physical keyboard to be sure.
 
         /* Catch all interaction with the date selector TextView */
 
-        dateSelectorClickArea.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onDateControlClicked(v);
-            }
+        dateSelectorClickArea.setOnClickListener(this::onDateControlClicked);
 
-        });
-
-        dateSelectorClickArea.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                onDateControlClicked(v);
-                return true;
-            }
+        dateSelectorClickArea.setOnKeyListener((view, keyCode, event) -> {
+            onDateControlClicked(view);
+            return true;
         });
 
         /* Catch all interaction with the time selector TextView */
 
-        timeSelectorClickArea.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onTimeControlClicked(v);
-            }
+        timeSelectorClickArea.setOnClickListener(this::onTimeControlClicked);
+
+        timeSelectorClickArea.setOnKeyListener((view, keyCode, event) -> {
+            onTimeControlClicked(view);
+            return true;
         });
 
-        timeSelectorClickArea.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                onTimeControlClicked(v);
-                return true;
-            }
-        });
-
+        // TODO Should they be set to the current time?
 
         /* Set the selectors to the current time/date using the locale-set format */
         java.text.DateFormat format = DateFormat.getDateFormat(getActivity());
         Calendar cal = Calendar.getInstance();
         String formattedDate = format.format(cal.getTime());
         dateSelector.setText(formattedDate);
+
         format = DateFormat.getTimeFormat(getActivity());
         String formattedTime = format.format(cal.getTime());
         timeSelector.setText(formattedTime);
 
         /* Setup location editing... */
 
-        locationEdit = v.findViewById(R.id.report_location_edit_text);
+        locationEdit = reportDialogView.findViewById(R.id.report_location_edit_text);
 
         /* Setup location selection to autocomplete... */
         // TODO fix this
 
-        GeoDataClient client = Places.getGeoDataClient(getActivity(), null);
-        final PlaceAutocompleteAdapter adapter = new PlaceAutocompleteAdapter(getActivity(), client, LocationUtil.getIthacaBounds(), null);
-        locationEdit.setAdapter(adapter);
-        locationEdit.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final AutocompletePrediction item = adapter.getItem(position);
-                final String placeId;
-                if (item != null) {
-                    placeId = item.getPlaceId();
+        Context context = AndroidUtil.getContext(reportDialogView, this);
 
+        if (context != null) {
+            final GeoDataClient client = Places.getGeoDataClient(context, null);
+            final PlaceAutocompleteAdapter adapter = new PlaceAutocompleteAdapter(context, client, LocationUtil.getIthacaBounds(), null);
+
+            locationEdit.setAdapter(adapter);
+            locationEdit.setOnItemClickListener((parent, view, position, id) -> {
+                final AutocompletePrediction item = adapter.getItem(position);
+
+                if (item != null) {
+                    final String placeId = item.getPlaceId();
                     final CharSequence primaryText = item.getPrimaryText(null);
 
                     Log.i(TAG, "Autocomplete item selected: " + primaryText);
 
-                    // TODO store this client
-                    GeoDataClient mGeoDataClient = Places.getGeoDataClient(getContext(), null);
-                    Task<PlaceBufferResponse> placeResult = mGeoDataClient.getPlaceById(placeId);
+                    Task<PlaceBufferResponse> placeResult = client.getPlaceById(placeId);
                     placeResult.addOnCompleteListener(mUpdatePlaceDetailsCallback);
                 } else {
                     Log.e(TAG, "No autocomplete item found at position: " + position);
                 }
-            }
-        });
+            });
+        } else {
+            // TODO Hide location field or allow user to input anything?
+        }
 
 
         /* Setup the location selector if a location was passed to the dialog... */
@@ -265,7 +230,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
             }
         }
 
-        return v;
+        return reportDialogView;
     }
 
     @Override
@@ -292,7 +257,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
     /* Handles setting the report location after place selection from the autofill list */
     private OnCompleteListener<PlaceBufferResponse> mUpdatePlaceDetailsCallback = new OnCompleteListener<PlaceBufferResponse>() {
         @Override
-        public void onComplete(Task<PlaceBufferResponse> task) {
+        public void onComplete(@NonNull Task<PlaceBufferResponse> task) {
             try {
                 PlaceBufferResponse places = task.getResult();
 
@@ -319,44 +284,42 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
         return dialog;
     }
 
-    private void onDateControlClicked(View v) {
+    private void onDateControlClicked(View clickedView) {
         /* Get current date/time */
         final Calendar c = Calendar.getInstance();
         int mYear = c.get(Calendar.YEAR);
         int mMonth = c.get(Calendar.MONTH);
         int mDay = c.get(Calendar.DAY_OF_MONTH);
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(),
-                new DatePickerDialog.OnDateSetListener() {
+        Context context = AndroidUtil.getContext(clickedView, this);
 
-                    @Override
-                    public void onDateSet(DatePicker view, int year,
-                                          int monthOfYear, int dayOfMonth) {
-                        java.text.DateFormat format = DateFormat.getDateFormat(getActivity());
-                        Calendar cal = Calendar.getInstance();
-                        cal.clear(); // TODO is this necessary?
-                        cal.set(year, monthOfYear, dayOfMonth); // NOTE: these months are 0-based
-                        String formattedDate = format.format(cal.getTime());
+        if (context != null) {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(context, (view, year, monthOfYear, dayOfMonth) -> {
+                java.text.DateFormat format = DateFormat.getDateFormat(getActivity());
+                Calendar cal = Calendar.getInstance();
+                cal.clear(); // TODO is this necessary?
+                cal.set(year, monthOfYear, dayOfMonth); // NOTE: these months are 0-based
+                String formattedDate = format.format(cal.getTime());
 
-                        dateSelector.setText(formattedDate);
-                        calendar.set(year, monthOfYear, dayOfMonth);
-                    }
-                }, mYear, mMonth, mDay);
-        datePickerDialog.show();
+                dateSelector.setText(formattedDate);
+                calendar.set(year, monthOfYear, dayOfMonth);
+            }, mYear, mMonth, mDay);
+            datePickerDialog.show();
+        }
     }
 
 
-    private void onTimeControlClicked(View v) {
+    private void onTimeControlClicked(View clickedView) {
         /* Get current date/time */
         final Calendar c = Calendar.getInstance();
         int mHour = c.get(Calendar.HOUR_OF_DAY);
         int mMinute = c.get(Calendar.MINUTE);
 
-        TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(),
-                new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay,
-                                          int minute) {
+        Context context = AndroidUtil.getContext(clickedView, this);
+
+        if (context != null) {
+            TimePickerDialog timePickerDialog = new TimePickerDialog(context,
+                    (view, hourOfDay, minute) -> {
                         java.text.DateFormat format = DateFormat.getTimeFormat(getActivity());
                         Calendar cal = Calendar.getInstance();
                         cal.clear(); // TODO is this necessary?
@@ -366,9 +329,9 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
                         timeSelector.setText(formattedDate);
                         calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
                         calendar.set(Calendar.MINUTE, minute);
-                    }
-                }, mHour, mMinute, DateFormat.is24HourFormat(getActivity()));
-        timePickerDialog.show();
+                    }, mHour, mMinute, DateFormat.is24HourFormat(getActivity()));
+            timePickerDialog.show();
+        }
     }
 
 }

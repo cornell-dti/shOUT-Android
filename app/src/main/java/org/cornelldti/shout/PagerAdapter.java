@@ -18,7 +18,7 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
 
     private static final String TAG = "PagerAdapter";
 
-    private int mNumOfTabs;
+    private final int mNumOfTabs;
 
 
     PagerAdapter(FragmentManager fm, int NumOfTabs) {

@@ -1,9 +1,7 @@
 package org.cornelldti.shout;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -175,23 +173,20 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
         if (currentUser == null) {
             /* Sign the user into firebase */
-            mAuth.signInAnonymously().addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()) {
-                        // Sign in success, update UI with the signed-in user's information
-                        Log.d(TAG, "Successfully signed into Firebase anonymously.");
-                    } else {
-                        /* if sign in fails, display a message to the user. */
-                        // TODO prevent certain app features
-                        // e.g. hide the FAB
-                        Log.d(TAG, "Failed to sign into Firebase anonymously.");
-                        Toast.makeText(MainActivity.this, "Failed to connect to shOUT.", Toast.LENGTH_SHORT).show();
-                    }
-
-                    /* Remove the start dialog. */
-                    startDialog.cancel();
+            mAuth.signInAnonymously().addOnCompleteListener(this, task -> {
+                if (task.isSuccessful()) {
+                    // Sign in success, update UI with the signed-in user's information
+                    Log.d(TAG, "Successfully signed into Firebase anonymously.");
+                } else {
+                    /* if sign in fails, display a message to the user. */
+                    // TODO prevent certain app features
+                    // e.g. hide the FAB
+                    Log.d(TAG, "Failed to sign into Firebase anonymously.");
+                    Toast.makeText(MainActivity.this, "Failed to connect to shOUT.", Toast.LENGTH_SHORT).show();
                 }
+
+                /* Remove the start dialog. */
+                startDialog.cancel();
             });
         } else {
             /* If the user is already signed in, remove the blocking dialog... */
