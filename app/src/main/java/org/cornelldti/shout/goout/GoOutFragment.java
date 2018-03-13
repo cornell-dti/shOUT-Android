@@ -1,6 +1,5 @@
 package org.cornelldti.shout.goout;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
@@ -10,6 +9,7 @@ import android.support.constraint.ConstraintSet;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,21 +27,23 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.maps.android.clustering.ClusterManager;
 
 import org.cornelldti.shout.MainActivity;
 import org.cornelldti.shout.PagerAdapter;
 import org.cornelldti.shout.R;
+import org.cornelldti.shout.speakout.ApprovedReport;
 import org.cornelldti.shout.speakout.ReportIncidentDialog;
 import org.cornelldti.shout.util.AndroidUtil;
 import org.cornelldti.shout.util.LayoutUtil;
@@ -58,7 +60,7 @@ import static org.cornelldti.shout.R.id.map_view;
  * Updated by Evan Welsh on 2/28/18
  */
 
-public class GoOutFragment extends Fragment implements PlaceSelectionListener, LocationListener {
+public class GoOutFragment extends Fragment implements PlaceSelectionListener, LocationListener{
 
     private MapView mMapView;
     private GoogleMap map;
@@ -131,7 +133,13 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
             googleMap.setPadding(0, statusbarSize + LayoutUtil.getPixelsFromDp(getResources(), 55), 0, 0);
 
             googleMap.setMinZoomPreference(14.5f);
-            googleMap.setMyLocationEnabled(false);
+            try {
+                googleMap.setMyLocationEnabled(false);
+            }
+            catch (SecurityException e)
+            {
+                e.printStackTrace();
+            }
             googleMap.getUiSettings().setCompassEnabled(false);
             googleMap.setLatLngBoundsForCameraTarget(LocationUtil.getIthacaBounds());
 
@@ -231,11 +239,23 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
-//                ApprovedReport mReport = getReport(key);
-                MarkerClusterItem item = new MarkerClusterItem(location.latitude, location.longitude, "Incident", "This is what happened");
-                markerClusterItems.put(key, item);
-                mClusterManager.addItem(item);
-                mClusterManager.cluster();
+
+                // Finds the ApprovedReport object for each marker location to access title and body!
+                FirebaseDatabase.getInstance().getReference("unapproved_reports").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        ApprovedReport report = dataSnapshot.getValue(ApprovedReport.class);
+                        MarkerClusterItem item = new MarkerClusterItem(location.latitude, location.longitude, report.getTitle(), report.getBody());
+                        markerClusterItems.put(key, item);
+                        mClusterManager.addItem(item);
+                        mClusterManager.cluster();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d("ERROR", "Database Error");
+                    }
+                });
             }
 
             @Override
@@ -260,26 +280,6 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener, L
             }
         });
     }
-
-//    private ApprovedReport getReport(final String key)
-//    {
-//        FirebaseDatabase.getInstance().getReference("approved_reports").addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                report = dataSnapshot.child(key).getValue(ApprovedReport.class);
-//                if(report.equals(null))
-//                {
-//                    Toast.makeText(getActivity(), "NULL", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
-//        return report;
-//    }
 
     @Override
     public void onLocationChanged(Location location) {
