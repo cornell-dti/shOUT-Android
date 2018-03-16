@@ -9,6 +9,8 @@ package org.cornelldti.shout.speakout;
 
 public class ApprovedReport {
 
+    // TODO[BACKEND] prevent uid from being locally synced...
+
     private String body, title, location;
     private long timestamp;
     private boolean hasbody;

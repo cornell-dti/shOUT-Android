@@ -1,5 +1,7 @@
 package org.cornelldti.shout.reachout;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
@@ -40,40 +42,17 @@ public class ReachOutFragment extends Fragment {
             toolbar.setPadding(0, statusbarSize, 0, 0);
         }
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        Query firebase = database.getReference("resources").orderByChild("ordering");
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
-        firebase.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                List<String> titleList = new ArrayList<>(),
-                        descriptionList = new ArrayList<>(),
-                        websiteList = new ArrayList<>();
 
-                for (DataSnapshot d : dataSnapshot.getChildren()) {
-                    Resource resource = d.getValue(Resource.class);
-
-                    if (resource != null) {
-                        descriptionList.add(resource.getDescription());
-                        titleList.add(resource.getTitle());
-                        websiteList.add(resource.getWebsite());
-                    }
-                }
-
-                ReachOutAdapter adapter = new ReachOutAdapter(titleList, descriptionList, websiteList);
-                recyclerView.setAdapter(adapter);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
+        ReachOutAdapter adapter = ReachOutAdapter.construct(this, uri -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
         });
+
+        recyclerView.setAdapter(adapter);
 
         return view;
     }
-
-
 }

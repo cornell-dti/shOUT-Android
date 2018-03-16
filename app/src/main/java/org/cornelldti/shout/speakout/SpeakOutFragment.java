@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,6 +23,7 @@ import com.google.firebase.firestore.Query;
 import org.cornelldti.shout.MainActivity;
 import org.cornelldti.shout.PagerAdapter;
 import org.cornelldti.shout.R;
+import org.cornelldti.shout.util.AndroidUtil;
 import org.cornelldti.shout.util.LayoutUtil;
 
 public class SpeakOutFragment extends Fragment {
@@ -50,29 +52,22 @@ public class SpeakOutFragment extends Fragment {
         final SpeakOutAdapterV2 adapter = SpeakOutAdapterV2.construct(this, stories, all, speakoutFragment.getContext());
         recyclerView.setAdapter(adapter);
 
+        /* Fix padding issues w/ the status bar positioning */
+
+        final int statusbarSize = LayoutUtil.getStatusBarHeight(getActivity());
+
+        if (statusbarSize > 0) {
+            AppBarLayout toolbar = speakoutFragment.findViewById(R.id.appbar);
+
+            toolbar.setPadding(0, statusbarSize, 0, 0);
+        }
 
         // NOTES ON REFRESH
         // Essentially the way I've put refresh together is this:
         // 1) Have the firebase data (currently top 100 reports) be constantly synced
         // 2) However, the data doesn't automatically populate the recyclerview (that could get chaotic)
         // 3) Refreshing simply brings the latest local data into the view
-        // 4) However, the implementation of this means that no data would be visible until the first refresh
-        //      -- To get around this I initially have the data be automatically populated. I then have a delayed
-        //         function that essentially checks if any data has been receive and once it has it stops auto
-        //         population.
-
-        /* Fix padding issues w/ the status bar positioning */
-
-        final int statusbarSize = LayoutUtil.getStatusBarHeight(getActivity());
-
-        if (statusbarSize > 0)
-
-        {
-            AppBarLayout toolbar = speakoutFragment.findViewById(R.id.appbar);
-
-            toolbar.setPadding(0, statusbarSize, 0, 0);
-        }
-
+        // 4) The initial data is handled by overrided the data loaded method of the Firestore adapter
 
         mSwipeRefreshLayout = speakoutFragment.findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
@@ -107,16 +102,24 @@ public class SpeakOutFragment extends Fragment {
 
         View makeBlogPost = speakoutFragment.findViewById(R.id.startReportButton);
         makeBlogPost.setOnClickListener(view -> {
-            Context context = getContext();
+            Context context = AndroidUtil.getContext(speakoutFragment, this);
 
             if (context instanceof MainActivity) {
-                ((MainActivity) context).setStatusBarColor(-1); // TODO add constant for "unknown" page
+                ((MainActivity) context).setStatusBarColor(PagerAdapter.Pages.UNKNOWN);
             }
 
             ReportIncidentDialog dialog = ReportIncidentDialog.newInstance(PagerAdapter.Pages.SPEAK_OUT);
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+            FragmentManager manager = getFragmentManager();
+
+            if (manager != null) {
+                FragmentTransaction transaction = manager.beginTransaction();
+
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+            } else {
+                // TODO display error to user and log issue
+                // this will probably never happen
+            }
         });
 
         return speakoutFragment;

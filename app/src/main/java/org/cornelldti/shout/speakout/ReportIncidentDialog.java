@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatDialogFragment;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -49,7 +50,9 @@ import org.cornelldti.shout.util.LocationUtil;
 
 import java.util.Calendar;
 
-
+/**
+ * A dialog for submitting reports.
+ */
 public class ReportIncidentDialog extends AppCompatDialogFragment {
 
     private static final String TAG = "ReportIncident";
@@ -71,7 +74,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
         // Supply num input as an argument.
         Bundle args = new Bundle();
         args.putDoubleArray("location", new double[]{latLng.latitude, latLng.longitude});
-        args.putInt("returnPage", returnPage);
+        args.putInt("returnPage", returnPage); // TODO find a better method to fix this UI issue
         dialog.setArguments(args);
 
         return dialog;
@@ -95,7 +98,8 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
      */
     public void saveReport(OnCompleteListener<Void> listener) {
         DatabaseReference database = FirebaseDatabase.getInstance().getReference("unapproved_reports");
-        if (editReportTitle.getText().toString().isEmpty()) {
+
+        if (TextUtils.isEmpty(editReportTitle.getText())) {
             Toast.makeText(getContext(), "Make sure to fill in post title", Toast.LENGTH_LONG).show();
         } else {
             if (editReportTitle.getText() != null) {
@@ -108,7 +112,7 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
                             user.getUid(),
                             locationEdit.getText().toString(),
                             location, calendar.getTimeInMillis());
-                    String id = FirebaseDatabase.getInstance().getReference("approved_reports").push().getKey();
+                    String id = FirebaseDatabase.getInstance().getReference("unapproved_reports").push().getKey();
                     database.child(id).setValue(m).addOnCompleteListener(listener);
                 } else {
                     Toast.makeText(getContext(), "Cannot connect to shOUT.", Toast.LENGTH_SHORT).show();

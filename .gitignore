@@ -18,3 +18,4 @@ app/.settings
 app/.settings/*.prefs
 app/.classpath
 *.log
+.vscode

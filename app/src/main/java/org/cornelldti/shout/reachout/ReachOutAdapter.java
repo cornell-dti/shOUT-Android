@@ -1,11 +1,20 @@
 package org.cornelldti.shout.reachout;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import org.cornelldti.shout.R;
 
@@ -16,25 +25,41 @@ import java.util.List;
  * Created by Evan Welsh on 3/1/18.
  */
 
-public class ReachOutAdapter extends RecyclerView.Adapter<ReachOutAdapter.ViewHolder> {
+public class ReachOutAdapter extends FirestoreRecyclerAdapter<Resource, ReachOutAdapter.ViewHolder> {
 
+    private final OpenResourceCallback callback;
     private List<String> titleList, descriptionList, websiteList;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView title, description, website;
+        private TextView title, description;
+        private Button website, directions;
 
         ViewHolder(View v) {
             super(v);
+
+            /* Cache views */
             title = v.findViewById(R.id.resource_item_title);
             description = v.findViewById(R.id.resource_item_description);
-            website = v.findViewById(R.id.resource_item_website);
+            website = v.findViewById(R.id.websiteButton);
+            directions = v.findViewById(R.id.directionsButton);
         }
     }
 
-    ReachOutAdapter(List<String> titleList, List<String> descriptionList, List<String> websiteList) {
-        this.titleList = titleList;
-        this.descriptionList = descriptionList;
-        this.websiteList = websiteList;
+    private ReachOutAdapter(FirestoreRecyclerOptions<Resource> options, OpenResourceCallback callback) {
+        super(options);
+        this.callback = callback;
+    }
+
+    static ReachOutAdapter construct(Fragment fragment, OpenResourceCallback callback) {
+        FirebaseFirestore database = FirebaseFirestore.getInstance();
+        Query query = database.collection("resources").orderBy("ordering");
+
+        FirestoreRecyclerOptions<Resource> options = new FirestoreRecyclerOptions.Builder<Resource>()
+                .setQuery(query, Resource.class)
+                .setLifecycleOwner(fragment)
+                .build();
+
+        return new ReachOutAdapter(options, callback);
     }
 
     @NonNull
@@ -46,12 +71,19 @@ public class ReachOutAdapter extends RecyclerView.Adapter<ReachOutAdapter.ViewHo
         return new ViewHolder(v);
     }
 
+
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
-        // todo switch away from ArrayList(s)
-        holder.title.setText(titleList.get(position));
-        holder.description.setText(descriptionList.get(position));
-        holder.website.setText(websiteList.get(position));
+    protected void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull Resource model) {
+        holder.title.setText(model.getTitle());
+        holder.description.setText(model.getDescription());
+
+        final String website = model.getWebsite();
+
+        holder.website.setOnClickListener(listener -> {
+            Uri uri = Uri.parse(website);
+            this.callback.openResourceUri(uri);
+        });
+
     }
 
     @Override
