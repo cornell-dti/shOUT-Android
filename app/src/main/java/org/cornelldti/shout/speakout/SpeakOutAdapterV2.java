@@ -14,7 +14,9 @@ import android.widget.TextView;
 import com.firebase.ui.common.ChangeEventType;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import org.cornelldti.shout.R;
@@ -99,12 +101,16 @@ public class SpeakOutAdapterV2 extends RecyclerView.Adapter<SpeakOutAdapterV2.Re
      * Constructs a SpeakOutAdapterV2
      *
      * @param fragment - The fragment to bind the firebase data listening lifecycle to.
-     * @param stories  - The query to retrieve stories.
-     * @param all      - The query to retrieve all reports.
      * @param context  - The context to determine date/time formatting within.
      * @return - A new SpeakOutAdapterV2
      */
-    static SpeakOutAdapterV2 construct(Fragment fragment, Query stories, Query all, Context context) {
+    static SpeakOutAdapterV2 construct(Fragment fragment, Context context) {
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        CollectionReference ref = firestore.collection("reports");
+
+        Query stories = ref.whereEqualTo("hasbody", true).orderBy("timestamp").limit(100);
+        Query all = ref.orderBy("timestamp").limit(100);
+
         FirestoreRecyclerOptions<ApprovedReport> storiesOptions = new FirestoreRecyclerOptions.Builder<ApprovedReport>()
                 .setQuery(stories, ApprovedReport.class)
                 .setLifecycleOwner(fragment)
@@ -163,7 +169,6 @@ public class SpeakOutAdapterV2 extends RecyclerView.Adapter<SpeakOutAdapterV2.Re
         public ReportViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_item, parent, false);
             return new ReportViewHolder(v);
-
         }
 
         @Override

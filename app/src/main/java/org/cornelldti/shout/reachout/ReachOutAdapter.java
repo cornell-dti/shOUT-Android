@@ -28,7 +28,6 @@ import java.util.List;
 public class ReachOutAdapter extends FirestoreRecyclerAdapter<Resource, ReachOutAdapter.ViewHolder> {
 
     private final OpenResourceCallback callback;
-    private List<String> titleList, descriptionList, websiteList;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         private TextView title, description;
@@ -85,10 +84,4 @@ public class ReachOutAdapter extends FirestoreRecyclerAdapter<Resource, ReachOut
         });
 
     }
-
-    @Override
-    public int getItemCount() {
-        return titleList.size();
-    }
-
 }

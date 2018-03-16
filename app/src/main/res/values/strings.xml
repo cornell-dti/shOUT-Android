@@ -3,7 +3,7 @@
     <string name="goout">Go Out</string>
     <string name="speakout">Speak Out</string>
     <string name="reachout">Reach Out</string>
-    <string name="location_search_hint">Search…</string>
+    <string name="location_search_hint">Find a location…</string>
     <string name="unknown_location">Unknown Location</string>
     <string name="save">Save</string>
     <string name="report_title">Report</string>
@@ -18,4 +18,10 @@
     <string name="logo_description">Application Logo</string>
     <string name="all_tab_label">All</string>
     <string name="stories_tab_title">Stories</string>
+    <string name="nearby_reports_header">Reports within 750 feet…</string>
+    <plurals name="number_of_reports">
+        <item quantity="zero">No reports at this location.</item>
+        <item quantity="one">%d report at this location.</item>
+        <item quantity="other">%d reports at this location.</item>
+    </plurals>
 </resources>

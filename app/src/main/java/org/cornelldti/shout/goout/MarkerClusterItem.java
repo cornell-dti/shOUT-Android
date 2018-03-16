@@ -9,16 +9,14 @@ import com.google.maps.android.clustering.ClusterItem;
 
 public class MarkerClusterItem implements ClusterItem {
     private final LatLng mPosition;
-    private String mTitle;
-    private String mSnippet;
+    private String reportId;
 
-    MarkerClusterItem(double lat, double lng, String title, String snippet) {
+    MarkerClusterItem(double lat, double lng, String reportId) {
         this(lat, lng);
-        mTitle = title;
-        mSnippet = snippet;
+        this.reportId = reportId;
     }
 
-    MarkerClusterItem(double lat, double lng) {
+    private MarkerClusterItem(double lat, double lng) {
         mPosition = new LatLng(lat, lng);
     }
 
@@ -27,13 +25,19 @@ public class MarkerClusterItem implements ClusterItem {
         return mPosition;
     }
 
+    /* These are no longer necessary due to our bottom sheet... */
+
     @Override
     public String getTitle() {
-        return mTitle;
+        return null;
     }
 
     @Override
     public String getSnippet() {
-        return mSnippet;
+        return null;
+    }
+
+    public String getReportId() {
+        return reportId;
     }
 }

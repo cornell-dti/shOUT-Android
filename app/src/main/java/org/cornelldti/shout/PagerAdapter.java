@@ -29,11 +29,11 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
     @Override
     public Fragment getItem(int position) {
         switch (position) {
-            case Pages.GO_OUT:
+            case Page.GO_OUT:
                 return new GoOutFragment();
-            case Pages.SPEAK_OUT:
+            case Page.SPEAK_OUT:
                 return new SpeakOutFragment();
-            case Pages.REACH_OUT:
+            case Page.REACH_OUT:
                 return new ReachOutFragment();
             default:
                 Log.d(TAG, "Attempted to retrieve unknown fragment from PagerAdapter");
@@ -44,12 +44,5 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
     @Override
     public int getCount() {
         return mNumOfTabs;
-    }
-
-    public interface Pages {
-        int UNKNOWN = -1;
-        int SPEAK_OUT = 0;
-        int GO_OUT = 1;
-        int REACH_OUT = 2;
     }
 }

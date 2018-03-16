@@ -37,8 +37,6 @@ public class SpeakOutFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         /* Setup reports recycler view... */
 
-        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-        CollectionReference ref = firestore.collection("reports");
 
         final View speakoutFragment = inflater.inflate(R.layout.speakout_fragment, container, false);
         final RecyclerView recyclerView = speakoutFragment.findViewById(R.id.recycler_view);
@@ -46,10 +44,7 @@ public class SpeakOutFragment extends Fragment {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
 
-        Query stories = ref.whereEqualTo("hasbody", true).orderBy("timestamp").limit(100);
-        Query all = ref.orderBy("timestamp").limit(100);
-
-        final SpeakOutAdapterV2 adapter = SpeakOutAdapterV2.construct(this, stories, all, speakoutFragment.getContext());
+        final SpeakOutAdapterV2 adapter = SpeakOutAdapterV2.construct(this, speakoutFragment.getContext());
         recyclerView.setAdapter(adapter);
 
         /* Fix padding issues w/ the status bar positioning */
@@ -99,28 +94,6 @@ public class SpeakOutFragment extends Fragment {
             adapter.filter(SpeakOutAdapterV2.FILTER_STORIES);
         });
 
-
-        View makeBlogPost = speakoutFragment.findViewById(R.id.startReportButton);
-        makeBlogPost.setOnClickListener(view -> {
-            Context context = AndroidUtil.getContext(speakoutFragment, this);
-
-            if (context instanceof MainActivity) {
-                ((MainActivity) context).setStatusBarColor(PagerAdapter.Pages.UNKNOWN);
-            }
-
-            ReportIncidentDialog dialog = ReportIncidentDialog.newInstance(PagerAdapter.Pages.SPEAK_OUT);
-            FragmentManager manager = getFragmentManager();
-
-            if (manager != null) {
-                FragmentTransaction transaction = manager.beginTransaction();
-
-                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
-            } else {
-                // TODO display error to user and log issue
-                // this will probably never happen
-            }
-        });
 
         return speakoutFragment;
     }
