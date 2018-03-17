@@ -83,8 +83,9 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
     private GeoQuery geoQuery;
     private Marker clickedLocationMarker;
 
-
     private GeoFire geoFire;
+
+    private final double QUERY_RADIUS = 0.2;
 
     /* PlaceSelectionListener Implementation */
 
@@ -215,8 +216,6 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
             /* Setup clustering manager and clusters... */
             mClusterManager = new ClusterManager<>(currentContext, googleMap);
 
-            // TODO support clicking on clusters
-
             mClusterManager.setOnClusterItemClickListener(item -> {
                 String reportId = item.getReportId();
 
@@ -233,8 +232,15 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
             // TODO zoom in on click?
             mClusterManager.setOnClusterClickListener(item -> {
                 Collection<MarkerClusterItem> items = item.getItems();
-
-                return false;
+                MarkerClusterItem firstItem = items.iterator().next();
+                if (activity instanceof MainActivity) {
+                    showReportsByRadius((MainActivity) activity, firstItem.getPosition(), QUERY_RADIUS);
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                            firstItem.getPosition(), (float) Math.floor(googleMap
+                                    .getCameraPosition().zoom + 4)), 500,
+                            null);
+                }
+                return true;
             });
 
             googleMap.setOnCameraIdleListener(() -> {

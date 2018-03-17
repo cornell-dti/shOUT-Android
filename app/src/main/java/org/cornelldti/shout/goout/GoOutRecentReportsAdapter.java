@@ -85,7 +85,6 @@ public class GoOutRecentReportsAdapter extends RecyclerView.Adapter<GoOutRecentR
     static GoOutRecentReportsAdapter construct(GoOutFragment fragment, LatLng location, Context context, double radius) {
         GeoFire geofire = fragment.geofire();
 
-
         GoOutRecentReportsAdapter adapter = new GoOutRecentReportsAdapter();
         adapter.mDateFormatter = DateFormat.getDateFormat(context); // todo
         adapter.mTimeFormatter = DateFormat.getTimeFormat(context);
