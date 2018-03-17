@@ -235,6 +235,7 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
                 MarkerClusterItem firstItem = items.iterator().next();
                 if (activity instanceof MainActivity) {
                     showReportsByRadius((MainActivity) activity, firstItem.getPosition(), QUERY_RADIUS);
+
                     googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                             firstItem.getPosition(), (float) Math.floor(googleMap
                                     .getCameraPosition().zoom + 4)), 500,
@@ -304,12 +305,12 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
     }
 
     private void showReportsAtLocation(MainActivity mainActivity, LatLng latLng) {
+        // TODO don't do this by radius...
         showReportsByRadius(mainActivity, latLng, 0.001, false);
     }
 
     private void showReportsByRadius(MainActivity mainActivity, LatLng latLng, double radius) {
-        // TODO don't do this by radius...
-        showReportsByRadius(mainActivity, latLng, 0.001, true);
+        showReportsByRadius(mainActivity, latLng, radius, true);
     }
 
     private void showReportsByRadius(MainActivity mainActivity, LatLng latLng, double radius, boolean nearby) {
@@ -325,6 +326,7 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
                         GoOutRecentReportsAdapter
                                 .construct(this, latLng, mainActivity, radius) // todo radius
                                 .withItemCountCallback(itemCount -> {
+
                                     int resId = nearby ? R.plurals.number_of_reports_nearby : R.plurals.number_of_reports;
                                     Resources res = getResources();
 
