@@ -89,6 +89,8 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
 
     private GeoFire geoFire;
 
+    private final double QUERY_RADIUS = 0.2;
+
     /* PlaceSelectionListener Implementation */
 
     @Override
@@ -175,7 +177,7 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
                     nearbyReportsView.setLayoutManager(mLayoutManager);
                     nearbyReportsView.setAdapter(
                             GoOutRecentReportsAdapter
-                                    .construct(this, latLng, mainActivity)
+                                    .construct(this, latLng, mainActivity, QUERY_RADIUS) // CHANGE? TODO
                                     .withItemCountCallback(itemCount -> {
                                         numberOfReports.setText(getResources().getQuantityString(R.plurals.number_of_reports, itemCount, itemCount)); // convert to resource
                                     })
@@ -329,17 +331,27 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
             /* Setup clustering manager and clusters... */
             mClusterManager = new ClusterManager<MarkerClusterItem>(currentContext, googleMap);
 
-            // TODO support clicking on clusters
-
             mClusterManager.setOnClusterItemClickListener(item -> {
-                String reportId = item.getReportId();
-
+                if(activity instanceof MainActivity) {
+                    setupLocationDetailsView((MainActivity)activity, item.getPosition(), 0);
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                            item.getPosition(), (float) Math.floor(googleMap
+                                    .getCameraPosition().zoom + 4)), 500,
+                            null);
+                }
                 return true;
             });
 
             mClusterManager.setOnClusterClickListener(item -> {
                 Collection<MarkerClusterItem> items = item.getItems();
-
+                MarkerClusterItem firstItem =  items.iterator().next();
+                if(activity instanceof MainActivity) {
+                    setupLocationDetailsView((MainActivity)activity, firstItem.getPosition(), QUERY_RADIUS);
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                            firstItem.getPosition(), (float) Math.floor(googleMap
+                                    .getCameraPosition().zoom + 4)), 500,
+                            null);
+                }
                 return true;
             });
 
@@ -398,8 +410,7 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
         }
     }
 
-    // TODO this will be used for when a user clicks on a marker
-    private void setupLocationDetailsView(MainActivity activity, LatLng latLng) {
+    private void setupLocationDetailsView(MainActivity activity, LatLng latLng, double radius) {
         activity.updateSheet((sheet, behavior) -> {
             behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
@@ -407,10 +418,18 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
 
             RecyclerView view = sheet.findViewById(R.id.nearby_reports_recycler_view);
 
+            TextView address = sheet.findViewById(R.id.address_quick_view);
+            TextView numberOfReports = sheet.findViewById(R.id.number_of_reports_quick_view);
+
             RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(activity);
             view.setLayoutManager(mLayoutManager);
 
-            view.setAdapter(GoOutRecentReportsAdapter.construct(this, latLng, activity));
+            view.setAdapter(GoOutRecentReportsAdapter.construct(this, latLng, activity, radius).withItemCountCallback(itemCount -> {
+                        numberOfReports.setText(getResources().getQuantityString(R.plurals.number_of_reports, itemCount, itemCount));
+                        // convert to resource
+                    })
+            );
+            address.setText("");
 
             activity.setFABAction(FABAction.START_REPORT, latLng, Page.GO_OUT);
 

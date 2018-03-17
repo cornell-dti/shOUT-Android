@@ -385,6 +385,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                 fab.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.location));
 
                 fab.setOnClickListener(view -> {
+
                 });
 
                 break;

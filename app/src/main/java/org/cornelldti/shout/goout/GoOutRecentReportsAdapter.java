@@ -83,15 +83,14 @@ public class GoOutRecentReportsAdapter extends RecyclerView.Adapter<GoOutRecentR
      * @param context  - The context to determine date/time formatting within.
      * @return - A new GoOutRecentReportsAdapter
      */
-    static GoOutRecentReportsAdapter construct(GoOutFragment fragment, LatLng location, Context context) {
+    static GoOutRecentReportsAdapter construct(GoOutFragment fragment, LatLng location, Context context, double radius) {
         GeoFire geofire = fragment.geofire();
-
 
         GoOutRecentReportsAdapter adapter = new GoOutRecentReportsAdapter();
         adapter.mDateFormatter = DateFormat.getDateFormat(context); // todo
         adapter.mTimeFormatter = DateFormat.getTimeFormat(context);
 
-        GeoQuery query = geofire.queryAtLocation(new GeoLocation(location.latitude, location.longitude), 0.2); // todo radius?
+        GeoQuery query = geofire.queryAtLocation(new GeoLocation(location.latitude, location.longitude), radius); // todo radius?
         query.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
