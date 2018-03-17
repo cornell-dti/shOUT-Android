@@ -1,6 +1,5 @@
 package org.cornelldti.shout.reachout;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -17,8 +16,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import org.cornelldti.shout.R;
-
-import java.util.List;
+import org.cornelldti.shout.util.function.Consumer;
 
 
 /**
@@ -27,7 +25,7 @@ import java.util.List;
 
 public class ReachOutAdapter extends FirestoreRecyclerAdapter<Resource, ReachOutAdapter.ViewHolder> {
 
-    private final OpenResourceCallback callback;
+    private final Consumer<Uri> callback;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         private TextView title, description;
@@ -44,12 +42,12 @@ public class ReachOutAdapter extends FirestoreRecyclerAdapter<Resource, ReachOut
         }
     }
 
-    private ReachOutAdapter(FirestoreRecyclerOptions<Resource> options, OpenResourceCallback callback) {
+    private ReachOutAdapter(FirestoreRecyclerOptions<Resource> options, Consumer<Uri> callback) {
         super(options);
         this.callback = callback;
     }
 
-    static ReachOutAdapter construct(Fragment fragment, OpenResourceCallback callback) {
+    static ReachOutAdapter construct(Fragment fragment, Consumer<Uri> callback) {
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         Query query = database.collection("resources").orderBy("ordering");
 
@@ -80,7 +78,7 @@ public class ReachOutAdapter extends FirestoreRecyclerAdapter<Resource, ReachOut
 
         holder.website.setOnClickListener(listener -> {
             Uri uri = Uri.parse(website);
-            this.callback.openResourceUri(uri);
+            this.callback.apply(uri);
         });
 
     }

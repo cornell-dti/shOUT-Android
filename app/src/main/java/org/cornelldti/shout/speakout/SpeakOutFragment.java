@@ -1,12 +1,9 @@
 package org.cornelldti.shout.speakout;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,14 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-
-import org.cornelldti.shout.MainActivity;
-import org.cornelldti.shout.PagerAdapter;
 import org.cornelldti.shout.R;
-import org.cornelldti.shout.util.AndroidUtil;
 import org.cornelldti.shout.util.LayoutUtil;
 
 public class SpeakOutFragment extends Fragment {
@@ -44,7 +34,7 @@ public class SpeakOutFragment extends Fragment {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
 
-        final SpeakOutAdapterV2 adapter = SpeakOutAdapterV2.construct(this, speakoutFragment.getContext());
+        final SpeakOutAdapter adapter = SpeakOutAdapter.construct(this, speakoutFragment.getContext());
         recyclerView.setAdapter(adapter);
 
         /* Fix padding issues w/ the status bar positioning */
@@ -83,7 +73,7 @@ public class SpeakOutFragment extends Fragment {
             buttonHighlight.setVisibility(View.VISIBLE);
             storiesHighlight.setVisibility(View.INVISIBLE);
 
-            adapter.filter(SpeakOutAdapterV2.FILTER_NONE);
+            adapter.filter(SpeakOutAdapter.FILTER_NONE);
 
         });
 
@@ -91,7 +81,7 @@ public class SpeakOutFragment extends Fragment {
             storiesHighlight.setVisibility(View.VISIBLE);
             buttonHighlight.setVisibility(View.INVISIBLE);
 
-            adapter.filter(SpeakOutAdapterV2.FILTER_STORIES);
+            adapter.filter(SpeakOutAdapter.FILTER_STORIES);
         });
 
 

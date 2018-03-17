@@ -12,7 +12,6 @@ public class Resource {
     public Resource() {
     }
 
-
     public Resource(String website, String title, String description, int ordering) {
         this.website = website;
         this.title = title;

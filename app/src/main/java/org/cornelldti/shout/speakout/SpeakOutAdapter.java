@@ -25,11 +25,11 @@ import org.cornelldti.shout.R;
  * An optimized and reloaded version of the original SpeakOutAdapter
  */
 
-public class SpeakOutAdapterV2 extends RecyclerView.Adapter<SpeakOutAdapterV2.ReportViewHolder> implements DataLoadedCallback {
+public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.ReportViewHolder> implements DataLoadedCallback {
     private FirestoreRecyclerAdapter<ApprovedReport, ReportViewHolder> storiesAdapter, allAdapter;
     private boolean filterStories = false; // TODO Support any filter.
 
-    private SpeakOutAdapterV2() {
+    private SpeakOutAdapter() {
     }
 
     /* Constants for filtering... */
@@ -98,13 +98,13 @@ public class SpeakOutAdapterV2 extends RecyclerView.Adapter<SpeakOutAdapterV2.Re
     }
 
     /**
-     * Constructs a SpeakOutAdapterV2
+     * Constructs a SpeakOutAdapter
      *
      * @param fragment - The fragment to bind the firebase data listening lifecycle to.
      * @param context  - The context to determine date/time formatting within.
-     * @return - A new SpeakOutAdapterV2
+     * @return - A new SpeakOutAdapter
      */
-    static SpeakOutAdapterV2 construct(Fragment fragment, Context context) {
+    static SpeakOutAdapter construct(Fragment fragment, Context context) {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         CollectionReference ref = firestore.collection("reports");
 
@@ -119,7 +119,7 @@ public class SpeakOutAdapterV2 extends RecyclerView.Adapter<SpeakOutAdapterV2.Re
                 .setQuery(all, ApprovedReport.class)
                 .setLifecycleOwner(fragment)
                 .build();
-        SpeakOutAdapterV2 adapter = new SpeakOutAdapterV2();
+        SpeakOutAdapter adapter = new SpeakOutAdapter();
         adapter.storiesAdapter = new InternalAdapter(context, adapter, storiesOptions);
         adapter.allAdapter = new InternalAdapter(context, adapter, allOptions);
         return adapter;

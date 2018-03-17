@@ -1,4 +1,4 @@
-package org.cornelldti.shout.util.functions;
+package org.cornelldti.shout.util.function;
 
 /**
  * A backport of Java 8's BiConsumer for Android

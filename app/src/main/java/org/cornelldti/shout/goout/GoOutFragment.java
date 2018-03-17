@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.arch.core.util.Function;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -22,15 +23,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.location.places.ui.SupportPlaceAutocompleteFragment;
@@ -85,7 +83,6 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
     private GeoQuery geoQuery;
     private Marker clickedLocationMarker;
 
-    private FusedLocationProviderClient client;
 
     private GeoFire geoFire;
 
@@ -160,113 +157,6 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
         return rootView;
     }
 
-    private Function<LatLng, Void> getMapLongClickFunc(MainActivity mainActivity) {
-        return latLng -> {
-
-            if (mainActivity != null) {
-                mainActivity.updateSheet((sheet, behavior) -> {
-                    /* Setup the recycler view for nearby reports */
-
-                    final RecyclerView nearbyReportsView = sheet.findViewById(R.id.nearby_reports_recycler_view);
-                    final TextView address = sheet.findViewById(R.id.address_quick_view);
-                    final TextView numberOfReports = sheet.findViewById(R.id.number_of_reports_quick_view);
-                    final RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(mainActivity);
-
-                    nearbyReportsView.setLayoutManager(mLayoutManager);
-                    nearbyReportsView.setAdapter(
-                            GoOutRecentReportsAdapter
-                                    .construct(this, latLng, mainActivity)
-                                    .withItemCountCallback(itemCount -> {
-                                        numberOfReports.setText(getResources().getQuantityString(R.plurals.number_of_reports, itemCount, itemCount)); // convert to resource
-                                    })
-                    );
-
-                    // TODO convert latLng to place *more correctly :p*
-                    address.setText(LocationUtil.getAddressForLocation(mainActivity, latLng).getAddressLine(0));
-
-                    /* Set the FAB Action to edit... */
-
-                    mainActivity.setFABAction(FABAction.START_REPORT, latLng, Page.GO_OUT);
-
-                    /* Show the "special location" marker... */
-
-                    // TODO update or recreate?
-                    clickedLocationMarker.setPosition(latLng);
-                    clickedLocationMarker.setVisible(true);
-
-                    final LinearLayout quickView = sheet.findViewById(R.id.quick_view_padding);
-
-                    /* This handles two primary styles... */
-                    /* 1) Clear all data/adapters when the bottom sheet is hidden. */
-                    /* 2) Adjust the top padding to ensure the bottom sheet doesn't go behind the status bar while being animated... */
-
-                    behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-                        @Override
-                        public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                            if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                                nearbyReportsView.setAdapter(null);
-                                mainActivity.setFABAction(FABAction.CURRENT_LOCATION, Page.GO_OUT);
-
-                                behavior.setBottomSheetCallback(null);
-
-                                clickedLocationMarker.setVisible(false);
-                            }
-
-                            if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                                ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(
-                                        ViewGroup.LayoutParams.MATCH_PARENT,
-                                        (int) Math.ceil(LayoutUtil.getStatusBarHeight(mainActivity))
-                                );
-
-                                quickView.setLayoutParams(params);
-                            }
-                        }
-
-                        @Override
-                        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                            // TODO Convert to animation for performance sake
-
-                            // Rough explanation...
-
-                            // Essentially once the sheet is more than half way ascended to the top, begin adding padding
-                            // corresponding to how close it is to the top. It gets 1/x * 2 * statusbarheight added every animation tick
-                            // where x is the total number of ticks. And the reverse is applied when descending.
-
-                            if (slideOffset > 0.5f) {
-                                ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(
-                                        ViewGroup.LayoutParams.MATCH_PARENT,
-                                        (int) Math.ceil((2 * (0.5 - (1.0 - slideOffset))) * LayoutUtil.getStatusBarHeight(mainActivity)) // + LayoutUtil.getPixelsFromDp(getResources(), 4)
-                                );
-
-                                quickView.setLayoutParams(params);
-                            } else if (slideOffset >= 0f) {
-                                if (quickView.getLayoutParams().height > 0) {
-                                    ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(
-                                            ViewGroup.LayoutParams.MATCH_PARENT,
-                                            0
-                                    );
-                                    quickView.setLayoutParams(params);
-                                }
-                            }
-                        }
-                    });
-
-                    /* Show the bottom sheet... */
-                    behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                });
-            } else {
-                // FALLBACK
-
-                ReportIncidentDialog dialog = ReportIncidentDialog.newInstance(latLng, Page.GO_OUT);
-
-                FragmentTransaction transaction = getFragmentManager().beginTransaction(); // todo nullpointer
-                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
-            }
-
-            return null; // (void return)
-        };
-    }
 
     private Function<GoogleMap, Void> getMapSetupFunc(Context context, int statusbarSize) {
         return googleMap -> {
@@ -303,11 +193,7 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
 
             Location centerLocation = LocationUtil.latLngToLocation(LocationUtil.CORNELL_CENTER);
 
-            if (activity != null) {
-                client = LocationServices.getFusedLocationProviderClient(activity);
-                // TODO actually get location updates and allow user to go to current location and send user to current location on opening
-                // client.requestLocationUpdates();
-            }
+            // todo locatino setup?
 
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(new LatLng(centerLocation.getLatitude(), centerLocation.getLongitude()))      // Sets the center of the mGoogleMap to website user
@@ -327,32 +213,29 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
             }
 
             /* Setup clustering manager and clusters... */
-            mClusterManager = new ClusterManager<MarkerClusterItem>(currentContext, googleMap);
+            mClusterManager = new ClusterManager<>(currentContext, googleMap);
 
             // TODO support clicking on clusters
 
             mClusterManager.setOnClusterItemClickListener(item -> {
                 String reportId = item.getReportId();
 
-                return true;
+                if (activity instanceof MainActivity) {
+                    showReportsAtLocation((MainActivity) activity, item.getPosition()); // todo
+                } else {
+                    // TODO error toast
+                }
+
+
+                return false;
             });
 
+            // TODO zoom in on click?
             mClusterManager.setOnClusterClickListener(item -> {
                 Collection<MarkerClusterItem> items = item.getItems();
 
-                return true;
+                return false;
             });
-
-            googleMap.setOnMarkerClickListener(mClusterManager);
-            googleMap.setOnInfoWindowClickListener(mClusterManager);
-
-            /* Setup long clicking for the details view... */
-
-            if (activity instanceof MainActivity) {
-                googleMap.setOnMapLongClickListener(getMapLongClickFunc((MainActivity) activity)::apply);
-            } else {
-                // TODO
-            }
 
             googleMap.setOnCameraIdleListener(() -> {
                 LatLngBounds bounds = mGoogleMap.getProjection().getVisibleRegion().latLngBounds;
@@ -367,7 +250,23 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
                 double radius = results[0] / 1000.0 + 1.0;
 
                 geoQuery.setLocation(new GeoLocation(center.latitude, center.longitude), radius);
+
+                // forward along
+                mClusterManager.onCameraIdle();
             });
+
+            googleMap.setOnMarkerClickListener(mClusterManager);
+            googleMap.setOnInfoWindowClickListener(mClusterManager);
+
+            /* Setup long clicking for the details view... */
+
+            if (activity instanceof MainActivity) {
+                googleMap.setOnMapLongClickListener((latLng -> {
+                    showReportsByRadius((MainActivity) activity, latLng, 0.2); // todo
+                }));
+            } else {
+                // TODO
+            }
 
             clickedLocationMarker = googleMap.addMarker(new MarkerOptions().position(LocationUtil.CORNELL_CENTER)
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
@@ -398,74 +297,120 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
         }
     }
 
-    // TODO this will be used for when a user clicks on a marker
-    private void setupLocationDetailsView(MainActivity activity, LatLng latLng) {
-        activity.updateSheet((sheet, behavior) -> {
-            behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    private void showReportsAtLocation(MainActivity mainActivity, LatLng latLng) {
+        showReportsByRadius(mainActivity, latLng, 0.001, false);
+    }
 
-            LinearLayout quickView = sheet.findViewById(R.id.quick_view_padding);
+    private void showReportsByRadius(MainActivity mainActivity, LatLng latLng, double radius) {
+        // TODO don't do this by radius...
+        showReportsByRadius(mainActivity, latLng, 0.001, true);
+    }
 
-            RecyclerView view = sheet.findViewById(R.id.nearby_reports_recycler_view);
+    private void showReportsByRadius(MainActivity mainActivity, LatLng latLng, double radius, boolean nearby) {
+        if (mainActivity != null) {
+            mainActivity.updateSheet((sheet, behavior, nearbyReportsView, addressTextView, numberOfReportsTextView) -> {
+                    /* Setup the recycler view for nearby reports */
 
-            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(activity);
-            view.setLayoutManager(mLayoutManager);
+                final RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(mainActivity);
 
-            view.setAdapter(GoOutRecentReportsAdapter.construct(this, latLng, activity));
+                nearbyReportsView.setLayoutManager(mLayoutManager);
 
-            activity.setFABAction(FABAction.START_REPORT, latLng, Page.GO_OUT);
+                nearbyReportsView.setAdapter(
+                        GoOutRecentReportsAdapter
+                                .construct(this, latLng, mainActivity, radius) // todo radius
+                                .withItemCountCallback(itemCount -> {
+                                    int resId = nearby ? R.plurals.number_of_reports_nearby : R.plurals.number_of_reports;
+                                    Resources res = getResources();
 
-            // TODO update or recreate?
-            clickedLocationMarker.setPosition(latLng);
-            clickedLocationMarker.setVisible(true);
+                                    numberOfReportsTextView.setText(res.getQuantityString(resId, itemCount, itemCount));
+                                })
+                );
 
-            behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-                @Override
-                public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                    if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                        view.setAdapter(null);
-                        ((MainActivity) activity).setFABAction(FABAction.CURRENT_LOCATION, Page.GO_OUT);
+                // TODO (change within 750 feet text too)
 
-                        behavior.setBottomSheetCallback(null);
+                // TODO convert latLng to place *more correctly :p*
+                addressTextView.setText(LocationUtil.getAddressForLocation(mainActivity, latLng).getAddressLine(0));
 
-                        clickedLocationMarker.setVisible(false);
-                    }
+                    /* Set the FAB Action to edit... */
 
-                    if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                        ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                (int) Math.ceil(LayoutUtil.getStatusBarHeight(activity)) // + LayoutUtil.getPixelsFromDp(getResources(), 4)
-                        );
+                mainActivity.setFABAction(FABAction.START_REPORT, latLng, Page.GO_OUT);
 
-                        quickView.setLayoutParams(params);
-                    }
-                }
+                    /* Show the "special location" marker... */
 
-                @Override
-                public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                    if (slideOffset > 0.5f) {
-                        ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                (int) Math.ceil((2 * (0.5 - (1.0 - slideOffset))) * LayoutUtil.getStatusBarHeight(activity)) // + LayoutUtil.getPixelsFromDp(getResources(), 4)
-                        );
+                // TODO update or recreate?
+                clickedLocationMarker.setPosition(latLng);
+                clickedLocationMarker.setVisible(true);
 
-                        quickView.setLayoutParams(params);
-                    } else if (slideOffset >= 0f) {
-                        if (quickView.getLayoutParams().height > 0) {
+                final LinearLayout quickView = sheet.findViewById(R.id.quick_view_padding);
 
+                    /* This handles two primary styles... */
+                    /* 1) Clear all data/adapters when the bottom sheet is hidden. */
+                    /* 2) Adjust the top padding to ensure the bottom sheet doesn't go behind the status bar while being animated... */
+
+                behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+                    @Override
+                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                        if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                            nearbyReportsView.setAdapter(null);
+                            mainActivity.setFABAction(FABAction.CURRENT_LOCATION, Page.GO_OUT);
+
+                            behavior.setBottomSheetCallback(null);
+
+                            clickedLocationMarker.setVisible(false);
+                        }
+
+                        if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                             ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(
                                     ViewGroup.LayoutParams.MATCH_PARENT,
-                                    0
+                                    (int) Math.ceil(LayoutUtil.getStatusBarHeight(mainActivity))
                             );
-
 
                             quickView.setLayoutParams(params);
                         }
                     }
-                }
-            });
-        });
-    }
 
+                    @Override
+                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                        // TODO Convert to animation for performance sake
+
+                        // Rough explanation...
+
+                        // Essentially once the sheet is more than half way ascended to the top, begin adding padding
+                        // corresponding to how close it is to the top. It gets 1/x * 2 * statusbarheight added every animation tick
+                        // where x is the total number of ticks. And the reverse is applied when descending.
+
+                        if (slideOffset > 0.5f) {
+                            ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    (int) Math.ceil((2 * (0.5 - (1.0 - slideOffset))) * LayoutUtil.getStatusBarHeight(mainActivity)) // + LayoutUtil.getPixelsFromDp(getResources(), 4)
+                            );
+
+                            quickView.setLayoutParams(params);
+                        } else if (slideOffset >= 0f) {
+                            if (quickView.getLayoutParams().height > 0) {
+                                ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(
+                                        ViewGroup.LayoutParams.MATCH_PARENT,
+                                        0
+                                );
+                                quickView.setLayoutParams(params);
+                            }
+                        }
+                    }
+                });
+
+                    /* Show the bottom sheet... */
+                behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            });
+        } else {
+            // FALLBACK
+
+            ReportIncidentDialog dialog = ReportIncidentDialog.newInstance(latLng, Page.GO_OUT);
+
+            FragmentTransaction transaction = getFragmentManager().beginTransaction(); // todo nullpointer
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+        }
+    }
 
     @Override
     public void onResume() {

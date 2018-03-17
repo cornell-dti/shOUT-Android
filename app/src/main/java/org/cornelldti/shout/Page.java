@@ -1,6 +1,8 @@
 package org.cornelldti.shout;
 
 /**
+ * An integer constant representation of the currently visible page.
+ * <p>
  * Created by Evan Welsh on 3/16/18.
  */
 

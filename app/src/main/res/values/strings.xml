@@ -24,4 +24,9 @@
         <item quantity="one">%d report at this location.</item>
         <item quantity="other">%d reports at this location.</item>
     </plurals>
+    <plurals name="number_of_reports_nearby">
+        <item quantity="zero">No reports nearby.</item>
+        <item quantity="one">%d report nearby.</item>
+        <item quantity="other">%d reports nearby.</item>
+    </plurals>
 </resources>
