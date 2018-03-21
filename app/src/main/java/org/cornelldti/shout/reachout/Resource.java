@@ -1,30 +1,34 @@
 package org.cornelldti.shout.reachout;
 
+import java.util.Collection;
+
 /**
  * Represents a resource in the RecyclerView
  * Created by Evan Welsh on 3/1/18.
  */
 
 public class Resource {
-    private String website, title, description;
+    private String url, name, description;
     private int ordering;
+    private Collection<Phone> phones;
 
     public Resource() {
     }
 
-    public Resource(String website, String title, String description, int ordering) {
-        this.website = website;
-        this.title = title;
+    public Resource(String url, String name, String description, Collection phones, int ordering) {
+        this.url = url;
+        this.name = name;
         this.description = description;
         this.ordering = ordering;
+        this.phones = phones;
     }
 
-    public String getWebsite() {
-        return website;
+    public String getUrl() {
+        return url;
     }
 
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
     }
 
     public String getDescription() {
@@ -33,6 +37,11 @@ public class Resource {
 
     public int getOrdering() {
         return ordering;
+    }
+
+    public Collection<Phone> getPhones()
+    {
+        return phones;
     }
 
 }
