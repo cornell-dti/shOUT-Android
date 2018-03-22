@@ -2,6 +2,7 @@ package org.cornelldti.shout.goout;
 
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -13,7 +14,7 @@ public interface BottomSheetUpdateCallback {
 
     void update(LinearLayout bottomSheet,
                 BottomSheetBehavior behavior,
-                RecyclerView reportsView,
+                View mBottomSheetShadow, RecyclerView reportsView,
                 TextView addressTextView,
                 TextView numberOfReportsTextView
     );

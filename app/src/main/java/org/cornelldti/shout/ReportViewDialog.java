@@ -1,8 +1,174 @@
 package org.cornelldti.shout;
 
+import android.annotation.SuppressLint;
+import android.app.Dialog;
+import android.content.Context;
+import android.location.Address;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AppCompatDialogFragment;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.TextView;
+
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBufferResponse;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.RuntimeRemoteException;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+
+import org.cornelldti.shout.speakout.Report;
+import org.cornelldti.shout.util.LayoutUtil;
+import org.cornelldti.shout.util.LocationUtil;
+
+import java.util.Calendar;
+
 /**
  * Created by Evan Welsh on 3/17/18.
  */
 
-public class ReportViewDialog {
+public class ReportViewDialog extends AppCompatDialogFragment {
+
+    private static final String TAG = "ReportView";
+
+    private TextView dateTextView, timeTextView, titleTextView, bodyTextView, locationTextView;
+    private MapView mapView;
+
+    private Calendar calendar = Calendar.getInstance();
+    private LatLng latLng;
+
+    private int returnPage;
+    private Report report;
+
+    public ReportViewDialog() {
+    }
+
+    public static ReportViewDialog newInstance(Report report, LatLng latLng, int returnPage) {
+        ReportViewDialog dialog = new ReportViewDialog();
+
+        Bundle args = new Bundle();
+        args.putDoubleArray("latLng", new double[]{latLng.latitude, latLng.longitude});
+        args.putInt("returnPage", returnPage); // TODO find a better method to fix this UI issue
+
+        args.putSerializable("report", report);
+
+        dialog.setArguments(args);
+
+        return dialog;
+    }
+
+    public static ReportViewDialog newInstance(Report report, int returnPage) {
+        ReportViewDialog dialog = new ReportViewDialog();
+
+        // Supply num input as an argument.
+        Bundle args = new Bundle();
+        args.putInt("returnPage", returnPage);
+        args.putSerializable("report", report);
+
+        dialog.setArguments(args);
+
+        return dialog;
+    }
+
+    @SuppressLint({"ClickableViewAccessibility", "PrivateResource"})
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View reportDialogView = inflater.inflate(R.layout.report_view_dialog, container, false);
+
+        AppBarLayout appBarLayout = reportDialogView.findViewById(R.id.report_view_appbar);
+
+        /* Ensure we don't overlap with the status bar. */
+
+        appBarLayout.setPadding(0, LayoutUtil.getStatusBarHeight(getContext()), 0, 0);
+
+       /* Setup toolbar buttons */
+        // TODO add close button
+
+        /* Disable options menu (we don't use it) */
+
+        setHasOptionsMenu(false);
+
+        /* Retrieve miscellaneous views... */
+
+        titleTextView = reportDialogView.findViewById(R.id.report_view_title_text_view);
+        bodyTextView = reportDialogView.findViewById(R.id.report_view_body_text_view);
+        dateTextView = reportDialogView.findViewById(R.id.report_date_spinner_text_view);
+        timeTextView = reportDialogView.findViewById(R.id.report_time_spinner_text_view);
+
+        /* Setup the latLng selector if a latLng was passed to the dialog... */
+
+        if (this.latLng != null) {
+            Address address = LocationUtil.getAddressForLocation(getContext(), this.latLng);
+            if (address != null) {
+                locationTextView.setText(address.getAddressLine(0));
+            } else {
+                locationTextView.setText(this.latLng.toString());
+            }
+        }
+
+        return reportDialogView;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        /* Get passed latLng from bundle */
+
+        Bundle bundle = getArguments();
+
+        if (bundle != null) {
+            double[] loc = bundle.getDoubleArray("latLng");
+
+            if (loc != null) {
+                this.latLng = new LatLng(loc[0], loc[1]);
+            }
+
+            this.returnPage = bundle.getInt("returnPage");
+
+            this.report = (Report) bundle.getSerializable("report");
+
+            if (this.report != null) {
+                this.titleTextView.setText(this.report.getTitle());
+                this.bodyTextView.setText(this.report.getBody());
+                this.locationTextView.setText(this.report.getLocation());
+                this.timeTextView.setText(Long.toString(this.report.getTimestamp()));
+            }
+
+        }
+
+        /* Set the style of this dialog. */
+
+        setStyle(DialogFragment.STYLE_NO_TITLE, R.style.FullScreenDialog);
+    }
+
+    @Override
+    public void dismiss() {
+        // TODO find less hacky solution
+
+        Context context = getContext();
+
+        if (context instanceof MainActivity) {
+            ((MainActivity) context).setStatusBarColor(returnPage);
+        }
+
+        super.dismiss();
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        /* This ensures the dialog fills the entire screen... */
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        return dialog;
+    }
 }

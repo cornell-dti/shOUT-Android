@@ -69,19 +69,15 @@ public class ReachOutFragment extends Fragment {
         adapter = new FirestoreRecyclerAdapter<Resource, ResourcesHolder>(response) {
 
             @Override
-            public void onBindViewHolder(ResourcesHolder holder, int position, Resource r) {
+            public void onBindViewHolder(@NonNull ResourcesHolder holder, int position, @NonNull Resource r) {
                 holder.title.setText(r.getName());
                 holder.description.setText(r.getDescription());
-                holder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        showDialog(r);
-                    }
-                });
+                holder.itemView.setOnClickListener(v -> showDialog(r));
             }
 
+            @NonNull
             @Override
-            public ResourcesHolder onCreateViewHolder(ViewGroup group, int i) {
+            public ResourcesHolder onCreateViewHolder(@NonNull ViewGroup group, int i) {
                 View view = LayoutInflater.from(group.getContext())
                         .inflate(R.layout.resource_item, group, false);
 
@@ -97,8 +93,7 @@ public class ReachOutFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
-    private void showDialog(Resource resource)
-    {
+    private void showDialog(Resource resource) {
         // PHONE COLLECTION NULL TODO FIX
         Collection<Phone> pho = resource.getPhones();
         Toast.makeText(getActivity(), String.valueOf(pho.size()), Toast.LENGTH_SHORT).show();
@@ -106,17 +101,16 @@ public class ReachOutFragment extends Fragment {
         MoreInfoResourceDialog dialog = MoreInfoResourceDialog.newInstance(resource);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        transaction.add(android.R.id.content, dialog ).addToBackStack(null).commit();
+        transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
     }
 
     public class ResourcesHolder extends RecyclerView.ViewHolder {
-        TextView title;
-        TextView description;
+        TextView title, description;
 
-        public ResourcesHolder(View itemView) {
+        ResourcesHolder(View itemView) {
             super(itemView);
-            title = (TextView) itemView.findViewById(R.id.resource_item_title);
-            description = (TextView) itemView.findViewById(R.id.resource_item_description);
+            title = itemView.findViewById(R.id.resource_item_title);
+            description = itemView.findViewById(R.id.resource_item_description);
         }
     }
 

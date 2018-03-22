@@ -15,7 +15,7 @@ public class Resource {
     public Resource() {
     }
 
-    public Resource(String url, String name, String description, Collection phones, int ordering) {
+    public Resource(String url, String name, String description, Collection<Phone> phones, int ordering) {
         this.url = url;
         this.name = name;
         this.description = description;

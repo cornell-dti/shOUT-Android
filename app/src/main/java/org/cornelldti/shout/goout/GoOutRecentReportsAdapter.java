@@ -21,7 +21,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.cornelldti.shout.R;
-import org.cornelldti.shout.speakout.ApprovedReport;
+import org.cornelldti.shout.speakout.Report;
 import org.cornelldti.shout.util.function.Consumer;
 
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class GoOutRecentReportsAdapter extends RecyclerView.Adapter<GoOutRecentR
 
     private class Reports {
 
-        private final List<ApprovedReport> list = new ArrayList<>();
+        private final List<Report> list = new ArrayList<>();
         private int intendedSize = 0;
         private boolean locked = false;
 
@@ -54,7 +54,7 @@ public class GoOutRecentReportsAdapter extends RecyclerView.Adapter<GoOutRecentR
                 ref.document(key).get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot snapshot = task.getResult();
-                        ApprovedReport report = snapshot.toObject(ApprovedReport.class);
+                        Report report = snapshot.toObject(Report.class);
                         list.add(report);
                         notifyItemInserted(list.size() - 1);
                     }
@@ -161,7 +161,7 @@ public class GoOutRecentReportsAdapter extends RecyclerView.Adapter<GoOutRecentR
 
     @Override
     public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
-        ApprovedReport model = reports.list.get(position);
+        Report model = reports.list.get(position);
 
         holder.title.setText(model.getTitle());
 

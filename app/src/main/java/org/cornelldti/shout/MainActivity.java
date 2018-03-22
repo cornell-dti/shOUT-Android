@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     private BottomNavigationView mBottomNavigationView;
     private BottomSheetBehavior mBottomSheetBehavior;
     private LinearLayout mBottomSheet;
+    private View mBottomSheetShadow;
 
     private RecyclerView mReportsView;
     private TextView mAddressTextView, mNumOfReportsTextView;
@@ -120,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             setStatusBarColor(position);
 
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            mBottomSheetShadow.setVisibility(View.INVISIBLE);
 
             switch (position) {
                 case Page.GO_OUT:
@@ -156,7 +158,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
         }
     };
-
 
     @Override
     public void onStart() {
@@ -256,8 +257,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                 // TODO I reset these values to what the comments said they should be. - Evan
                 .setInterval(10000L)        // 10 seconds, in milliseconds
                 .setFastestInterval(1000L);
-
-
         mLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -295,11 +294,11 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
         mFloatingActionButton = findViewById(R.id.fab);
         mBottomSheet = findViewById(R.id.bottom_sheet);
+        mBottomSheetShadow = findViewById(R.id.bottom_sheet_shadow);
         mBottomSheetBehavior = BottomSheetBehavior.from(mBottomSheet);
         mReportsView = mBottomSheet.findViewById(R.id.nearby_reports_recycler_view);
         mAddressTextView = mBottomSheet.findViewById(R.id.address_quick_view);
         mNumOfReportsTextView = mBottomSheet.findViewById(R.id.number_of_reports_quick_view);
-
 
         /* Setup the pages adapter... */
 
@@ -405,7 +404,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     public void updateSheet(BottomSheetUpdateCallback updater) {
         if (updater == null) return;
 
-        updater.update(mBottomSheet, mBottomSheetBehavior, mReportsView, mAddressTextView, mNumOfReportsTextView);
+        updater.update(mBottomSheet, mBottomSheetBehavior, mBottomSheetShadow, mReportsView, mAddressTextView, mNumOfReportsTextView);
     }
 
     /**

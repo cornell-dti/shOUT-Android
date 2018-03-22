@@ -52,7 +52,7 @@ import org.cornelldti.shout.FABAction;
 import org.cornelldti.shout.MainActivity;
 import org.cornelldti.shout.Page;
 import org.cornelldti.shout.R;
-import org.cornelldti.shout.speakout.ApprovedReport;
+import org.cornelldti.shout.speakout.Report;
 import org.cornelldti.shout.speakout.ReportIncidentDialog;
 import org.cornelldti.shout.util.AndroidUtil;
 import org.cornelldti.shout.util.LayoutUtil;
@@ -315,7 +315,7 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
 
     private void showReportsByRadius(MainActivity mainActivity, LatLng latLng, double radius, boolean nearby) {
         if (mainActivity != null) {
-            mainActivity.updateSheet((sheet, behavior, nearbyReportsView, addressTextView, numberOfReportsTextView) -> {
+            mainActivity.updateSheet((sheet, behavior, shadow, nearbyReportsView, addressTextView, numberOfReportsTextView) -> {
                     /* Setup the recycler view for nearby reports */
 
                 final RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(mainActivity);
@@ -364,7 +364,13 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
 
                             behavior.setBottomSheetCallback(null);
 
+                            shadow.setVisibility(View.INVISIBLE);
+
                             clickedLocationMarker.setVisible(false);
+                        }
+
+                        if(newState != BottomSheetBehavior.STATE_HIDDEN) {
+                            shadow.setVisibility(View.INVISIBLE);
                         }
 
                         if (newState == BottomSheetBehavior.STATE_EXPANDED) {
@@ -466,10 +472,10 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
             @Override
             public void onKeyEntered(String reportId, GeoLocation location) {
 
-                // Finds the ApprovedReport object for each marker location to access title and body!
+                // Finds the Report object for each marker location to access title and body!
                 FirebaseFirestore.getInstance().collection("reports").document(reportId).get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        ApprovedReport report = task.getResult().toObject(ApprovedReport.class);
+                        Report report = task.getResult().toObject(Report.class);
                         MarkerClusterItem item = new MarkerClusterItem(location.latitude, location.longitude, reportId);
                         markerClusterItems.put(reportId, item);
                         mClusterManager.addItem(item);

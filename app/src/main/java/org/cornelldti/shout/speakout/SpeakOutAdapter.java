@@ -20,13 +20,14 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import org.cornelldti.shout.R;
+import org.cornelldti.shout.ShoutFirestore;
 
 /**
  * An optimized and reloaded version of the original SpeakOutAdapter
  */
 
 public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.ReportViewHolder> implements DataLoadedCallback {
-    private FirestoreRecyclerAdapter<ApprovedReport, ReportViewHolder> storiesAdapter, allAdapter;
+    private FirestoreRecyclerAdapter<Report, ReportViewHolder> storiesAdapter, allAdapter;
     private boolean filterStories = false; // TODO Support any filter.
 
     private SpeakOutAdapter() {
@@ -38,7 +39,7 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
     public static final int FILTER_NONE = -1;
 
 
-    private FirestoreRecyclerAdapter<ApprovedReport, ReportViewHolder> adapter() {
+    private FirestoreRecyclerAdapter<Report, ReportViewHolder> adapter() {
         return filterStories ? storiesAdapter : allAdapter;
     }
 
@@ -106,17 +107,17 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
      */
     static SpeakOutAdapter construct(Fragment fragment, Context context) {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-        CollectionReference ref = firestore.collection("reports");
+        CollectionReference ref = firestore.collection(ShoutFirestore.REPORTS_COLLECTION);
 
-        Query stories = ref.whereEqualTo("hasbody", true).orderBy("timestamp").limit(100);
-        Query all = ref.orderBy("timestamp").limit(100);
+        Query stories = ref.whereEqualTo(Report.HAS_BODY, true).orderBy(Report.TIMESTAMP).limit(100);
+        Query all = ref.orderBy(Report.TIMESTAMP).limit(100);
 
-        FirestoreRecyclerOptions<ApprovedReport> storiesOptions = new FirestoreRecyclerOptions.Builder<ApprovedReport>()
-                .setQuery(stories, ApprovedReport.class)
+        FirestoreRecyclerOptions<Report> storiesOptions = new FirestoreRecyclerOptions.Builder<Report>()
+                .setQuery(stories, Report.class)
                 .setLifecycleOwner(fragment)
                 .build();
-        FirestoreRecyclerOptions<ApprovedReport> allOptions = new FirestoreRecyclerOptions.Builder<ApprovedReport>()
-                .setQuery(all, ApprovedReport.class)
+        FirestoreRecyclerOptions<Report> allOptions = new FirestoreRecyclerOptions.Builder<Report>()
+                .setQuery(all, Report.class)
                 .setLifecycleOwner(fragment)
                 .build();
         SpeakOutAdapter adapter = new SpeakOutAdapter();
@@ -142,7 +143,7 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
         }
     }
 
-    private static class InternalAdapter extends FirestoreRecyclerAdapter<ApprovedReport, ReportViewHolder> {
+    private static class InternalAdapter extends FirestoreRecyclerAdapter<Report, ReportViewHolder> {
 
         private final java.text.DateFormat dateFormatter, timeFormatter;
         private DataLoadedCallback callback;
@@ -155,7 +156,7 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
          * @param callback - The callback to call when initial data has been loaded.
          * @param options  - The options to construct this Firestore adapter with.
          */
-        private InternalAdapter(Context context, DataLoadedCallback callback, @NonNull FirestoreRecyclerOptions<ApprovedReport> options) {
+        private InternalAdapter(Context context, DataLoadedCallback callback, @NonNull FirestoreRecyclerOptions<Report> options) {
             super(options);
 
             this.callback = callback;
@@ -172,7 +173,7 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
         }
 
         @Override
-        protected void onBindViewHolder(@NonNull ReportViewHolder holder, int position, @NonNull ApprovedReport model) {
+        protected void onBindViewHolder(@NonNull ReportViewHolder holder, int position, @NonNull Report model) {
             holder.title.setText(model.getTitle());
 
             String body = model.getBody();

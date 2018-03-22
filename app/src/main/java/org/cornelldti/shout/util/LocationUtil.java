@@ -52,6 +52,7 @@ public class LocationUtil {
     public static Address getAddressForLocation(Context context, LatLng latLng) {
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         Address address = null;
+
         try {
             List<Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1); // todo 1 may not be enough ;)
             if (addresses.size() > 0) {
@@ -60,6 +61,7 @@ public class LocationUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         return address;
     }
 }

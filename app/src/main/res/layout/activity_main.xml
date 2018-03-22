@@ -25,11 +25,9 @@
         tools:ignore="KeyboardInaccessibleWidget" />
 
     <RelativeLayout
-
         android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
 
         <android.support.v4.view.ViewPager
             android:id="@+id/pager"
@@ -37,7 +35,6 @@
             android:layout_height="match_parent"
             android:layout_above="@+id/bottom_navigation"
             tools:layout_editor_absoluteX="4dp" />
-
 
         <View
             android:layout_width="match_parent"
@@ -64,6 +61,7 @@
     </RelativeLayout>
 
     <View
+        android:id="@+id/bottom_sheet_shadow"
         android:layout_width="match_parent"
         android:layout_height="16dp"
         android:background="@drawable/bottom_navigation_shadow"

@@ -8,11 +8,9 @@ public class Phone {
 
     private String number;
     private String label;
-    private String description = new String();
+    private String description = "";
 
-    public Phone()
-    {
-
+    public Phone() {
     }
 
     public Phone(String number, String label) {
@@ -27,22 +25,19 @@ public class Phone {
         this.description = description;
     }
 
-    public String getLabel()
-    {
+    public String getLabel() {
         return label;
     }
 
-    public String getNumber()
-    {
+    public String getNumber() {
         return number;
     }
-    public String getDescription()
-    {
+
+    public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description)
-    {
+    public void setDescription(String description) {
         this.description = description;
     }
 }

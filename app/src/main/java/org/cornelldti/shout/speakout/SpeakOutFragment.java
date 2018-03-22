@@ -4,7 +4,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -36,6 +38,13 @@ public class SpeakOutFragment extends Fragment {
 
         final SpeakOutAdapter adapter = SpeakOutAdapter.construct(this, speakoutFragment.getContext());
         recyclerView.setAdapter(adapter);
+
+        ViewCompat.setNestedScrollingEnabled(recyclerView, false); // enables "fast" scrolling
+
+        // TODO decorate
+
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);
+        recyclerView.addItemDecoration(dividerItemDecoration);
 
         /* Fix padding issues w/ the status bar positioning */
 
