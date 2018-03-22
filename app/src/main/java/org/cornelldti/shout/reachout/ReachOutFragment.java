@@ -6,6 +6,7 @@ import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,18 +14,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 
 import org.cornelldti.shout.R;
 import org.cornelldti.shout.util.LayoutUtil;
-
-import java.util.Collection;
 
 public class ReachOutFragment extends Fragment {
 
@@ -53,6 +52,8 @@ public class ReachOutFragment extends Fragment {
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);
+        recyclerView.addItemDecoration(dividerItemDecoration);
 
         queryResources();
 
@@ -73,7 +74,14 @@ public class ReachOutFragment extends Fragment {
             public void onBindViewHolder(@NonNull ResourcesHolder holder, int position, @NonNull Resource r) {
                 holder.title.setText(r.getName());
                 holder.description.setText(r.getDescription());
-                holder.itemView.setOnClickListener(v -> showDialog(r));
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        DocumentSnapshot snapshot = getSnapshots().getSnapshot(holder.getAdapterPosition());
+                        String resId = snapshot.getId();
+                        showDialog(r, resId );
+                    }
+                });
             }
 
             @NonNull
@@ -97,12 +105,20 @@ public class ReachOutFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
-    private void showDialog(Resource resource) {
+    private void showDialog(Resource resource, String resId)
+    {
+//        Query query = db.collection("resources").document(resId).collection("phones");
         // PHONE COLLECTION NULL TODO FIX
-        Collection<Phone> pho = resource.getPhones();
-        Toast.makeText(getActivity(), String.valueOf(pho.size()), Toast.LENGTH_SHORT).show();
+//        query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+//            @Override
+//            public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+//
+//            }
+//        });
+//        Collection<Phone> pho = resource.getPhones();
+//        Toast.makeText(getActivity(), String.valueOf(pho.size()), Toast.LENGTH_SHORT).show();
 
-        MoreInfoResourceDialog dialog = MoreInfoResourceDialog.newInstance(resource);
+        MoreInfoResourceDialog dialog = MoreInfoResourceDialog.newInstance(resource, resId);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();

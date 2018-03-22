@@ -14,12 +14,16 @@ import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.cornelldti.shout.R;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by kaushikr on 3/20/18.
@@ -29,41 +33,44 @@ public class MoreInfoResourceDialog extends AppCompatDialogFragment {
 
     String name, description, url;
 
-    ArrayList<String> phoneNumbers, phoneDescriptions, phoneLabels;
+//    ArrayList<String> phoneNumbers, phoneDescriptions, phoneLabels;
 
     TextView resourceName, resourceDescription, resourceURL;
 
     ListView phoneNumberList;
 
+    String mResId;
+
     public MoreInfoResourceDialog() {
 
     }
 
-    public static MoreInfoResourceDialog newInstance(Resource resource) {
+    public static MoreInfoResourceDialog newInstance(Resource resource, String resId) {
         MoreInfoResourceDialog dialog = new MoreInfoResourceDialog();
 
         Bundle args = new Bundle();
         args.putString("name", resource.getName());
         args.putString("description", resource.getDescription());
         args.putString("url", resource.getUrl());
+        args.putString("resId", resId);
 
-        if (resource.getPhones() != null) {
-            Iterator<Phone> phonesIterator = resource.getPhones().iterator();
-            ArrayList<String> phoneNumbers = new ArrayList<String>();
-            ArrayList<String> phoneLabels = new ArrayList<String>();
-            ArrayList<String> phoneDescriptions = new ArrayList<String>();
-            while (phonesIterator.hasNext()) {
-                Phone phone = phonesIterator.next();
-
-                phoneNumbers.add(phone.getNumber());
-                phoneLabels.add(phone.getLabel());
-                phoneDescriptions.add(phone.getDescription());
-            }
-
-            args.putStringArrayList("phoneNumbers", phoneNumbers);
-            args.putStringArrayList("phoneLabels", phoneLabels);
-            args.putStringArrayList("phoneDescriptions", phoneDescriptions);
-        }
+//        if (resource.getPhones() != null) {
+//            Iterator<Phone> phonesIterator = resource.getPhones().iterator();
+//            ArrayList<String> phoneNumbers = new ArrayList<String>();
+//            ArrayList<String> phoneLabels = new ArrayList<String>();
+//            ArrayList<String> phoneDescriptions = new ArrayList<String>();
+//            while (phonesIterator.hasNext()) {
+//                Phone phone = phonesIterator.next();
+//
+//                phoneNumbers.add(phone.getNumber());
+//                phoneLabels.add(phone.getLabel());
+//                phoneDescriptions.add(phone.getDescription());
+//            }
+//
+//            args.putStringArrayList("phoneNumbers", phoneNumbers);
+//            args.putStringArrayList("phoneLabels", phoneLabels);
+//            args.putStringArrayList("phoneDescriptions", phoneDescriptions);
+//        }
 
         dialog.setArguments(args);
 
@@ -97,6 +104,26 @@ public class MoreInfoResourceDialog extends AppCompatDialogFragment {
                 startActivity(browserIntent);
             }
         });
+
+        Query query = FirebaseFirestore.getInstance().collection("resources").document(mResId).collection("phones");
+        query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                List<Phone> phones = task.getResult().toObjects(Phone.class);
+                phoneNumberList.setAdapter(new PhoneAdapter(getActivity(), phones));
+            }
+        });
+
+//        query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+//            @Override
+//            public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+//                for(DocumentSnapshot snapshot : documentSnapshots)
+//                {
+//                    Toast.makeText(getActivity(), snapshot.getString("name"), Toast.LENGTH_LONG ).show();
+//                }
+//            }
+//        });
+
 //        for(int i = 0; i < phoneNumbers.size(); i++)
 //        {
 //            Phone p = new Phone(phoneNumbers.get(i), phoneLabels.get(i));
@@ -122,13 +149,7 @@ public class MoreInfoResourceDialog extends AppCompatDialogFragment {
             name = bundle.getString("name");
             description = bundle.getString("description");
             url = bundle.getString("url");
-            phoneNumbers = bundle.getStringArrayList("phoneNumbers");
-            phoneDescriptions = bundle.getStringArrayList("phoneDescriptions");
-            phoneLabels = bundle.getStringArrayList("phoneLabels");
-            if(phoneNumbers == null)
-            {
-                Toast.makeText(getActivity(), "PHONE NUMBERS HAS BEEN INIT", Toast.LENGTH_SHORT).show();
-            }
+            mResId = bundle.getString("resId");
         }
         setStyle(DialogFragment.STYLE_NO_TITLE, R.style.FullScreenDialog);
     }
