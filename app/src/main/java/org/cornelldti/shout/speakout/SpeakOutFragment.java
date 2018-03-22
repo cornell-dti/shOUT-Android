@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
@@ -15,7 +16,18 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.LocationCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import org.cornelldti.shout.Page;
 import org.cornelldti.shout.R;
+import org.cornelldti.shout.ReportViewDialog;
+import org.cornelldti.shout.ShoutRealtimeDatabase;
 import org.cornelldti.shout.util.LayoutUtil;
 
 public class SpeakOutFragment extends Fragment {
@@ -36,8 +48,56 @@ public class SpeakOutFragment extends Fragment {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
 
-        final SpeakOutAdapter adapter = SpeakOutAdapter.construct(this, speakoutFragment.getContext());
-        recyclerView.setAdapter(adapter);
+        final SpeakOutAdapter[] adapter = new SpeakOutAdapter[1];
+
+        adapter[0] = SpeakOutAdapter.construct(this, (view, reportHolder) -> {
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference(ShoutRealtimeDatabase.REPORT_LOCATIONS_KEY);
+            GeoFire geoFire = new GeoFire(ref);
+
+            if (adapter[0] == null) return;
+
+            String id = adapter[0].getId(reportHolder.getAdapterPosition());
+
+            if (id != null) {
+                geoFire.getLocation(id, new LocationCallback() {
+                    @Override
+                    public void onLocationResult(String key, GeoLocation location) {
+                        if (reportHolder.report == null) return;
+
+                        ReportViewDialog dialog = ReportViewDialog.newInstance(
+                                reportHolder.report,
+                                new LatLng(location.latitude, location.longitude),
+                                Page.UNKNOWN
+                        );
+                        showDialog(dialog);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        if (reportHolder.report == null) return;
+
+                        ReportViewDialog dialog = ReportViewDialog.newInstance(reportHolder.report, Page.UNKNOWN);
+                        showDialog(dialog);
+                    }
+
+                    private void showDialog(ReportViewDialog dialog) {
+                        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                        transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+                    }
+                });
+            } else {
+                if (reportHolder.report == null) return;
+
+                ReportViewDialog dialog = ReportViewDialog.newInstance(reportHolder.report, Page.UNKNOWN);
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+            }
+
+        }, speakoutFragment.getContext());
+
+        recyclerView.setAdapter(adapter[0]);
 
         ViewCompat.setNestedScrollingEnabled(recyclerView, false); // enables "fast" scrolling
 
@@ -66,7 +126,7 @@ public class SpeakOutFragment extends Fragment {
         mSwipeRefreshLayout = speakoutFragment.findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
             // Refresh items
-            adapter.refreshItems();
+            adapter[0].refreshItems();
             mSwipeRefreshLayout.setRefreshing(false);
         });
 
@@ -82,7 +142,7 @@ public class SpeakOutFragment extends Fragment {
             buttonHighlight.setVisibility(View.VISIBLE);
             storiesHighlight.setVisibility(View.INVISIBLE);
 
-            adapter.filter(SpeakOutAdapter.FILTER_NONE);
+            adapter[0].filter(SpeakOutAdapter.FILTER_NONE);
 
         });
 
@@ -90,7 +150,7 @@ public class SpeakOutFragment extends Fragment {
             storiesHighlight.setVisibility(View.VISIBLE);
             buttonHighlight.setVisibility(View.INVISIBLE);
 
-            adapter.filter(SpeakOutAdapter.FILTER_STORIES);
+            adapter[0].filter(SpeakOutAdapter.FILTER_STORIES);
         });
 
 

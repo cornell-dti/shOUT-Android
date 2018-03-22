@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBufferResponse;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.RuntimeRemoteException;
@@ -100,18 +101,27 @@ public class ReportViewDialog extends AppCompatDialogFragment {
 
         titleTextView = reportDialogView.findViewById(R.id.report_view_title_text_view);
         bodyTextView = reportDialogView.findViewById(R.id.report_view_body_text_view);
-        dateTextView = reportDialogView.findViewById(R.id.report_date_spinner_text_view);
-        timeTextView = reportDialogView.findViewById(R.id.report_time_spinner_text_view);
+        dateTextView = reportDialogView.findViewById(R.id.report_view_time_date_view);
+        timeTextView = dateTextView;
+        locationTextView = reportDialogView.findViewById(R.id.report_view_address_text_view);
+        // timeTextView = reportDialogView.findViewById(R.id.report_time_spinner_text_view);
+        mapView = reportDialogView.findViewById(R.id.report_view_map_view);
+        mapView.onCreate(savedInstanceState);
+        mapView.onResume();
 
         /* Setup the latLng selector if a latLng was passed to the dialog... */
 
+        if (this.report != null) {
+            this.titleTextView.setText(this.report.getTitle());
+            this.bodyTextView.setText(this.report.getBody());
+            this.locationTextView.setText(this.report.getLocation());
+            this.timeTextView.setText(Long.toString(this.report.getTimestamp()));
+        }
+
         if (this.latLng != null) {
-            Address address = LocationUtil.getAddressForLocation(getContext(), this.latLng);
-            if (address != null) {
-                locationTextView.setText(address.getAddressLine(0));
-            } else {
-                locationTextView.setText(this.latLng.toString());
-            }
+            this.mapView.getMapAsync((map) -> {
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(this.latLng, 17));
+            });
         }
 
         return reportDialogView;
@@ -136,12 +146,6 @@ public class ReportViewDialog extends AppCompatDialogFragment {
 
             this.report = (Report) bundle.getSerializable("report");
 
-            if (this.report != null) {
-                this.titleTextView.setText(this.report.getTitle());
-                this.bodyTextView.setText(this.report.getBody());
-                this.locationTextView.setText(this.report.getLocation());
-                this.timeTextView.setText(Long.toString(this.report.getTimestamp()));
-            }
 
         }
 

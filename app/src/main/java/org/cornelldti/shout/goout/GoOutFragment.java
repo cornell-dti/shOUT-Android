@@ -52,6 +52,7 @@ import org.cornelldti.shout.FABAction;
 import org.cornelldti.shout.MainActivity;
 import org.cornelldti.shout.Page;
 import org.cornelldti.shout.R;
+import org.cornelldti.shout.ShoutRealtimeDatabase;
 import org.cornelldti.shout.speakout.Report;
 import org.cornelldti.shout.speakout.ReportIncidentDialog;
 import org.cornelldti.shout.util.AndroidUtil;
@@ -288,7 +289,7 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
     }
 
     private void setupGeoFire() {
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("report_locations");
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference(ShoutRealtimeDatabase.REPORT_LOCATIONS_KEY);
         geoFire = new GeoFire(ref); // setup
     }
 
@@ -369,7 +370,7 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
                             clickedLocationMarker.setVisible(false);
                         }
 
-                        if(newState != BottomSheetBehavior.STATE_HIDDEN) {
+                        if (newState != BottomSheetBehavior.STATE_HIDDEN) {
                             shadow.setVisibility(View.INVISIBLE);
                         }
 

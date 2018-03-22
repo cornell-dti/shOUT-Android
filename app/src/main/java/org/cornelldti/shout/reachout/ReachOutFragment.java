@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -89,6 +90,9 @@ public class ReachOutFragment extends Fragment {
                 Log.e("error", e.getMessage());
             }
         };
+
+        ViewCompat.setNestedScrollingEnabled(recyclerView, false); // enables "fast" scrolling
+
         recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
     }
