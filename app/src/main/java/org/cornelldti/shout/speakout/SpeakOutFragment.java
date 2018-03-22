@@ -48,15 +48,13 @@ public class SpeakOutFragment extends Fragment {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
 
-        final SpeakOutAdapter[] adapter = new SpeakOutAdapter[1];
-
-        adapter[0] = SpeakOutAdapter.construct(this, (view, reportHolder) -> {
+        final SpeakOutAdapter adapter = SpeakOutAdapter.construct(this, (eventAdapter, reportHolder) -> {
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference(ShoutRealtimeDatabase.REPORT_LOCATIONS_KEY);
             GeoFire geoFire = new GeoFire(ref);
 
-            if (adapter[0] == null) return;
+            if (eventAdapter == null) return;
 
-            String id = adapter[0].getId(reportHolder.getAdapterPosition());
+            String id = eventAdapter.getId(reportHolder.getAdapterPosition());
 
             if (id != null) {
                 geoFire.getLocation(id, new LocationCallback() {
@@ -97,7 +95,7 @@ public class SpeakOutFragment extends Fragment {
 
         }, speakoutFragment.getContext());
 
-        recyclerView.setAdapter(adapter[0]);
+        recyclerView.setAdapter(adapter);
 
         ViewCompat.setNestedScrollingEnabled(recyclerView, false); // enables "fast" scrolling
 
@@ -126,7 +124,7 @@ public class SpeakOutFragment extends Fragment {
         mSwipeRefreshLayout = speakoutFragment.findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
             // Refresh items
-            adapter[0].refreshItems();
+            adapter.refreshItems();
             mSwipeRefreshLayout.setRefreshing(false);
         });
 
@@ -142,7 +140,7 @@ public class SpeakOutFragment extends Fragment {
             buttonHighlight.setVisibility(View.VISIBLE);
             storiesHighlight.setVisibility(View.INVISIBLE);
 
-            adapter[0].filter(SpeakOutAdapter.FILTER_NONE);
+            adapter.filter(SpeakOutAdapter.FILTER_NONE);
 
         });
 
@@ -150,7 +148,7 @@ public class SpeakOutFragment extends Fragment {
             storiesHighlight.setVisibility(View.VISIBLE);
             buttonHighlight.setVisibility(View.INVISIBLE);
 
-            adapter[0].filter(SpeakOutAdapter.FILTER_STORIES);
+            adapter.filter(SpeakOutAdapter.FILTER_STORIES);
         });
 
 

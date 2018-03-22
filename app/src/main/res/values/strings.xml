@@ -19,6 +19,9 @@
     <string name="all_tab_label">All</string>
     <string name="stories_tab_title">Stories</string>
     <string name="nearby_reports_header">Reports within 750 feet…</string>
+    <string name="report_time_date">%s at %s</string>
+    <string name="report_time_today">Today at %s</string>
+    <string name="report_time_yesterday">Yesterday at %s</string>
     <plurals name="number_of_reports">
         <item quantity="zero">No reports at this location.</item>
         <item quantity="one">%d report at this location.</item>

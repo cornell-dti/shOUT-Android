@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatDialogFragment;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,11 +41,14 @@ public class ReportViewDialog extends AppCompatDialogFragment {
 
     private static final String TAG = "ReportView";
 
-    private TextView dateTextView, timeTextView, titleTextView, bodyTextView, locationTextView;
+    private TextView timeTextView, titleTextView, bodyTextView, locationTextView;
     private MapView mapView;
 
     private Calendar calendar = Calendar.getInstance();
     private LatLng latLng;
+
+    private java.text.DateFormat timeFormatter;
+    private java.text.DateFormat dateFormatter;
 
     private int returnPage;
     private Report report;
@@ -97,12 +101,17 @@ public class ReportViewDialog extends AppCompatDialogFragment {
 
         setHasOptionsMenu(false);
 
+        Context context = getContext();
+
+        this.dateFormatter = DateFormat.getDateFormat(context);
+        this.timeFormatter = DateFormat.getTimeFormat(context);
+
         /* Retrieve miscellaneous views... */
 
         titleTextView = reportDialogView.findViewById(R.id.report_view_title_text_view);
         bodyTextView = reportDialogView.findViewById(R.id.report_view_body_text_view);
-        dateTextView = reportDialogView.findViewById(R.id.report_view_time_date_view);
-        timeTextView = dateTextView;
+        timeTextView = reportDialogView.findViewById(R.id.report_view_time_text_view);
+
         locationTextView = reportDialogView.findViewById(R.id.report_view_address_text_view);
         // timeTextView = reportDialogView.findViewById(R.id.report_time_spinner_text_view);
         mapView = reportDialogView.findViewById(R.id.report_view_map_view);
@@ -115,7 +124,27 @@ public class ReportViewDialog extends AppCompatDialogFragment {
             this.titleTextView.setText(this.report.getTitle());
             this.bodyTextView.setText(this.report.getBody());
             this.locationTextView.setText(this.report.getLocation());
-            this.timeTextView.setText(Long.toString(this.report.getTimestamp()));
+
+            long timestamp = this.report.getTimestamp();
+
+            String time = this.timeFormatter.format(timestamp);
+            String date = this.dateFormatter.format(timestamp);
+
+            this.calendar.setTimeInMillis(timestamp);
+
+            Calendar calendar = Calendar.getInstance();
+
+            boolean thisYear = calendar.get(Calendar.YEAR) == this.calendar.get(Calendar.YEAR);
+            boolean today = thisYear && calendar.get(Calendar.DAY_OF_YEAR) == this.calendar.get(Calendar.DAY_OF_YEAR);
+            boolean yesterday = thisYear && calendar.get(Calendar.DAY_OF_YEAR) == this.calendar.get(Calendar.DAY_OF_YEAR) + 1;
+
+            if (today) {
+                this.timeTextView.setText(getResources().getString(R.string.report_time_today, time));
+            } else if (yesterday) {
+                this.timeTextView.setText(getResources().getString(R.string.report_time_yesterday, time));
+            } else {
+                this.timeTextView.setText(getResources().getString(R.string.report_time_date, date, time));
+            }
         }
 
         if (this.latLng != null) {
@@ -123,6 +152,7 @@ public class ReportViewDialog extends AppCompatDialogFragment {
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(this.latLng, 17));
             });
         }
+
 
         return reportDialogView;
     }

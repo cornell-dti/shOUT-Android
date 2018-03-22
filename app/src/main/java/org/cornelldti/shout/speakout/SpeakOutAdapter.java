@@ -127,12 +127,12 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
      * @param context  - The context to determine date/time formatting within.
      * @return - A new SpeakOutAdapter
      */
-    static SpeakOutAdapter construct(Fragment fragment, BiConsumer<View, ReportViewHolder> clickListener, Context context) {
+    static SpeakOutAdapter construct(Fragment fragment, BiConsumer<SpeakOutAdapter, ReportViewHolder> clickListener, Context context) {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         CollectionReference ref = firestore.collection(ShoutFirestore.REPORTS_COLLECTION);
 
-        Query stories = ref.whereEqualTo(Report.HAS_BODY, true).orderBy(Report.TIMESTAMP).limit(100);
-        Query all = ref.orderBy(Report.TIMESTAMP).limit(100);
+        Query stories = ref.whereEqualTo(Report.HAS_BODY, true).orderBy(Report.TIMESTAMP, Query.Direction.DESCENDING).limit(100);
+        Query all = ref.orderBy(Report.TIMESTAMP, Query.Direction.DESCENDING).limit(100);
 
         FirestoreRecyclerOptions<Report> storiesOptions = new FirestoreRecyclerOptions.Builder<Report>()
                 .setQuery(stories, Report.class)
@@ -144,8 +144,19 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
                 .build();
 
         SpeakOutAdapter adapter = new SpeakOutAdapter();
-        adapter.storiesAdapter = new InternalAdapter(context, clickListener, adapter, storiesOptions);
-        adapter.allAdapter = new InternalAdapter(context, clickListener, adapter, allOptions);
+        adapter.storiesAdapter = new InternalAdapter(
+                context,
+                reportViewHolder -> clickListener.apply(adapter, reportViewHolder),
+                adapter,
+                storiesOptions
+        );
+
+        adapter.allAdapter = new InternalAdapter(
+                context,
+                reportViewHolder -> clickListener.apply(adapter, reportViewHolder),
+                adapter,
+                allOptions
+        );
 
         return adapter;
     }
@@ -175,7 +186,7 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
 
         private final java.text.DateFormat dateFormatter, timeFormatter;
         private DataLoadedCallback dataLoadedCallback;
-        private BiConsumer<View, ReportViewHolder> onItemClickListener;
+        private Consumer<ReportViewHolder> onItemClickListener;
 
         /**
          * Create storiesAdapter new RecyclerView adapter that listens to storiesAdapter Firestore Query.  See {@link
@@ -185,7 +196,7 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
          * @param dataLoadedCallback - The dataLoadedCallback to call when initial data has been loaded.
          * @param options            - The options to construct this Firestore adapter with.
          */
-        private InternalAdapter(Context context, BiConsumer<View, ReportViewHolder> onItemClickListener, DataLoadedCallback dataLoadedCallback, @NonNull FirestoreRecyclerOptions<Report> options) {
+        private InternalAdapter(Context context, Consumer<ReportViewHolder> onItemClickListener, DataLoadedCallback dataLoadedCallback, @NonNull FirestoreRecyclerOptions<Report> options) {
             super(options);
 
             this.dataLoadedCallback = dataLoadedCallback;
@@ -202,9 +213,7 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
 
             final ReportViewHolder holder = new ReportViewHolder(feedItemView);
 
-            feedItemView.setOnClickListener((view) -> {
-                onItemClickListener.apply(view, holder);
-            });
+            feedItemView.setOnClickListener(view -> onItemClickListener.apply(holder));
 
             return holder;
         }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/background_light"
@@ -19,6 +20,15 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
+            <ImageButton
+                android:id="@+id/report_view_button_back"
+                android:layout_width="?attr/actionBarSize"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/close_button_description"
+                android:tint="@android:color/white"
+                app:srcCompat="@drawable/ic_arrow_back" />
+
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -35,32 +45,21 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/report_view_time_date_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="8dp"
-            android:text="TextView"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/report_view_time_text_view" />
-
-        <TextView
             android:id="@+id/report_view_time_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             android:text="TextView"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/report_view_map_view" />
+            app:layout_constraintTop_toBottomOf="@+id/report_view_address_text_view"
+            tools:layout_editor_absoluteX="177dp" />
 
         <com.google.android.gms.maps.MapView
             android:id="@+id/report_view_map_view"
             android:layout_width="0dp"
-            android:layout_height="300dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_height="200dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -70,9 +69,12 @@
             android:id="@+id/report_view_title_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:text="TextView"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/report_view_map_view" />
 
@@ -80,20 +82,26 @@
             android:id="@+id/report_view_address_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:text="TextView"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/report_view_title_text_view" />
 
         <TextView
             android:id="@+id/report_view_body_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="16dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
             android:text="TextView"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/report_view_address_text_view" />
+            app:layout_constraintTop_toBottomOf="@+id/report_view_time_text_view" />
     </android.support.constraint.ConstraintLayout>
 </LinearLayout>
