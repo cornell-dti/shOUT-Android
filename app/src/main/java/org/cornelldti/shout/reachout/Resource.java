@@ -39,9 +39,9 @@ public class Resource {
         return ordering;
     }
 
-//    public Query getPhones()
-//    {
-//        Query query = FirebaseFirestore.getInstance().collection("resources");
-//    }
+    public Collection<Phone> getPhones()
+    {
+        return phones;
+    }
 
 }

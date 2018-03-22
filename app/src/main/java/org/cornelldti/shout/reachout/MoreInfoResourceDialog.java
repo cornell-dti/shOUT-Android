@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -33,13 +34,13 @@ public class MoreInfoResourceDialog extends AppCompatDialogFragment {
 
     String name, description, url;
 
-//    ArrayList<String> phoneNumbers, phoneDescriptions, phoneLabels;
-
     TextView resourceName, resourceDescription, resourceURL;
 
     ListView phoneNumberList;
 
     String mResId;
+
+    List<Phone> mPhones;
 
     public MoreInfoResourceDialog() {
 
@@ -53,24 +54,6 @@ public class MoreInfoResourceDialog extends AppCompatDialogFragment {
         args.putString("description", resource.getDescription());
         args.putString("url", resource.getUrl());
         args.putString("resId", resId);
-
-//        if (resource.getPhones() != null) {
-//            Iterator<Phone> phonesIterator = resource.getPhones().iterator();
-//            ArrayList<String> phoneNumbers = new ArrayList<String>();
-//            ArrayList<String> phoneLabels = new ArrayList<String>();
-//            ArrayList<String> phoneDescriptions = new ArrayList<String>();
-//            while (phonesIterator.hasNext()) {
-//                Phone phone = phonesIterator.next();
-//
-//                phoneNumbers.add(phone.getNumber());
-//                phoneLabels.add(phone.getLabel());
-//                phoneDescriptions.add(phone.getDescription());
-//            }
-//
-//            args.putStringArrayList("phoneNumbers", phoneNumbers);
-//            args.putStringArrayList("phoneLabels", phoneLabels);
-//            args.putStringArrayList("phoneDescriptions", phoneDescriptions);
-//        }
 
         dialog.setArguments(args);
 
@@ -109,35 +92,20 @@ public class MoreInfoResourceDialog extends AppCompatDialogFragment {
         query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                List<Phone> phones = task.getResult().toObjects(Phone.class);
-                phoneNumberList.setAdapter(new PhoneAdapter(getActivity(), phones));
+                mPhones = task.getResult().toObjects(Phone.class);
+                phoneNumberList.setAdapter(new PhoneAdapter(getActivity(), mPhones));
             }
         });
-
-//        query.addSnapshotListener(new EventListener<QuerySnapshot>() {
-//            @Override
-//            public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-//                for(DocumentSnapshot snapshot : documentSnapshots)
-//                {
-//                    Toast.makeText(getActivity(), snapshot.getString("name"), Toast.LENGTH_LONG ).show();
-//                }
-//            }
-//        });
-
-//        for(int i = 0; i < phoneNumbers.size(); i++)
-//        {
-//            Phone p = new Phone(phoneNumbers.get(i), phoneLabels.get(i));
-//            if(phoneDescriptions.get(i))
-//            phones.add();
-//        }
-//        phoneNumberList.setAdapter(inflater, );
-//        if (phoneDescriptions.size() == phoneNumbers.size() && phoneDescriptions.size() == phoneLabels.size() && phoneLabels.size() == phoneNumbers.size()) {
-//            Toast.makeText(getActivity(), "ALL SAME SIZE", Toast.LENGTH_SHORT).show();
-//        }
-//        else
-//        {
-//            Toast.makeText(getActivity(), "NOT ALL SAME SIZE", Toast.LENGTH_SHORT).show();
-//        }
+        phoneNumberList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:" + mPhones.get(position).getNumber()));
+                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivity(intent);
+                }
+            }
+        });
         return moreInfoResDialog;
     }
 
