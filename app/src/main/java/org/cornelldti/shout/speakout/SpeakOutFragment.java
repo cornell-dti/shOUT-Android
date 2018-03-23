@@ -65,7 +65,7 @@ public class SpeakOutFragment extends Fragment {
                         ReportViewDialog dialog = ReportViewDialog.newInstance(
                                 reportHolder.report,
                                 new LatLng(location.latitude, location.longitude),
-                                Page.UNKNOWN
+                                Page.SPEAK_OUT
                         );
                         showDialog(dialog);
                     }
@@ -74,7 +74,7 @@ public class SpeakOutFragment extends Fragment {
                     public void onCancelled(DatabaseError databaseError) {
                         if (reportHolder.report == null) return;
 
-                        ReportViewDialog dialog = ReportViewDialog.newInstance(reportHolder.report, Page.UNKNOWN);
+                        ReportViewDialog dialog = ReportViewDialog.newInstance(reportHolder.report, Page.SPEAK_OUT);
                         showDialog(dialog);
                     }
 
@@ -87,7 +87,7 @@ public class SpeakOutFragment extends Fragment {
             } else {
                 if (reportHolder.report == null) return;
 
-                ReportViewDialog dialog = ReportViewDialog.newInstance(reportHolder.report, Page.UNKNOWN);
+                ReportViewDialog dialog = ReportViewDialog.newInstance(reportHolder.report, Page.SPEAK_OUT);
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();

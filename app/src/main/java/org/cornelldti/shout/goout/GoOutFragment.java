@@ -166,7 +166,7 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
 
             // moves all "mGoogleMap drawn" ui elements (buttons, etc)
             // 55 = margins + size of searchbar
-            googleMap.setPadding(0, statusbarSize + LayoutUtil.getPixelsFromDp(getResources(), 55), 0, LayoutUtil.getPixelsFromDp(getResources(), 55));
+            googleMap.setPadding(0, statusbarSize + LayoutUtil.getPixelsFromDp(getResources(), 55), LayoutUtil.getPixelsFromDp(getResources(), 65), 0);
 
             googleMap.setMinZoomPreference(14.5f);
 

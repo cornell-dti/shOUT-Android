@@ -3,33 +3,27 @@ package org.cornelldti.shout;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
-import android.location.Address;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.TextView;
 
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.PlaceBufferResponse;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.RuntimeRemoteException;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.cornelldti.shout.speakout.Report;
 import org.cornelldti.shout.util.LayoutUtil;
-import org.cornelldti.shout.util.LocationUtil;
 
 import java.util.Calendar;
 
@@ -150,7 +144,10 @@ public class ReportViewDialog extends AppCompatDialogFragment {
         if (this.latLng != null) {
             this.mapView.getMapAsync((map) -> {
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(this.latLng, 17));
+
+                map.addMarker(new MarkerOptions().position(this.latLng));
             });
+
         }
 
 
@@ -182,18 +179,16 @@ public class ReportViewDialog extends AppCompatDialogFragment {
         /* Set the style of this dialog. */
 
         setStyle(DialogFragment.STYLE_NO_TITLE, R.style.FullScreenDialog);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // this.statusBarColor = getActivity().getWindow().getStatusBarColor();
+            getActivity().getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }
     }
 
     @Override
     public void dismiss() {
         // TODO find less hacky solution
-
-        Context context = getContext();
-
-        if (context instanceof MainActivity) {
-            ((MainActivity) context).setStatusBarColor(returnPage);
-        }
-
         super.dismiss();
     }
 

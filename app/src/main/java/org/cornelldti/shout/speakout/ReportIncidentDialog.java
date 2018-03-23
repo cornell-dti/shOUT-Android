@@ -1,11 +1,14 @@
 package org.cornelldti.shout.speakout;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.location.Address;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
@@ -270,6 +273,10 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
         /* Set the style of this dialog. */
 
         setStyle(DialogFragment.STYLE_NO_TITLE, R.style.FullScreenDialog);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getActivity().getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }
     }
 
     /* Handles setting the report location after place selection from the autofill list */
@@ -296,10 +303,10 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
     public void dismiss() {
         // TODO find less hacky solution
 
-        Context context = getContext();
+        Activity activity = getActivity();
 
-        if (context instanceof MainActivity) {
-            ((MainActivity) context).setStatusBarColor(returnPage);
+        if (activity instanceof MainActivity) {
+            ((MainActivity) activity).setStatusBarColor(returnPage);
         }
 
         super.dismiss();

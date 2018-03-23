@@ -492,7 +492,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                 });
                 break;
         }
-
     }
 
     /**
@@ -523,7 +522,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
                     window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
                     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-
                 }
             } else {
                 // TODO test compatibility code (update the compat code)
