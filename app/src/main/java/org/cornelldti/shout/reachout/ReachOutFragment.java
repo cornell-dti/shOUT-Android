@@ -69,18 +69,14 @@ public class ReachOutFragment extends Fragment {
                 .setLifecycleOwner(this)
                 .build();
         adapter = new FirestoreRecyclerAdapter<Resource, ResourcesHolder>(response) {
-
             @Override
             public void onBindViewHolder(@NonNull ResourcesHolder holder, int position, @NonNull Resource r) {
                 holder.title.setText(r.getName());
                 holder.description.setText(r.getDescription());
-                holder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        DocumentSnapshot snapshot = getSnapshots().getSnapshot(holder.getAdapterPosition());
-                        String resId = snapshot.getId();
-                        showDialog(r, resId );
-                    }
+                holder.itemView.setOnClickListener(v -> {
+                    DocumentSnapshot snapshot = getSnapshots().getSnapshot(holder.getAdapterPosition());
+                    String resId = snapshot.getId();
+                    showDialog(r, resId);
                 });
             }
 
@@ -105,8 +101,7 @@ public class ReachOutFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
-    private void showDialog(Resource resource, String resId)
-    {
+    private void showDialog(Resource resource, String resId) {
 //        Query query = db.collection("resources").document(resId).collection("phones");
         // PHONE COLLECTION NULL TODO FIX
 //        query.addSnapshotListener(new EventListener<QuerySnapshot>() {
@@ -119,9 +114,7 @@ public class ReachOutFragment extends Fragment {
 //        Toast.makeText(getActivity(), String.valueOf(pho.size()), Toast.LENGTH_SHORT).show();
 
         MoreInfoResourceDialog dialog = MoreInfoResourceDialog.newInstance(resource, resId);
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+        dialog.show(getFragmentManager(), "");
     }
 
     public class ResourcesHolder extends RecyclerView.ViewHolder {
@@ -132,18 +125,6 @@ public class ReachOutFragment extends Fragment {
             title = itemView.findViewById(R.id.resource_item_title);
             description = itemView.findViewById(R.id.resource_item_description);
         }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        adapter.startListening();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        adapter.stopListening();
     }
 
 

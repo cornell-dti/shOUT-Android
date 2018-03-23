@@ -128,17 +128,15 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                     setFABAction(FABAction.CURRENT_LOCATION, position);
                     break;
                 case Page.REACH_OUT:
-
-                    setFABAction(FABAction.HELP, position);
+                    setFABAction(FABAction.DISABLED, position);
                     break;
                 case Page.SPEAK_OUT:
                     setFABAction(FABAction.START_REPORT, position);
                     break;
                 default:
-                    mBottomSheet.setVisibility(View.INVISIBLE);
-
                     setFABAction(FABAction.DISABLED, position);
             }
+
             if (mPrevMenuItem != null) {
                 mPrevMenuItem.setChecked(false);
             } else {
@@ -437,7 +435,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     public void setFABAction(FABAction action, LatLng location, int returnPage) {
         switch (action) {
             case START_REPORT:
-                mFloatingActionButton.setVisibility(View.VISIBLE);
+                //  mFloatingActionButton.show();
 
                 mFloatingActionButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_edit));
 
@@ -468,28 +466,23 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
                 break;
             case CURRENT_LOCATION:
-                mFloatingActionButton.setVisibility(View.VISIBLE);
+                // mFloatingActionButton.show();
 
                 mFloatingActionButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_my_location));
 
-                mFloatingActionButton.setOnClickListener(view -> {
-                });
-
                 break;
             case HELP:
-                mFloatingActionButton.setVisibility(View.VISIBLE);
 
+                // mFloatingActionButton.show();
                 mFloatingActionButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_help));
-
-                mFloatingActionButton.setOnClickListener(view -> {
-                    // todo help
-                });
                 break;
             case DISABLED:
+                mFloatingActionButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_help));
+                break;
             default:
-                mFloatingActionButton.setVisibility(View.GONE);
-                mFloatingActionButton.setOnClickListener(view -> {
-                });
+
+                // mFloatingActionButton.setImageDrawable(null);
+
                 break;
         }
     }
@@ -504,21 +497,14 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         Window window = getWindow();
         if (window != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (page == Page.SPEAK_OUT) {
-                    window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-
-                    window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
-
-                    window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-                    window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                } else if (page == Page.GO_OUT) {
+                if (page == Page.GO_OUT) {
                     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 
                     window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-                } else if (page == Page.REACH_OUT) {
-                    window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+                } else {
+                    window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
-                    window.setStatusBarColor(Color.TRANSPARENT);
+                    window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
 
                     window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
                     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
