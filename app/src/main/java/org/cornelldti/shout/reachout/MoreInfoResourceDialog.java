@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
@@ -30,7 +31,7 @@ import java.util.List;
  * Created by kaushikr on 3/20/18.
  */
 
-public class MoreInfoResourceDialog extends AppCompatDialogFragment {
+public class MoreInfoResourceDialog extends BottomSheetDialogFragment {
 
     String name, description, url;
 
@@ -63,16 +64,11 @@ public class MoreInfoResourceDialog extends AppCompatDialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View moreInfoResDialog = inflater.inflate(R.layout.more_info_resource_dialog, container, false);
-        ImageButton closeButton = moreInfoResDialog.findViewById(R.id.goBack);
         resourceName = moreInfoResDialog.findViewById(R.id.name);
         resourceDescription = moreInfoResDialog.findViewById(R.id.description);
         resourceURL = moreInfoResDialog.findViewById(R.id.url);
         phoneNumberList = moreInfoResDialog.findViewById(R.id.phoneNumberList);
 
-        closeButton.setOnClickListener(view -> {
-            /* Manually hide the keyboard to ensure it doesn't stick around */
-            dismiss();
-        });
 
         // SETUP DIALOG UI
         resourceName.setText(name);
@@ -89,21 +85,15 @@ public class MoreInfoResourceDialog extends AppCompatDialogFragment {
         });
 
         Query query = FirebaseFirestore.getInstance().collection("resources").document(mResId).collection("phones");
-        query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                mPhones = task.getResult().toObjects(Phone.class);
-                phoneNumberList.setAdapter(new PhoneAdapter(getActivity(), mPhones));
-            }
+        query.get().addOnCompleteListener(task -> {
+            mPhones = task.getResult().toObjects(Phone.class);
+            phoneNumberList.setAdapter(new PhoneAdapter(getActivity(), mPhones));
         });
-        phoneNumberList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(Intent.ACTION_DIAL);
-                intent.setData(Uri.parse("tel:" + mPhones.get(position).getNumber()));
-                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-                    startActivity(intent);
-                }
+        phoneNumberList.setOnItemClickListener((parent, view, position, id) -> {
+            Intent intent = new Intent(Intent.ACTION_DIAL);
+            intent.setData(Uri.parse("tel:" + mPhones.get(position).getNumber()));
+            if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                startActivity(intent);
             }
         });
         return moreInfoResDialog;
@@ -112,6 +102,7 @@ public class MoreInfoResourceDialog extends AppCompatDialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         Bundle bundle = getArguments();
         if (bundle != null) {
             name = bundle.getString("name");
@@ -119,16 +110,8 @@ public class MoreInfoResourceDialog extends AppCompatDialogFragment {
             url = bundle.getString("url");
             mResId = bundle.getString("resId");
         }
-        setStyle(DialogFragment.STYLE_NO_TITLE, R.style.FullScreenDialog);
+
     }
 
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Dialog dialog = super.onCreateDialog(savedInstanceState);
-        /* This ensures the dialog fills the entire screen... */
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        return dialog;
-    }
 }
 

@@ -8,7 +8,7 @@
         android:id="@+id/reachout_appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorAccent"
+        android:background="@color/colorPrimary"
         android:fitsSystemWindows="true">
 
         <android.support.v7.widget.Toolbar
@@ -17,7 +17,7 @@
             android:layout_height="?attr/actionBarSize"
 
             app:title="Resources"
-            app:titleTextColor="@android:color/white" />
+            app:titleTextColor="@android:color/black" />
 
 
     </android.support.design.widget.AppBarLayout>
@@ -25,6 +25,7 @@
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/colorPrimary"
         app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior">
 
         <RelativeLayout

@@ -70,7 +70,6 @@ public class ReachOutFragment extends ShoutTabFragment {
                 .setLifecycleOwner(this)
                 .build();
         adapter = new FirestoreRecyclerAdapter<Resource, ResourcesHolder>(response) {
-
             @Override
             public void onBindViewHolder(@NonNull ResourcesHolder holder, int position, @NonNull Resource r) {
                 holder.title.setText(r.getName());
@@ -119,9 +118,7 @@ public class ReachOutFragment extends ShoutTabFragment {
 //        Toast.makeText(getActivity(), String.valueOf(pho.size()), Toast.LENGTH_SHORT).show();
 
         MoreInfoResourceDialog dialog = MoreInfoResourceDialog.newInstance(resource, resId);
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+        dialog.show(getFragmentManager(), "");
     }
 
     @Override
@@ -142,18 +139,6 @@ public class ReachOutFragment extends ShoutTabFragment {
             title = itemView.findViewById(R.id.resource_item_title);
             description = itemView.findViewById(R.id.resource_item_description);
         }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        adapter.startListening();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        adapter.stopListening();
     }
 
 
