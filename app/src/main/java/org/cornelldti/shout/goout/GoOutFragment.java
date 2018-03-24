@@ -89,6 +89,8 @@ public class GoOutFragment extends ShoutTabFragment {
 
     private final double QUERY_RADIUS = 0.2;
 
+    private boolean initialMove;
+
     /* FRAGMENT LIFECYCLE */
 
     @Override
@@ -250,9 +252,12 @@ public class GoOutFragment extends ShoutTabFragment {
 
             // TODO don't use last location, its imprecise
 
-            if (defaultLocationOverride == null && activity instanceof MainActivity) {
-                ((MainActivity) activity).getLastLocation((lastLocation) -> {
-                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 14));
+            if (activity instanceof MainActivity) {
+                ((MainActivity) activity).registerLocationListener((lastLocation, force) -> {
+                    if (force || (defaultLocationOverride == null && initialMove)) {
+                        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 17));
+                        initialMove = false;
+                    }
                 });
             }
 

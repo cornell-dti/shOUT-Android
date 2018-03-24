@@ -38,11 +38,14 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import org.cornelldti.shout.goout.BottomSheetUpdateCallback;
 import org.cornelldti.shout.speakout.ReportIncidentDialogFragment;
+import org.cornelldti.shout.util.function.BiConsumer;
 import org.cornelldti.shout.util.function.Consumer;
 
 import static android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -86,14 +89,10 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     private GoogleApiClient mGoogleApiClient;
     private FirebaseAuth mAuth;
 
-    private ReportViewDialog.ShowMapCallback showMapHandler;
-
-    private Consumer<Location> mLastLocationCallback;
+    private BiConsumer<Location, Boolean> mLastLocationCallback;
     private ShoutPagerAdapter mViewPagerAdapter;
 
-    public void setShowMapHandler(ReportViewDialog.ShowMapCallback showMapHandler) {
-        this.showMapHandler = showMapHandler;
-    }
+
 
     /* Listeners */
 
@@ -299,8 +298,9 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             mLocationClient.requestLocationUpdates(mLocationRequest, new LocationCallback() {
                 @Override
                 public void onLocationResult(LocationResult result) {
-                    result.getLastLocation();
-
+                    if (mLastLocationCallback != null) {
+                        mLastLocationCallback.apply(result.getLastLocation(), false);
+                    }
                 }
             }, getMainLooper());
         }
@@ -391,22 +391,14 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
      *
      * @param callback - The listener to set.
      */
-    public void getLastLocation(Consumer<Location> callback) {
+    public void registerLocationListener(BiConsumer<Location, Boolean> callback) {
         /* Request permissions if we don't have them, otherwise setup location updates... */
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            this.mLastLocationCallback = callback;
-
-            // todo hm
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
-        } else if (mGoogleApiClient.isConnected()) {
-            // TODO don't wait for the first location update.
-            Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            callback.apply(lastLocation);
-        } else {
-            this.mLastLocationCallback = callback;
         }
 
+        this.mLastLocationCallback = callback;
     }
 
     /* Permissions */
@@ -418,9 +410,9 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                 if (mGoogleApiClient.isConnected()) {
                     // duh, we just got the permissions google...
                     @SuppressLint("MissingPermission")
-                    Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-                    mLastLocationCallback.apply(lastLocation);
-                    mLastLocationCallback = null;
+                    Task task = mLocationClient.getLastLocation().addOnSuccessListener((location) -> {
+                        mLastLocationCallback.apply(location, true);
+                    });
                 }
             }
         }
@@ -477,7 +469,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
                 // TODO one listener, switch inside
                 mFloatingActionButton.setOnClickListener(view -> {
-                    this.setStatusBarColor(Page.UNKNOWN);
+                    setStatusBarColor(Page.UNKNOWN);
 
                     ReportIncidentDialogFragment dialog;
 
@@ -507,6 +499,13 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                 mFloatingActionButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_my_location));
 
                 mFloatingActionButton.setOnClickListener(view -> {
+                    if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
+                    } else {
+                        Task task = mLocationClient.getLastLocation().addOnSuccessListener((lastLocation) -> {
+                            mLastLocationCallback.apply(lastLocation, true);
+                        });
+                    }
                 });
 
                 break;
