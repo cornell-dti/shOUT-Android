@@ -42,7 +42,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import org.cornelldti.shout.goout.BottomSheetUpdateCallback;
-import org.cornelldti.shout.speakout.ReportIncidentDialog;
+import org.cornelldti.shout.speakout.ReportIncidentDialogFragment;
 import org.cornelldti.shout.util.function.Consumer;
 
 import static android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -248,6 +248,8 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                 return;
             }
         }
+
+        setStatusBarColor(mViewPager.getCurrentItem());
 
         super.onBackPressed();
     }
@@ -477,12 +479,12 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                 mFloatingActionButton.setOnClickListener(view -> {
                     this.setStatusBarColor(Page.UNKNOWN);
 
-                    ReportIncidentDialog dialog;
+                    ReportIncidentDialogFragment dialog;
 
                     if (location != null) {
-                        dialog = ReportIncidentDialog.newInstance(location, returnPage);
+                        dialog = ReportIncidentDialogFragment.newInstance(location, returnPage);
                     } else {
-                        dialog = ReportIncidentDialog.newInstance(returnPage);
+                        dialog = ReportIncidentDialogFragment.newInstance(returnPage);
                     }
 
                     FragmentManager manager = getSupportFragmentManager();
@@ -492,7 +494,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
                         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                         transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
-                    } else {
+                       } else {
                         // TODO display error to user and log issue
                         // this will probably never happen
                     }

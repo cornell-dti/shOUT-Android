@@ -42,7 +42,6 @@ public class SpeakOutFragment extends ShoutTabFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         /* Setup reports recycler view... */
 
-
         final View speakoutFragment = inflater.inflate(R.layout.speakout_fragment, container, false);
         final RecyclerView recyclerView = speakoutFragment.findViewById(R.id.recycler_view);
 

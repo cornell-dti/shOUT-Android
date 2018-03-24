@@ -3,7 +3,6 @@ package org.cornelldti.shout.goout;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.arch.core.util.Function;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -14,11 +13,11 @@ import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +35,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -45,7 +45,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.maps.android.clustering.ClusterManager;
 
 import org.cornelldti.shout.FABAction;
@@ -54,9 +53,7 @@ import org.cornelldti.shout.Page;
 import org.cornelldti.shout.R;
 import org.cornelldti.shout.ShoutRealtimeDatabase;
 import org.cornelldti.shout.ShoutTabFragment;
-import org.cornelldti.shout.TabVisibilityChangeListener;
-import org.cornelldti.shout.speakout.Report;
-import org.cornelldti.shout.speakout.ReportIncidentDialog;
+import org.cornelldti.shout.speakout.ReportIncidentDialogFragment;
 import org.cornelldti.shout.util.AndroidUtil;
 import org.cornelldti.shout.util.LayoutUtil;
 import org.cornelldti.shout.util.LocationUtil;
@@ -73,7 +70,9 @@ import static org.cornelldti.shout.R.id.map_view;
  * Updated by Evan Welsh on 2/28/18
  */
 
-public class GoOutFragment extends ShoutTabFragment implements PlaceSelectionListener {
+public class GoOutFragment extends ShoutTabFragment {
+
+    private static final String TAG = "GoOutFragment";
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 200;
 
@@ -88,23 +87,35 @@ public class GoOutFragment extends ShoutTabFragment implements PlaceSelectionLis
 
     private LatLng defaultLocationOverride;
 
-    private GeoFire geoFire;
-
     private final double QUERY_RADIUS = 0.2;
 
-    /* PlaceSelectionListener Implementation */
+    /* FRAGMENT LIFECYCLE */
 
     @Override
-    public void onPlaceSelected(Place place) {
-        if (mGoogleMap != null) {
-            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
-        }
+    public void onResume() {
+        super.onResume();
+        mMapView.onResume();
     }
 
     @Override
-    public void onError(Status status) {
-        // TODO handle errrors from place selection.
+    public void onPause() {
+        super.onPause();
+        mMapView.onPause();
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mMapView.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mMapView.onLowMemory();
+    }
+
+    /* TAB VISIBILITY */
 
     @Override
     public void onDisplayed(Bundle bundle) {
@@ -124,7 +135,7 @@ public class GoOutFragment extends ShoutTabFragment implements PlaceSelectionLis
 
     }
 
-    /* Fragment Methods */
+    /* FRAGMENT CREATION */
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -148,7 +159,20 @@ public class GoOutFragment extends ShoutTabFragment implements PlaceSelectionLis
         /* Setup the search bar... */
 
         SupportPlaceAutocompleteFragment autocompleteFragment = (SupportPlaceAutocompleteFragment) getChildFragmentManager().findFragmentById(R.id.place_fragment);
-        autocompleteFragment.setOnPlaceSelectedListener(this);
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                if (mGoogleMap != null) {
+                    mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
+                }
+            }
+
+            @Override
+            public void onError(Status status) {
+                // TODO handle errrors from place selection.
+            }
+        });
+
         autocompleteFragment.setHint(getString(R.string.location_search_hint));
         autocompleteFragment.setBoundsBias(LocationUtil.getIthacaBounds());
 
@@ -170,19 +194,15 @@ public class GoOutFragment extends ShoutTabFragment implements PlaceSelectionLis
             }
         }
 
-        /* Setup GeoFire */
-
-        setupGeoFire();
-
         /* Setup the map... */
 
-        mMapView.getMapAsync(getMapSetupFunc(context, statusbarSize)::apply);
+        mMapView.getMapAsync(instantiateMapHandler(context, statusbarSize));
 
         return rootView;
     }
 
 
-    private Function<GoogleMap, Void> getMapSetupFunc(Context context, int statusbarSize) {
+    private OnMapReadyCallback instantiateMapHandler(Context context, int statusbarSize) {
         return googleMap -> {
             GoOutFragment.this.mGoogleMap = googleMap;
 
@@ -270,19 +290,7 @@ public class GoOutFragment extends ShoutTabFragment implements PlaceSelectionLis
             });
 
             googleMap.setOnCameraIdleListener(() -> {
-                LatLngBounds bounds = mGoogleMap.getProjection().getVisibleRegion().latLngBounds;
-                LatLng a = bounds.northeast;
-                LatLng b = bounds.southwest;
-                float[] results = new float[4];
-
-                Location.distanceBetween(a.latitude, a.longitude, b.latitude, b.longitude, results);
-
-                LatLng center = mGoogleMap.getCameraPosition().target;
-
-                double radius = results[0] / 1000.0 + 1.0;
-
-                geoQuery.setLocation(new GeoLocation(center.latitude, center.longitude), radius);
-
+                updateGeoQuery();
                 // forward along
                 mClusterManager.onCameraIdle();
             });
@@ -304,18 +312,65 @@ public class GoOutFragment extends ShoutTabFragment implements PlaceSelectionLis
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
             clickedLocationMarker.setVisible(false);
 
-            // Adds markers organized into clusters
-            addMarkers();
-
-            return null;
-
+            updateGeoQuery();
         };
     }
 
-    private void setupGeoFire() {
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference(ShoutRealtimeDatabase.REPORT_LOCATIONS_KEY);
-        geoFire = new GeoFire(ref); // setup
+    private void updateGeoQuery() {
+        LatLngBounds bounds = mGoogleMap.getProjection().getVisibleRegion().latLngBounds;
+        LatLng a = bounds.northeast, b = bounds.southwest;
+
+        float[] results = new float[4];
+
+        Location.distanceBetween(a.latitude, a.longitude, b.latitude, b.longitude, results);
+
+        LatLng center = mGoogleMap.getCameraPosition().target;
+
+        double radius = results[0] / 1000.0 + 1.0;
+
+        if (geoQuery == null) {
+            geoQuery = geofire().queryAtLocation(new GeoLocation(center.latitude, center.longitude), radius);
+            geoQuery.addGeoQueryEventListener(geoQueryEventListener);
+        } else {
+            geoQuery.setLocation(new GeoLocation(center.latitude, center.longitude), radius);
+        }
     }
+
+    private GeoQueryEventListener geoQueryEventListener = new GeoQueryEventListener() {
+        @Override
+        public void onKeyEntered(String reportId, GeoLocation location) {
+            MarkerClusterItem item = new MarkerClusterItem(location.latitude, location.longitude, reportId);
+            markerClusterItems.put(reportId, item);
+            mClusterManager.addItem(item);
+            mClusterManager.cluster();
+        }
+
+
+        @Override
+        public void onKeyExited(String reportId) {
+            MarkerClusterItem item = markerClusterItems.get(reportId);
+
+            if (item != null) {
+                mClusterManager.removeItem(item);
+            }
+        }
+
+        @Override
+        public void onKeyMoved(String reportId, GeoLocation location) {
+            onKeyExited(reportId);
+            onKeyEntered(reportId, location);
+        }
+
+        @Override
+        public void onGeoQueryReady() {
+            // TODO display loading progress?
+        }
+
+        @Override
+        public void onGeoQueryError(DatabaseError error) {
+            Log.d(TAG, error.getMessage());
+        }
+    };
 
     @SuppressLint("MissingPermission")
     @Override
@@ -328,6 +383,8 @@ public class GoOutFragment extends ShoutTabFragment implements PlaceSelectionLis
             }
         }
     }
+
+    /* GEOFIRE UTILITY FUNCTIONS */
 
     private void showReportsAtLocation(MainActivity mainActivity, LatLng latLng) {
         // TODO don't do this by radius...
@@ -443,7 +500,7 @@ public class GoOutFragment extends ShoutTabFragment implements PlaceSelectionLis
         } else {
             // FALLBACK
 
-            ReportIncidentDialog dialog = ReportIncidentDialog.newInstance(latLng, Page.GO_OUT);
+            ReportIncidentDialogFragment dialog = ReportIncidentDialogFragment.newInstance(latLng, Page.GO_OUT);
 
             FragmentTransaction transaction = getFragmentManager().beginTransaction(); // todo nullpointer
             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
@@ -451,92 +508,16 @@ public class GoOutFragment extends ShoutTabFragment implements PlaceSelectionLis
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        mMapView.onResume();
-    }
+    /* GEOFIRE INSTANTIATION/HANDLING */
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        mMapView.onPause();
-    }
+    @Deprecated // just a little hack to make sure this variable is never utilized out of context.
+    private GeoFire geoFire;
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mMapView.onDestroy();
-    }
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        mMapView.onLowMemory();
-    }
-
-    private void addMarkers() {
-        LatLngBounds bounds = mGoogleMap.getProjection().getVisibleRegion().latLngBounds;
-        LatLng a = bounds.northeast;
-        LatLng b = bounds.southwest;
-        float[] results = new float[4];
-
-        Location.distanceBetween(a.latitude, a.longitude, b.latitude, b.longitude, results);
-
-        LatLng center = mGoogleMap.getCameraPosition().target;
-
-
-        double radius = results[0] / 1000.0 + 1.0;
-
-        if (geoFire == null) {
-            setupGeoFire();
-        }
-
-        geoQuery = geoFire.queryAtLocation(new GeoLocation(center.latitude, center.longitude), radius);
-        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-            @Override
-            public void onKeyEntered(String reportId, GeoLocation location) {
-
-                // Finds the Report object for each marker location to access title and body!
-                FirebaseFirestore.getInstance().collection("reports").document(reportId).get().addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Report report = task.getResult().toObject(Report.class);
-                        MarkerClusterItem item = new MarkerClusterItem(location.latitude, location.longitude, reportId);
-                        markerClusterItems.put(reportId, item);
-                        mClusterManager.addItem(item);
-                        mClusterManager.cluster();
-                    } else {
-                        // todo error;
-                    }
-                });
-            }
-
-            @Override
-            public void onKeyExited(String key) {
-                MarkerClusterItem item = markerClusterItems.get(key);
-                if (item != null) {
-                    mClusterManager.removeItem(item);
-                }
-            }
-
-            @Override
-            public void onKeyMoved(String key, GeoLocation location) {
-            }
-
-            @Override
-            public void onGeoQueryReady() {
-                // TODO display loading progress?
-            }
-
-            @Override
-            public void onGeoQueryError(DatabaseError error) {
-            }
-        });
-    }
-
+    @SuppressWarnings("deprecated")
     public GeoFire geofire() {
         if (geoFire == null) {
-            setupGeoFire();
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference(ShoutRealtimeDatabase.REPORT_LOCATIONS_KEY);
+            geoFire = new GeoFire(ref);
         }
 
         return geoFire;

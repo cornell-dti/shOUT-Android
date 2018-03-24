@@ -6,6 +6,7 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.location.Address;
 import android.os.Build;
@@ -45,7 +46,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.playservices.placecomplete.PlaceAutocompleteAdapter;
 
 import org.cornelldti.shout.MainActivity;
-import org.cornelldti.shout.PagerAdapter;
 import org.cornelldti.shout.R;
 import org.cornelldti.shout.util.AndroidUtil;
 import org.cornelldti.shout.util.LayoutUtil;
@@ -56,7 +56,7 @@ import java.util.Calendar;
 /**
  * A dialog for submitting reports.
  */
-public class ReportIncidentDialog extends AppCompatDialogFragment {
+public class ReportIncidentDialogFragment extends AppCompatDialogFragment {
 
     private static final String TAG = "ReportIncident";
     private AutoCompleteTextView locationEdit;
@@ -68,11 +68,11 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
 
     private int returnPage;
 
-    public ReportIncidentDialog() {
+    public ReportIncidentDialogFragment() {
     }
 
-    public static ReportIncidentDialog newInstance(LatLng latLng, int returnPage) {
-        ReportIncidentDialog dialog = new ReportIncidentDialog();
+    public static ReportIncidentDialogFragment newInstance(LatLng latLng, int returnPage) {
+        ReportIncidentDialogFragment dialog = new ReportIncidentDialogFragment();
 
         // Supply num input as an argument.
         Bundle args = new Bundle();
@@ -83,8 +83,8 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
         return dialog;
     }
 
-    public static ReportIncidentDialog newInstance(int returnPage) {
-        ReportIncidentDialog dialog = new ReportIncidentDialog();
+    public static ReportIncidentDialogFragment newInstance(int returnPage) {
+        ReportIncidentDialogFragment dialog = new ReportIncidentDialogFragment();
 
         // Supply num input as an argument.
         Bundle args = new Bundle();
@@ -302,7 +302,6 @@ public class ReportIncidentDialog extends AppCompatDialogFragment {
     @Override
     public void dismiss() {
         // TODO find less hacky solution
-
         Activity activity = getActivity();
 
         if (activity instanceof MainActivity) {
