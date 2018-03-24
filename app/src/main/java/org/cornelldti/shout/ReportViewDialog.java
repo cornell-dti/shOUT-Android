@@ -47,7 +47,20 @@ public class ReportViewDialog extends AppCompatDialogFragment {
     private int returnPage;
     private Report report;
 
-    public ReportViewDialog() {
+    private ShowMapCallback showMapCallback = latLng -> {
+    };
+
+    public interface ShowMapCallback {
+        void showMap(LatLng latLng);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        if (context instanceof ShowMapCallback) {
+            showMapCallback = (ShowMapCallback) context;
+        }
+
+        super.onAttach(context);
     }
 
     public static ReportViewDialog newInstance(Report report, LatLng latLng, int returnPage) {
@@ -146,6 +159,12 @@ public class ReportViewDialog extends AppCompatDialogFragment {
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(this.latLng, 17));
 
                 map.addMarker(new MarkerOptions().position(this.latLng));
+
+                map.setOnMapClickListener(latLng -> {
+                    ReportViewDialog.this.dismiss();
+
+                    showMapCallback.showMap(latLng);
+                });
             });
 
         }

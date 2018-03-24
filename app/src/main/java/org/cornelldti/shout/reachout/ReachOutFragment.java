@@ -23,9 +23,10 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 
 import org.cornelldti.shout.R;
+import org.cornelldti.shout.ShoutTabFragment;
 import org.cornelldti.shout.util.LayoutUtil;
 
-public class ReachOutFragment extends Fragment {
+public class ReachOutFragment extends ShoutTabFragment {
 
     private FirestoreRecyclerAdapter adapter;
 
@@ -79,7 +80,7 @@ public class ReachOutFragment extends Fragment {
                     public void onClick(View v) {
                         DocumentSnapshot snapshot = getSnapshots().getSnapshot(holder.getAdapterPosition());
                         String resId = snapshot.getId();
-                        showDialog(r, resId );
+                        showDialog(r, resId);
                     }
                 });
             }
@@ -105,8 +106,7 @@ public class ReachOutFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
-    private void showDialog(Resource resource, String resId)
-    {
+    private void showDialog(Resource resource, String resId) {
 //        Query query = db.collection("resources").document(resId).collection("phones");
         // PHONE COLLECTION NULL TODO FIX
 //        query.addSnapshotListener(new EventListener<QuerySnapshot>() {
@@ -122,6 +122,16 @@ public class ReachOutFragment extends Fragment {
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+    }
+
+    @Override
+    public void onDisplayed(Bundle bundle) {
+
+    }
+
+    @Override
+    public void onRemoved() {
+
     }
 
     public class ResourcesHolder extends RecyclerView.ViewHolder {

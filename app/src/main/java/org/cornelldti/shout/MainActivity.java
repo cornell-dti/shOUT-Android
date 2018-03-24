@@ -43,7 +43,6 @@ import com.google.firebase.auth.FirebaseUser;
 
 import org.cornelldti.shout.goout.BottomSheetUpdateCallback;
 import org.cornelldti.shout.speakout.ReportIncidentDialog;
-import org.cornelldti.shout.util.function.BiConsumer;
 import org.cornelldti.shout.util.function.Consumer;
 
 import static android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -53,7 +52,7 @@ import static com.google.android.gms.common.api.GoogleApiClient.OnConnectionFail
 
 // TODO Migrate away from deprecated FusedLocationApi.
 
-public class MainActivity extends AppCompatActivity implements ConnectionCallbacks, OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity implements ConnectionCallbacks, OnConnectionFailedListener, ReportViewDialog.ShowMapCallback {
 
     private static final String TAG = "MainActivity";
 
@@ -87,7 +86,14 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     private GoogleApiClient mGoogleApiClient;
     private FirebaseAuth mAuth;
 
+    private ReportViewDialog.ShowMapCallback showMapHandler;
+
     private Consumer<Location> mLastLocationCallback;
+    private PagerAdapter mViewPagerAdapter;
+
+    public void setShowMapHandler(ReportViewDialog.ShowMapCallback showMapHandler) {
+        this.showMapHandler = showMapHandler;
+    }
 
     /* Listeners */
 
@@ -123,22 +129,48 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             mBottomSheetShadow.setVisibility(View.INVISIBLE);
 
+
+            Bundle bundle = new Bundle();
+
+            for (int x = 0; x < mViewPagerAdapter.getCount(); x++) {
+
+                if (x != position) {
+                    ShoutTabFragment tab = mViewPagerAdapter.getItem(position);
+
+                    if (tab != null) tab.onRemoved();
+                }
+            }
+
+            ShoutTabFragment tab = mViewPagerAdapter.getItem(position);
+
             switch (position) {
                 case Page.GO_OUT:
                     setFABAction(FABAction.CURRENT_LOCATION, position);
+
+                    if (showMap && showMapLatLng != null) {
+                        bundle.putDoubleArray("latLng", new double[]{showMapLatLng.latitude, showMapLatLng.longitude});
+                    }
+
+                    showMap = false;
+                    showMapLatLng = null;
+
+                    tab.onDisplayed(bundle);
                     break;
                 case Page.REACH_OUT:
-
                     setFABAction(FABAction.HELP, position);
+
+                    tab.onDisplayed(bundle);
                     break;
                 case Page.SPEAK_OUT:
                     setFABAction(FABAction.START_REPORT, position);
+
+                    tab.onDisplayed(bundle);
                     break;
                 default:
                     mBottomSheet.setVisibility(View.INVISIBLE);
-
                     setFABAction(FABAction.DISABLED, position);
             }
+
             if (mPrevMenuItem != null) {
                 mPrevMenuItem.setChecked(false);
             } else {
@@ -302,8 +334,8 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
         /* Setup the pages adapter... */
 
-        final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager(), getResources().getInteger(R.integer.number_of_tabs));
-        mViewPager.setAdapter(adapter);
+        mViewPagerAdapter = new PagerAdapter(getSupportFragmentManager(), getResources().getInteger(R.integer.number_of_tabs));
+        mViewPager.setAdapter(mViewPagerAdapter);
 
         /* Set the default page to "Go Out" */
 
@@ -541,5 +573,16 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                 }
             }
         }
+    }
+
+    private boolean showMap = false;
+    private LatLng showMapLatLng;
+
+    @Override
+    public void showMap(LatLng latLng) {
+        showMap = true;
+        showMapLatLng = latLng;
+
+        mViewPager.setCurrentItem(Page.GO_OUT);
     }
 }

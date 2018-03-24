@@ -28,9 +28,10 @@ import org.cornelldti.shout.Page;
 import org.cornelldti.shout.R;
 import org.cornelldti.shout.ReportViewDialog;
 import org.cornelldti.shout.ShoutRealtimeDatabase;
+import org.cornelldti.shout.ShoutTabFragment;
 import org.cornelldti.shout.util.LayoutUtil;
 
-public class SpeakOutFragment extends Fragment {
+public class SpeakOutFragment extends ShoutTabFragment {
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
@@ -156,4 +157,13 @@ public class SpeakOutFragment extends Fragment {
     }
 
 
+    @Override
+    public void onDisplayed(Bundle bundle) {
+
+    }
+
+    @Override
+    public void onRemoved() {
+
+    }
 }

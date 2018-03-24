@@ -53,6 +53,8 @@ import org.cornelldti.shout.MainActivity;
 import org.cornelldti.shout.Page;
 import org.cornelldti.shout.R;
 import org.cornelldti.shout.ShoutRealtimeDatabase;
+import org.cornelldti.shout.ShoutTabFragment;
+import org.cornelldti.shout.TabVisibilityChangeListener;
 import org.cornelldti.shout.speakout.Report;
 import org.cornelldti.shout.speakout.ReportIncidentDialog;
 import org.cornelldti.shout.util.AndroidUtil;
@@ -71,7 +73,7 @@ import static org.cornelldti.shout.R.id.map_view;
  * Updated by Evan Welsh on 2/28/18
  */
 
-public class GoOutFragment extends Fragment implements PlaceSelectionListener {
+public class GoOutFragment extends ShoutTabFragment implements PlaceSelectionListener {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 200;
 
@@ -83,6 +85,8 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
 
     private GeoQuery geoQuery;
     private Marker clickedLocationMarker;
+
+    private LatLng defaultLocationOverride;
 
     private GeoFire geoFire;
 
@@ -100,6 +104,24 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
     @Override
     public void onError(Status status) {
         // TODO handle errrors from place selection.
+    }
+
+    @Override
+    public void onDisplayed(Bundle bundle) {
+        double[] latLngArr = bundle.getDoubleArray("latLng");
+
+        if (latLngArr == null) return;
+
+        if (mMapView != null && mGoogleMap != null) {
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latLngArr[0], latLngArr[1]), 20));
+        } else {
+            defaultLocationOverride = new LatLng(latLngArr[0], latLngArr[1]);
+        }
+    }
+
+    @Override
+    public void onRemoved() {
+
     }
 
     /* Fragment Methods */
@@ -193,12 +215,12 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
 
             /* Setup location updates to allow the "current location" FAB to function */
 
-            Location centerLocation = LocationUtil.latLngToLocation(LocationUtil.CORNELL_CENTER);
+            LatLng defaultLocation = defaultLocationOverride != null ? defaultLocationOverride : LocationUtil.CORNELL_CENTER;
 
             // todo locatino setup?
 
             CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(new LatLng(centerLocation.getLatitude(), centerLocation.getLongitude()))      // Sets the center of the mGoogleMap to website user
+                    .target(defaultLocation)      // Sets the center of the mGoogleMap to website user
                     .zoom(17)                   // Sets the zoom
                     .bearing(90)                // Sets the orientation of the camera to east
                     .tilt(40)                   // Sets the tilt of the camera to 30 degrees
@@ -208,11 +230,13 @@ public class GoOutFragment extends Fragment implements PlaceSelectionListener {
 
             // TODO don't use last location, its imprecise
 
-            if (activity instanceof MainActivity) {
+            if (defaultLocationOverride == null && activity instanceof MainActivity) {
                 ((MainActivity) activity).getLastLocation((lastLocation) -> {
                     googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 14));
                 });
             }
+
+            defaultLocationOverride = null;
 
             /* Setup clustering manager and clusters... */
             mClusterManager = new ClusterManager<>(currentContext, googleMap);
