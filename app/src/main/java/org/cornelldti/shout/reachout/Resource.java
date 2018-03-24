@@ -1,26 +1,35 @@
 package org.cornelldti.shout.reachout;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Represents a resource in the RecyclerView
  * Created by Evan Welsh on 3/1/18.
  */
 
-public class Resource {
-    private String url, name, description;
+public class Resource implements Serializable {
+    private String url, name, description, address;
     private int ordering;
-    private Collection<Phone> phones;
+
+    private ArrayList<Phone> phones = new ArrayList<>();
+
+    /* FIRESTORE KEYS */
+    public static final String PHONES = "phones";
 
     public Resource() {
     }
 
-    public Resource(String url, String name, String description, Collection<Phone> phones, int ordering) {
+    public Resource(String url, String name, String description, String address, List<Phone> phones, int ordering) {
         this.url = url;
         this.name = name;
         this.description = description;
+        this.address = address;
         this.ordering = ordering;
-        this.phones = phones;
+        this.phones = new ArrayList<>(phones);
     }
 
     public String getUrl() {
@@ -39,9 +48,17 @@ public class Resource {
         return ordering;
     }
 
-    public Collection<Phone> getPhones()
-    {
+    public String getAddress() {
+        return address;
+    }
+
+    public List<Phone> getPhoneNumbers() {
         return phones;
     }
+
+    void setPhoneNumbers(Collection<Phone> numbers) {
+        this.phones = new ArrayList<>(numbers);
+    }
+
 
 }

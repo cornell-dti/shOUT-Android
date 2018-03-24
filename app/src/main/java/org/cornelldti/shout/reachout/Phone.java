@@ -1,14 +1,14 @@
 package org.cornelldti.shout.reachout;
 
+import java.io.Serializable;
+
 /**
  * Created by kaushikr on 3/19/18.
  */
 
-public class Phone {
+public class Phone implements Serializable {
 
-    private String number;
-    private String label;
-    private String description = "";
+    private String number, label = "Phone", description = "";
 
     public Phone() {
     }
@@ -25,19 +25,15 @@ public class Phone {
         this.description = description;
     }
 
-    public String getLabel() {
+    String getLabel() {
         return label;
     }
 
-    public String getNumber() {
+    String getNumber() {
         return number;
     }
 
-    public String getDescription() {
+    String getDescription() {
         return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 }

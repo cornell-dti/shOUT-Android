@@ -1,58 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/resource_info_layout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="@android:color/background_light"
     android:clickable="true"
-    android:orientation="vertical"
     app:behavior_hideable="true"
     app:behavior_peekHeight="250dp"
     app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
-    <TextView
-        android:id="@+id/name"
+    <LinearLayout
+        android:id="@+id/resource_info_separator_b"
         android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="@color/edit_text_separator"
+        app:layout_constraintTop_toBottomOf="@+id/resource_info_description_text_view"
+        tools:ignore="Orientation" />
+
+    <LinearLayout
+        android:id="@+id/resource_info_actions"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:layout_gravity="center"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="56dp"
-        android:layout_marginRight="56dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/resource_info_separator_b">
+
+        <Button
+            android:id="@+id/resource_info_directions_button"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:drawableTop="@drawable/directions_icon_small"
+            android:padding="0dp"
+            android:text="Directions"
+            android:textSize="8sp"
+            app:layout_constraintBottom_toBottomOf="@+id/resource_info_url_button"
+            app:layout_constraintStart_toEndOf="@+id/resource_info_url_button"
+            app:layout_constraintTop_toBottomOf="@+id/resource_info_description_text_view" />
+
+        <Button
+            android:id="@+id/resource_info_url_button"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:drawableTop="@drawable/website_icon_small"
+            android:padding="0dp"
+            android:text="Website"
+            android:textSize="8sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/resource_info_description_text_view" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/resource_info_name_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:text="Name"
         android:textAlignment="center"
-        android:textSize="20dp" />
+        android:textSize="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/description"
-        android:layout_width="wrap_content"
+        android:id="@+id/resource_info_description_text_view"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="8dp"
         android:text="Description"
-        android:textSize="18dp" />
+        android:textSize="18dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/resource_info_name_text_view" />
 
-    <TextView
-        android:id="@+id/url"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="40dp"
-        android:text="URL"
-        android:textSize="18dp" />
-
-
+    <LinearLayout
+        android:id="@+id/resource_info_separator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="@color/edit_text_separator"
+        app:layout_constraintTop_toBottomOf="@+id/resource_info_actions"
+        tools:ignore="Orientation" />
 
     <ListView
-        android:id="@+id/phoneNumberList"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="20dp"
+        android:id="@+id/resource_info_phone_number_list_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
         android:divider="@null"
-        android:dividerHeight="0dp" />
+        android:dividerHeight="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/resource_info_separator" />
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

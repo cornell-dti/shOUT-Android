@@ -6,40 +6,57 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import org.cornelldti.shout.R;
-
-import java.util.List;
 
 /**
  * Created by kaushikr on 3/21/18.
  */
 
-public class PhoneAdapter extends ArrayAdapter<Phone> {
+public class PhoneAdapter extends BaseAdapter {
     private Context mContext;
-    private List<Phone> mPhones;
+    private Resource mResource;
 
-    public PhoneAdapter(Context context, List<Phone> phones) {
-        super(context, 0, phones);
+    PhoneAdapter(Context context, Resource resource) {
         mContext = context;
-        mPhones = phones;
+        mResource = resource;
     }
 
     @Override
+    public int getCount() {
+        return mResource.getPhoneNumbers().size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return mResource.getPhoneNumbers().get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @NonNull
+    @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         View listItem = convertView;
-        if(listItem == null)
-            listItem = LayoutInflater.from(mContext).inflate(R.layout.phone_item,parent,false);
 
-        Phone currentPhone = mPhones.get(position);
+        if (listItem == null) {
+            listItem = LayoutInflater.from(mContext).inflate(R.layout.phone_item, parent, false);
+        }
 
-        TextView labelAndNumber = (TextView) listItem.findViewById(R.id.labelAndNum);
-        labelAndNumber.setText(currentPhone.getLabel() + ": " + currentPhone.getNumber());
+        Phone currentPhone = mResource.getPhoneNumbers().get(position);
 
-        TextView description = (TextView) listItem.findViewById(R.id.description);
-        description.setText(currentPhone.getDescription());
+        if (currentPhone != null) {
+            TextView labelTextView = listItem.findViewById(R.id.phone_item_label_text_view);
+            labelTextView.setText(currentPhone.getLabel());
+
+            TextView numberTextView = listItem.findViewById(R.id.phone_item_number_text_view);
+            numberTextView.setText(currentPhone.getNumber());
+        }
 
         return listItem;
     }
