@@ -27,6 +27,7 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+import com.firebase.geofire.LocationCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
@@ -51,6 +52,7 @@ import org.cornelldti.shout.FABAction;
 import org.cornelldti.shout.MainActivity;
 import org.cornelldti.shout.Page;
 import org.cornelldti.shout.R;
+import org.cornelldti.shout.ReportViewDialog;
 import org.cornelldti.shout.ShoutRealtimeDatabase;
 import org.cornelldti.shout.ShoutTabFragment;
 import org.cornelldti.shout.speakout.ReportIncidentDialogFragment;
@@ -419,9 +421,57 @@ public class GoOutFragment extends ShoutTabFragment {
 
                 nearbyReportsView.setLayoutManager(mLayoutManager);
 
+                // TODO close bottom sheet and refocus map on map page (doesn't currently happen because it relies on a page change event...
+                // TODO ... that isn't refired if already on map page.
+
                 nearbyReportsView.setAdapter(
                         GoOutRecentReportsAdapter
-                                .construct(this, latLng, mainActivity, radius) // todo radius
+                                .construct(this, (eventAdapter, reportHolder) -> {
+                                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference(ShoutRealtimeDatabase.REPORT_LOCATIONS_KEY);
+                                    GeoFire geoFire = new GeoFire(ref);
+
+                                    if (eventAdapter == null) return;
+
+                                    String id = eventAdapter.getId(reportHolder.getAdapterPosition());
+
+                                    if (id != null) {
+                                        geoFire.getLocation(id, new LocationCallback() {
+                                            @Override
+                                            public void onLocationResult(String key, GeoLocation location) {
+                                                if (reportHolder.report == null) return;
+
+                                                ReportViewDialog dialog = ReportViewDialog.newInstance(
+                                                        reportHolder.report,
+                                                        new LatLng(location.latitude, location.longitude),
+                                                        Page.GO_OUT
+                                                );
+                                                showDialog(dialog);
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+                                                if (reportHolder.report == null) return;
+
+                                                ReportViewDialog dialog = ReportViewDialog.newInstance(reportHolder.report, Page.GO_OUT);
+                                                showDialog(dialog);
+                                            }
+
+                                            private void showDialog(ReportViewDialog dialog) {
+                                                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                                                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                                                transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+                                            }
+                                        });
+                                    } else {
+                                        if (reportHolder.report == null) return;
+
+                                        ReportViewDialog dialog = ReportViewDialog.newInstance(reportHolder.report, Page.GO_OUT);
+                                        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                                        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                                        transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+                                    }
+
+                                }, latLng, mainActivity, radius) // todo radius
                                 .withItemCountCallback(itemCount -> {
 
                                     int resId = nearby ? R.plurals.number_of_reports_nearby : R.plurals.number_of_reports;

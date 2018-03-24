@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,21 +23,29 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.cornelldti.shout.R;
 import org.cornelldti.shout.speakout.Report;
+import org.cornelldti.shout.speakout.SpeakOutAdapter;
+import org.cornelldti.shout.util.function.BiConsumer;
 import org.cornelldti.shout.util.function.Consumer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An optimized and reloaded version of the original SpeakOutAdapter
  */
 
 public class GoOutRecentReportsAdapter extends RecyclerView.Adapter<GoOutRecentReportsAdapter.ReportViewHolder> {
+
+    private Consumer<ReportViewHolder> mClickListener;
     private Reports reports = new Reports();
 
     private class Reports {
 
         private final List<Report> list = new ArrayList<>();
+        private final SparseArray<String> posToId = new SparseArray<>();
+
         private int intendedSize = 0;
         private boolean locked = false;
 
@@ -51,12 +60,15 @@ public class GoOutRecentReportsAdapter extends RecyclerView.Adapter<GoOutRecentR
             if (!locked) {
                 intendedSize++;
 
+
                 ref.document(key).get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot snapshot = task.getResult();
                         Report report = snapshot.toObject(Report.class);
                         list.add(report);
-                        notifyItemInserted(list.size() - 1);
+                        int index = list.size() - 1;
+                        posToId.put(index, key); // TODO double check list spec to ensure that add always adds to end
+                        notifyItemInserted(index);
                     }
                 });
 
@@ -68,7 +80,10 @@ public class GoOutRecentReportsAdapter extends RecyclerView.Adapter<GoOutRecentR
         }
     }
 
-    private GoOutRecentReportsAdapter() {
+    private GoOutRecentReportsAdapter(BiConsumer<GoOutRecentReportsAdapter, ReportViewHolder> clickListener) {
+        mClickListener = (viewHolder) -> {
+            clickListener.apply(this, viewHolder);
+        };
     }
 
 
@@ -82,12 +97,13 @@ public class GoOutRecentReportsAdapter extends RecyclerView.Adapter<GoOutRecentR
      * @param context  - The context to determine date/time formatting within.
      * @return - A new GoOutRecentReportsAdapter
      */
-    static GoOutRecentReportsAdapter construct(GoOutFragment fragment, LatLng location, Context context, double radius) {
+    static GoOutRecentReportsAdapter construct(GoOutFragment fragment, BiConsumer<GoOutRecentReportsAdapter, ReportViewHolder> clickListener, LatLng location, Context context, double radius) {
         GeoFire geofire = fragment.geofire();
 
-        GoOutRecentReportsAdapter adapter = new GoOutRecentReportsAdapter();
+        GoOutRecentReportsAdapter adapter = new GoOutRecentReportsAdapter(clickListener);
         adapter.mDateFormatter = DateFormat.getDateFormat(context); // todo
         adapter.mTimeFormatter = DateFormat.getTimeFormat(context);
+
 
         GeoQuery query = geofire.queryAtLocation(new GeoLocation(location.latitude, location.longitude), radius); // todo radius?
         query.addGeoQueryEventListener(new GeoQueryEventListener() {
@@ -122,7 +138,6 @@ public class GoOutRecentReportsAdapter extends RecyclerView.Adapter<GoOutRecentR
             }
         });
 
-
         return adapter;
     }
 
@@ -132,6 +147,7 @@ public class GoOutRecentReportsAdapter extends RecyclerView.Adapter<GoOutRecentR
      */
     static class ReportViewHolder extends RecyclerView.ViewHolder {
         TextView title, body, date, time, location;
+        transient Report report;
 
         ReportViewHolder(View v) {
             super(v);
@@ -156,12 +172,19 @@ public class GoOutRecentReportsAdapter extends RecyclerView.Adapter<GoOutRecentR
     @Override
     public ReportViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_item, parent, false);
-        return new ReportViewHolder(v);
+
+        final ReportViewHolder holder = new ReportViewHolder(v);
+
+        v.setOnClickListener(view -> mClickListener.apply(holder));
+
+        return holder;
     }
 
     @Override
     public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
         Report model = reports.list.get(position);
+
+        holder.report = model; // TODO double check this addition
 
         holder.title.setText(model.getTitle());
 
@@ -191,5 +214,10 @@ public class GoOutRecentReportsAdapter extends RecyclerView.Adapter<GoOutRecentR
     public int getItemCount() {
         return reports.list.size();
     }
+
+    public String getId(int position) {
+        return reports.posToId.get(position);
+    }
+
 }
 
