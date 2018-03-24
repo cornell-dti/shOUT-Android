@@ -1,5 +1,6 @@
 package org.cornelldti.shout;
 
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.util.Log;
@@ -18,19 +19,74 @@ import java.lang.ref.WeakReference;
  * Updated by Evan Welsh on 3/1/18
  */
 
-public class PagerAdapter extends FragmentPagerAdapter {
+public class ShoutPagerAdapter extends FragmentPagerAdapter {
 
-    private static final String TAG = "PagerAdapter";
-
-    private final int mNumOfTabs;
-
-
-    PagerAdapter(FragmentManager fm, int NumOfTabs) {
-        super(fm);
-        this.mNumOfTabs = NumOfTabs;
-    }
+    private static final String TAG = "ShoutPagerAdapter";
 
     private WeakReference<ShoutTabFragment> goOut, speakOut, reachOut;
+    private final static int NUMBER_OF_TABS = 3;
+
+    ShoutPagerAdapter(FragmentManager fm) {
+        super(fm);
+    }
+
+    @Override
+    public ShoutTabFragment getItem(int position) {
+        switch (position) {
+            case Page.GO_OUT:
+                return goOut();
+            case Page.SPEAK_OUT:
+                return speakOut();
+            case Page.REACH_OUT:
+                return reachOut();
+            default:
+                Log.d(TAG, "Attempted to retrieve unknown fragment from ShoutPagerAdapter");
+                return null;
+        }
+    }
+
+    @Override
+    public int getCount() {
+        return NUMBER_OF_TABS;
+    }
+
+    @Override
+    public void destroyItem(ViewGroup group, int position, Object obj) {
+        switch (position) {
+            case Page.GO_OUT:
+                goOut = null;
+                break;
+            case Page.SPEAK_OUT:
+                speakOut = null;
+                break;
+            case Page.REACH_OUT:
+                reachOut = null;
+                break;
+            default:
+        }
+
+        super.destroyItem(group, position, obj);
+    }
+
+    @Override
+    public void destroyItem(@NonNull View container, int position, @NonNull Object obj) {
+        switch (position) {
+            case Page.GO_OUT:
+                goOut = null;
+                break;
+            case Page.SPEAK_OUT:
+                speakOut = null;
+                break;
+            case Page.REACH_OUT:
+                reachOut = null;
+                break;
+            default:
+        }
+
+        super.destroyItem(container, position, obj);
+    }
+
+    /* Fragment Reference Util Getters */
 
     private ShoutTabFragment goOut() {
         ShoutTabFragment fragment = null;
@@ -75,62 +131,5 @@ public class PagerAdapter extends FragmentPagerAdapter {
         }
 
         return fragment;
-    }
-
-    @Override
-    public ShoutTabFragment getItem(int position) {
-        switch (position) {
-            case Page.GO_OUT:
-                return goOut();
-            case Page.SPEAK_OUT:
-                return speakOut();
-            case Page.REACH_OUT:
-                return reachOut();
-            default:
-
-                Log.d(TAG, "Attempted to retrieve unknown fragment from PagerAdapter");
-                return null;
-        }
-    }
-
-    @Override
-    public int getCount() {
-        return mNumOfTabs;
-    }
-
-    @Override
-    public void destroyItem(ViewGroup group, int position, Object obj) {
-        switch (position) {
-            case Page.GO_OUT:
-                goOut = null;
-                break;
-            case Page.SPEAK_OUT:
-                speakOut = null;
-                break;
-            case Page.REACH_OUT:
-                reachOut = null;
-                break;
-            default:
-        }
-
-        super.destroyItem(group, position, obj);
-    }
-
-    @Override
-    public void destroyItem(View container, int position, Object obj) {
-        switch (position) {
-            case Page.GO_OUT:
-                goOut = null;
-                break;
-            case Page.SPEAK_OUT:
-                speakOut = null;
-                break;
-            case Page.REACH_OUT:
-                reachOut = null;
-                break;
-            default:
-        }
-
-        super.destroyItem(container, position, obj);
     }
 }

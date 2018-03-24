@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     private ReportViewDialog.ShowMapCallback showMapHandler;
 
     private Consumer<Location> mLastLocationCallback;
-    private PagerAdapter mViewPagerAdapter;
+    private ShoutPagerAdapter mViewPagerAdapter;
 
     public void setShowMapHandler(ReportViewDialog.ShowMapCallback showMapHandler) {
         this.showMapHandler = showMapHandler;
@@ -336,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
         /* Setup the pages adapter... */
 
-        mViewPagerAdapter = new PagerAdapter(getSupportFragmentManager(), getResources().getInteger(R.integer.number_of_tabs));
+        mViewPagerAdapter = new ShoutPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mViewPagerAdapter);
 
         /* Set the default page to "Go Out" */
@@ -494,7 +494,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
                         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                         transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
-                       } else {
+                    } else {
                         // TODO display error to user and log issue
                         // this will probably never happen
                     }
