@@ -22,6 +22,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.cornelldti.shout.goout.ZoomLevel;
 import org.cornelldti.shout.speakout.Report;
 import org.cornelldti.shout.util.LayoutUtil;
 
@@ -156,7 +157,7 @@ public class ReportViewDialog extends AppCompatDialogFragment {
 
         if (this.latLng != null) {
             this.mapView.getMapAsync((map) -> {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(this.latLng, 17));
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(this.latLng, ZoomLevel.DEFAULT));
 
                 map.addMarker(new MarkerOptions().position(this.latLng));
 

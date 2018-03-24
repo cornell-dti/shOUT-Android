@@ -60,6 +60,7 @@ import org.cornelldti.shout.util.LocationUtil;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static org.cornelldti.shout.R.id.map_view;
@@ -126,7 +127,7 @@ public class GoOutFragment extends ShoutTabFragment {
         if (latLngArr == null) return;
 
         if (mMapView != null && mGoogleMap != null) {
-            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latLngArr[0], latLngArr[1]), 20));
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latLngArr[0], latLngArr[1]), ZoomLevel.DEFAULT));
         } else {
             defaultLocationOverride = new LatLng(latLngArr[0], latLngArr[1]);
         }
@@ -165,7 +166,7 @@ public class GoOutFragment extends ShoutTabFragment {
             @Override
             public void onPlaceSelected(Place place) {
                 if (mGoogleMap != null) {
-                    mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
+                    mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), ZoomLevel.DEFAULT));
                 }
             }
 
@@ -255,7 +256,7 @@ public class GoOutFragment extends ShoutTabFragment {
             if (activity instanceof MainActivity) {
                 ((MainActivity) activity).registerLocationListener((lastLocation, force) -> {
                     if (force || (defaultLocationOverride == null && initialMove)) {
-                        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 17));
+                        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), ZoomLevel.DEFAULT));
                         initialMove = false;
                     }
                 });
@@ -279,18 +280,27 @@ public class GoOutFragment extends ShoutTabFragment {
                 return false;
             });
 
-            // TODO zoom in on click?
             mClusterManager.setOnClusterClickListener(item -> {
                 Collection<MarkerClusterItem> items = item.getItems();
-                MarkerClusterItem firstItem = items.iterator().next();
-                if (activity instanceof MainActivity) {
-                    showReportsByRadius((MainActivity) activity, firstItem.getPosition(), QUERY_RADIUS);
+                Iterator<MarkerClusterItem> iter = items.iterator();
 
-                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                            firstItem.getPosition(), (float) Math.floor(googleMap
-                                    .getCameraPosition().zoom + 4)), 500,
-                            null);
+                if (!iter.hasNext()) return true;
+
+                LatLng first = iter.next().getPosition();
+                double latAvg = first.latitude, longAvg = first.longitude;
+
+                while (iter.hasNext()) {
+                    LatLng pos = iter.next().getPosition();
+                    latAvg = ((pos.latitude + latAvg) / 2);
+                    longAvg = ((pos.longitude + longAvg) / 2);
                 }
+
+                float zoomLevel = Math.min((googleMap.getCameraPosition().zoom + 4), ZoomLevel.CLOSE_UP);
+
+                if (activity instanceof MainActivity) {
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latAvg, longAvg), zoomLevel), 500, null);
+                }
+
                 return true;
             });
 
