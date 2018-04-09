@@ -1,5 +1,6 @@
 package org.cornelldti.shout;
 
+import android.arch.core.util.Function;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -34,11 +35,9 @@ public class ShoutPagerAdapter extends FragmentPagerAdapter {
     public ShoutTabFragment getItem(int position) {
         switch (position) {
             case Page.GO_OUT:
-                return goOut();
             case Page.SPEAK_OUT:
-                return speakOut();
             case Page.REACH_OUT:
-                return reachOut();
+                return getTabFragmentInstance(position);
             default:
                 Log.d(TAG, "Attempted to retrieve unknown fragment from ShoutPagerAdapter");
                 return null;
@@ -88,46 +87,44 @@ public class ShoutPagerAdapter extends FragmentPagerAdapter {
 
     /* Fragment Reference Util Getters */
 
-    private ShoutTabFragment goOut() {
+    private ShoutTabFragment getTabFragmentInstance(int page) {
         ShoutTabFragment fragment = null;
 
-        if (goOut != null) {
-            fragment = goOut.get();
+        WeakReference<ShoutTabFragment> ref = null;
+
+        switch (page) {
+            case Page.GO_OUT:
+                ref = goOut;
+                break;
+            case Page.REACH_OUT:
+                ref = reachOut;
+                break;
+            case Page.SPEAK_OUT:
+                ref = speakOut;
+                break;
+            default:
+        }
+
+        if (ref != null) {
+            fragment = ref.get();
         }
 
         if (fragment == null) {
-            fragment = new GoOutFragment();
-            goOut = new WeakReference<>(fragment);
-        }
-
-        return fragment;
-    }
-
-    private ShoutTabFragment speakOut() {
-        ShoutTabFragment fragment = null;
-
-        if (speakOut != null) {
-            fragment = speakOut.get();
-        }
-
-        if (fragment == null) {
-            fragment = new SpeakOutFragment();
-            speakOut = new WeakReference<>(fragment);
-        }
-
-        return fragment;
-    }
-
-    private ShoutTabFragment reachOut() {
-        ShoutTabFragment fragment = null;
-
-        if (reachOut != null) {
-            fragment = reachOut.get();
-        }
-
-        if (fragment == null) {
-            fragment = new ReachOutFragment();
-            reachOut = new WeakReference<>(fragment);
+            switch (page) {
+                case Page.GO_OUT:
+                    fragment = new GoOutFragment();
+                    goOut = new WeakReference<>(fragment);
+                    break;
+                case Page.REACH_OUT:
+                    fragment = new ReachOutFragment();
+                    reachOut = new WeakReference<>(fragment);
+                    break;
+                case Page.SPEAK_OUT:
+                    fragment = new SpeakOutFragment();
+                    speakOut = new WeakReference<>(fragment);
+                    break;
+                default:
+            }
         }
 
         return fragment;

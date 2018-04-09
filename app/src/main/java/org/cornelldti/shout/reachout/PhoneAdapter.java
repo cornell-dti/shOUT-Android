@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.cornelldti.shout.R;
@@ -51,6 +52,9 @@ public class PhoneAdapter extends BaseAdapter {
         Phone currentPhone = mResource.getPhoneNumbers().get(position);
 
         if (currentPhone != null) {
+            ImageView iconView = listItem.findViewById(R.id.phone_icon);
+            iconView.setImageResource(R.drawable.ic_call);
+
             TextView labelTextView = listItem.findViewById(R.id.phone_item_label_text_view);
             labelTextView.setText(currentPhone.getLabel());
 

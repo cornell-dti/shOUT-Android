@@ -5,12 +5,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetDialogFragment;
-import android.support.v7.widget.DividerItemDecoration;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,8 +46,8 @@ public class ResourceInfoDialogFragment extends BottomSheetDialogFragment {
 
         TextView nameTextView = moreInfoResDialog.findViewById(R.id.resource_info_name_text_view);
         TextView descriptionTextView = moreInfoResDialog.findViewById(R.id.resource_info_description_text_view);
-        Button addressButton = moreInfoResDialog.findViewById(R.id.resource_info_directions_button);
-        Button websiteButton = moreInfoResDialog.findViewById(R.id.resource_info_url_button);
+        ConstraintLayout addressButton = moreInfoResDialog.findViewById(R.id.resource_info_directions_button);
+        ConstraintLayout websiteButton = moreInfoResDialog.findViewById(R.id.resource_info_url_button);
         ListView mPhoneNumberList = moreInfoResDialog.findViewById(R.id.resource_info_phone_number_list_view);
 
         // SETUP DIALOG UI
@@ -57,21 +56,30 @@ public class ResourceInfoDialogFragment extends BottomSheetDialogFragment {
 
         if (mResource.getUrl() == null) {
             websiteButton.setVisibility(View.GONE);
+            moreInfoResDialog.findViewById(R.id.resource_info_separator_c).setVisibility(View.GONE);
         } else {
+            String url = mResource.getUrl();
+
+            final Uri uri = Uri.parse(url);
+
+            TextView website = moreInfoResDialog.findViewById(R.id.resource_item_website_subtitle_text_view);
+            website.setText(uri.getHost());
+
             websiteButton.setOnClickListener(v -> {
-                String uri = mResource.getUrl();
 
-                if (!uri.startsWith("http://") && !uri.startsWith("https://")) // TODO is this safe?
-                    uri = "http://" + uri;
 
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(browserIntent);
             });
         }
 
         if (mResource.getAddress() == null) {
             addressButton.setVisibility(View.GONE);
+            moreInfoResDialog.findViewById(R.id.resource_info_separator_b).setVisibility(View.GONE);
         } else {
+            TextView address = moreInfoResDialog.findViewById(R.id.resource_item_directions_subtitle_text_view);
+            address.setText(mResource.getAddress());
+
             addressButton.setOnClickListener(v -> {
                 String uri = "google.navigation:q=" + mResource.getAddress();
 
@@ -83,7 +91,6 @@ public class ResourceInfoDialogFragment extends BottomSheetDialogFragment {
         // TODO cleanup this hacky fix
 
         if (mResource.getAddress() == null && mResource.getUrl() == null) {
-            moreInfoResDialog.findViewById(R.id.resource_info_actions).setVisibility(View.GONE);
             moreInfoResDialog.findViewById(R.id.resource_info_separator).setVisibility(View.GONE);
         }
 

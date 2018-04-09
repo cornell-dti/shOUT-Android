@@ -20,6 +20,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
@@ -38,7 +39,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -46,7 +46,6 @@ import com.google.firebase.auth.FirebaseUser;
 import org.cornelldti.shout.goout.BottomSheetUpdateCallback;
 import org.cornelldti.shout.speakout.ReportIncidentDialogFragment;
 import org.cornelldti.shout.util.function.BiConsumer;
-import org.cornelldti.shout.util.function.Consumer;
 
 import static android.support.v4.view.ViewPager.OnPageChangeListener;
 import static com.google.android.gms.common.api.GoogleApiClient.Builder;
@@ -55,7 +54,7 @@ import static com.google.android.gms.common.api.GoogleApiClient.OnConnectionFail
 
 // TODO Migrate away from deprecated FusedLocationApi.
 
-public class MainActivity extends AppCompatActivity implements ConnectionCallbacks, OnConnectionFailedListener, ReportViewDialog.ShowMapCallback {
+public class MainActivity extends AppCompatActivity implements ConnectionCallbacks, OnConnectionFailedListener, ReportViewDialog.ShowMapCallback, OfflineFragment.RefreshCallback, UnauthenticatedFragment.AuthenticateCallback {
 
     private static final String TAG = "MainActivity";
 
@@ -194,6 +193,11 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     public void onStart() {
         super.onStart();
 
+        this.startAuthentication();
+    }
+
+
+    public void startAuthentication() {
         /* Retrieve the current user... */
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
@@ -203,10 +207,15 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                 if (task.isSuccessful()) {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "Successfully signed into Firebase anonymously.");
+
+                    setPage(Page.SPEAK_OUT);
                 } else {
                     /* if sign in fails, display a message to the user. */
                     // TODO prevent certain app features
                     // e.g. hide the FAB
+
+                    showDialog(new UnauthenticatedFragment());
+
                     Log.d(TAG, "Failed to sign into Firebase anonymously.");
                     Toast.makeText(MainActivity.this, "Failed to connect to shOUT.", Toast.LENGTH_SHORT).show();
                 }
@@ -217,7 +226,54 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         } else {
             /* If the user is already signed in, remove the blocking dialog... */
             mStartDialog.cancel();
+
+            setPage(Page.SPEAK_OUT);
         }
+    }
+
+    @Override
+    public void authenticate(AuthenticationResult result) {
+        /* Retrieve the current user... */
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+
+        if (currentUser == null) {
+            /* Sign the user into firebase */
+            mAuth.signInAnonymously().addOnCompleteListener(this, task -> {
+                if (task.isSuccessful()) {
+                    // Sign in success, update UI with the signed-in user's information
+                    Log.d(TAG, "Successfully signed into Firebase anonymously.");
+
+                    setPage(Page.SPEAK_OUT);
+
+                    result.success();
+                } else {
+                    /* if sign in fails, display a message to the user. */
+                    // TODO prevent certain app features
+                    // e.g. hide the FAB
+
+                    result.failure();
+
+                    Log.d(TAG, "Failed to sign into Firebase anonymously.");
+                    Toast.makeText(MainActivity.this, "Failed to connect to shOUT.", Toast.LENGTH_SHORT).show();
+                }
+
+                /* Remove the start dialog. */
+                mStartDialog.cancel();
+            });
+        } else {
+            /* If the user is already signed in, remove the blocking dialog... */
+            mStartDialog.cancel();
+
+            result.success();
+
+            setPage(Page.SPEAK_OUT);
+        }
+    }
+
+    private void showDialog(AppCompatDialogFragment dialog) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
     }
 
     @Override
@@ -334,25 +390,27 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         mAddressTextView = mBottomSheet.findViewById(R.id.address_quick_view);
         mNumOfReportsTextView = mBottomSheet.findViewById(R.id.number_of_reports_quick_view);
 
-        /* Setup the pages adapter... */
-
         mViewPagerAdapter = new ShoutPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mViewPagerAdapter);
+        mViewPager.setOffscreenPageLimit(2);
+
+
+        /* Setup the pages adapter... */
 
         /* Set the default page to "Go Out" */
 
+        setPage(Page.SPEAK_OUT);
+
         // TODO double check that this is the correct way to set the default page
-        mViewPager.setCurrentItem(Page.SPEAK_OUT);
-        mBottomNavigationView.getMenu().getItem(Page.SPEAK_OUT).setChecked(true);
-        setStatusBarColor(Page.SPEAK_OUT);
-        setFABAction(FABAction.START_REPORT, Page.SPEAK_OUT);
-        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
 
 
         /* Register page change listeners... */
 
         mViewPager.addOnPageChangeListener(mOnPageChangeListener);
         mBottomNavigationView.setOnNavigationItemSelectedListener(mOnNavItemSelectedListener);
+
+
     }
 
     /* Google Client Connection Handling */
@@ -431,6 +489,29 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         if (updater == null) return;
 
         updater.update(mBottomSheet, mBottomSheetBehavior, mBottomSheetShadow, mReportsView, mAddressTextView, mNumOfReportsTextView);
+    }
+
+    public void setPage(int page) {
+        switch (page) {
+            case Page.SPEAK_OUT:
+                mBottomNavigationView.getMenu().getItem(Page.SPEAK_OUT).setChecked(true);
+                break;
+            case Page.GO_OUT:
+                mBottomNavigationView.getMenu().getItem(Page.GO_OUT).setChecked(true);
+                break;
+            case Page.REACH_OUT:
+                mBottomNavigationView.getMenu().getItem(Page.REACH_OUT).setChecked(true);
+                break;
+            default:
+                page = -1;
+        }
+
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        mBottomSheetShadow.setVisibility(View.INVISIBLE);
+        setStatusBarColor(page);
+        setFABAction(FABAction.START_REPORT, page);
+
+        mViewPager.setCurrentItem(page);
     }
 
     /**
@@ -576,5 +657,10 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         showMapLatLng = latLng;
 
         mViewPager.setCurrentItem(Page.GO_OUT);
+    }
+
+    @Override
+    public void refresh() {
+
     }
 }

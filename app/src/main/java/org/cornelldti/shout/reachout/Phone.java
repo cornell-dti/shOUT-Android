@@ -8,7 +8,8 @@ import java.io.Serializable;
 
 public class Phone implements Serializable {
 
-    private String number, label = "Phone", description = "";
+    public String number, label = "Phone", description = "";
+    public boolean emergency;
 
     public Phone() {
     }
@@ -25,15 +26,20 @@ public class Phone implements Serializable {
         this.description = description;
     }
 
-    String getLabel() {
+    public boolean isEmergency() {
+        return emergency;
+    }
+
+    public String getLabel() {
         return label;
     }
 
-    String getNumber() {
+    public String getNumber() {
         return number;
     }
 
-    String getDescription() {
+    public String getDescription() {
         return description;
     }
+
 }

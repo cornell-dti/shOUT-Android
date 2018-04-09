@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">@android:color/white</color>
-    <color name="colorAccent">#FF75AB9F</color>
+    <color name="colorAccent">#0cc9b4</color>
     <color name="colorPrimaryDark">#FF75AB9F</color>
     <color name="selectedTab">@color/colorAccent</color>
     <color name="unselectedTab">@android:color/primary_text_light</color>

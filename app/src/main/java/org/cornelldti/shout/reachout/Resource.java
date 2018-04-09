@@ -2,8 +2,6 @@ package org.cornelldti.shout.reachout;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -12,7 +10,7 @@ import java.util.List;
  */
 
 public class Resource implements Serializable {
-    private String url, name, description, address;
+    private String url, name, description, address, section, email;
     private int ordering;
 
     private ArrayList<Phone> phones = new ArrayList<>();
@@ -23,11 +21,12 @@ public class Resource implements Serializable {
     public Resource() {
     }
 
-    public Resource(String url, String name, String description, String address, List<Phone> phones, int ordering) {
+    public Resource(String url, String name, String description, String address, String section, List<Phone> phones, int ordering) {
         this.url = url;
         this.name = name;
         this.description = description;
         this.address = address;
+        this.section = section;
         this.ordering = ordering;
         this.phones = new ArrayList<>(phones);
     }
@@ -52,12 +51,20 @@ public class Resource implements Serializable {
         return address;
     }
 
+    public String getSection() {
+        return section;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
     public List<Phone> getPhoneNumbers() {
         return phones;
     }
 
-    void setPhoneNumbers(Collection<Phone> numbers) {
-        this.phones = new ArrayList<>(numbers);
+    void addPhoneNumber(Phone number) {
+        this.phones.add(number);
     }
 
 
