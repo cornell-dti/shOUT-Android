@@ -1,61 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!-- A CardView that contains a TextView -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/feed_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
-    android:layout_marginStart="10dp"
-    android:layout_marginEnd="10dp"
-    android:layout_marginTop="10dp">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/feed_item_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:text="title"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/feed_item_body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/feed_item_time"
-        android:layout_marginEnd="10dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="13dp"
+        android:layout_marginTop="12dp"
+        android:text="body"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="15sp" />
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/feed_item_time" />
 
     <TextView
         android:id="@+id/feed_item_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/feed_item_body"
-        android:layout_alignTop="@+id/feed_item_title"
+        android:text="@string/report_time_date"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/place_autocomplete_search_hint"
         android:textSize="15sp"
-        android:textStyle="italic" />
+        app:layout_constraintEnd_toEndOf="@+id/feed_item_body"
+        app:layout_constraintTop_toTopOf="@+id/feed_item_title" />
 
     <TextView
         android:id="@+id/feed_item_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/feed_item_date"
-        android:layout_below="@+id/feed_item_title"
+        android:layout_marginTop="8dp"
+        android:text="@string/date_time_label"
         android:textColor="@color/place_autocomplete_search_hint"
         android:textSize="15sp"
-        android:textStyle="italic" />
+        app:layout_constraintEnd_toEndOf="@+id/feed_item_date"
+        app:layout_constraintTop_toBottomOf="@+id/feed_item_date" />
 
     <TextView
         android:id="@+id/feed_item_location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/feed_item_body"
-        android:layout_alignStart="@+id/feed_item_title"
-        android:text="@string/unknown_location" />
-</RelativeLayout>
+        android:layout_marginBottom="12dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/unknown_location"
+        app:layout_constraintBottom_toTopOf="@+id/feed_item_body"
+        app:layout_constraintStart_toStartOf="@+id/feed_item_title"
+        app:layout_constraintTop_toBottomOf="@+id/feed_item_title" />
+</android.support.constraint.ConstraintLayout>

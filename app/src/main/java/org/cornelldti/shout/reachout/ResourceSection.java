@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import org.cornelldti.shout.R;
-import org.cornelldti.shout.util.LayoutUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,7 @@ class ResourceSection extends StatelessSection {
 
     ResourceSection(ReachOutFragment fragment, Context context, String sectionHeader) {
         super(SectionParameters.builder()
-                .itemResourceId(R.layout.resource_recycler_item)
+                .itemResourceId(R.layout.resource_list_item)
                 .headerResourceId(R.layout.resource_header)
                 .build());
         this.mContext = context;
@@ -42,7 +41,7 @@ class ResourceSection extends StatelessSection {
 
     @Override
     public RecyclerView.ViewHolder getItemViewHolder(View view) {
-        return new ResourcesHolder(view);
+        return new ResourceListItemHolder(view);
     }
 
     public RecyclerView.ViewHolder getHeaderViewHolder(View view) {
@@ -60,10 +59,10 @@ class ResourceSection extends StatelessSection {
         }
     }
 
-    public static class ResourcesHolder extends RecyclerView.ViewHolder {
+    public static class ResourceListItemHolder extends RecyclerView.ViewHolder {
         TextView title, description;
 
-        ResourcesHolder(View itemView) {
+        ResourceListItemHolder(View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.resource_item_title);
             description = itemView.findViewById(R.id.resource_item_description);
@@ -72,25 +71,22 @@ class ResourceSection extends StatelessSection {
 
     @Override
     public void onBindItemViewHolder(RecyclerView.ViewHolder holder, int position) {
-        ResourcesHolder itemHolder = (ResourcesHolder) holder;
-        final Resource r = mResourceList.get(position);
+        if (holder instanceof ResourceListItemHolder) {
+            ResourceListItemHolder itemHolder = (ResourceListItemHolder) holder;
+            final Resource r = mResourceList.get(position);
 
+            itemHolder.title.setText(r.getName());
 
-        itemHolder.title.setText(r.getName());
+            String rDescription = r.getDescription();
 
-        String rDescription = r.getDescription();
+            if (!TextUtils.isEmpty(rDescription)) {
+                itemHolder.description.setText(rDescription);
+            } else {
+                itemHolder.description.setVisibility(View.GONE);
+            }
 
-        if (!TextUtils.isEmpty(rDescription)) {
-            itemHolder.description.setText(rDescription);
-        } else {
-            itemHolder.description.setVisibility(View.GONE);
-
-            // TODO fix this in the xml (probably move to a linearlayout parent with margin/padding
-
-            itemHolder.title.setPadding(0, 0, 0, LayoutUtil.getPixelsFromDp(mContext.getResources(), 16));
+            holder.itemView.setOnClickListener(v -> this.mFragment.showDialog(r));
         }
-
-        holder.itemView.setOnClickListener(v -> this.mFragment.showDialog(r));
     }
 
     @Override

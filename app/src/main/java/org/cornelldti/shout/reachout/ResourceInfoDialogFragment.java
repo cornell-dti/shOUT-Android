@@ -56,7 +56,7 @@ public class ResourceInfoDialogFragment extends BottomSheetDialogFragment {
 
         if (mResource.getUrl() == null) {
             websiteButton.setVisibility(View.GONE);
-            moreInfoResDialog.findViewById(R.id.resource_info_separator_c).setVisibility(View.GONE);
+            moreInfoResDialog.findViewById(R.id.resource_info_separator_c).setVisibility(View.INVISIBLE);
         } else {
             String url = mResource.getUrl();
 
@@ -75,7 +75,7 @@ public class ResourceInfoDialogFragment extends BottomSheetDialogFragment {
 
         if (mResource.getAddress() == null) {
             addressButton.setVisibility(View.GONE);
-            moreInfoResDialog.findViewById(R.id.resource_info_separator_b).setVisibility(View.GONE);
+            moreInfoResDialog.findViewById(R.id.resource_info_separator).setVisibility(View.INVISIBLE);
         } else {
             TextView address = moreInfoResDialog.findViewById(R.id.resource_item_directions_subtitle_text_view);
             address.setText(mResource.getAddress());
@@ -89,10 +89,6 @@ public class ResourceInfoDialogFragment extends BottomSheetDialogFragment {
         }
 
         // TODO cleanup this hacky fix
-
-        if (mResource.getAddress() == null && mResource.getUrl() == null) {
-            moreInfoResDialog.findViewById(R.id.resource_info_separator).setVisibility(View.GONE);
-        }
 
         mPhoneNumberList.setAdapter(new PhoneAdapter(getContext(), mResource));
 
@@ -121,6 +117,7 @@ public class ResourceInfoDialogFragment extends BottomSheetDialogFragment {
                 }
             }
         });
+
         return moreInfoResDialog;
     }
 
