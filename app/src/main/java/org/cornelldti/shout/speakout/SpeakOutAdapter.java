@@ -1,9 +1,10 @@
 package org.cornelldti.shout.speakout;
 
+import android.arch.lifecycle.LifecycleObserver;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
@@ -13,28 +14,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.firebase.geofire.GeoFire;
-import com.firebase.geofire.GeoLocation;
-import com.firebase.geofire.LocationCallback;
-import com.firebase.ui.common.ChangeEventType;
-import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
-import org.cornelldti.shout.Page;
 import org.cornelldti.shout.R;
-import org.cornelldti.shout.ReportViewDialog;
 import org.cornelldti.shout.ShoutFirestore;
-import org.cornelldti.shout.ShoutRealtimeDatabase;
 import org.cornelldti.shout.util.function.BiConsumer;
 import org.cornelldti.shout.util.function.Consumer;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * An optimized and reloaded version of the original SpeakOutAdapter
@@ -47,17 +39,41 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
     private SpeakOutAdapter() {
     }
 
+    private int visibleThreshold = 5;
+    private int lastVisibleItem, totalItemCount;
+    boolean isLoading;
+    boolean isAllLoaded = false;
+
+    public RecyclerView.OnScrollListener listener() {
+        return new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                LinearLayoutManager llm = (LinearLayoutManager) recyclerView.getLayoutManager();
+
+                lastVisibleItem = llm.findLastVisibleItemPosition();
+                totalItemCount = llm.getItemCount();
+
+                if (!isLoading && totalItemCount <= (lastVisibleItem + visibleThreshold) && !isAllLoaded) {
+
+                    adapter().loadMore(visibleThreshold);
+
+                    isLoading = true;
+                }
+            }
+        };
+    }
+
     /* Constants for filtering... */
 
     public static final int FILTER_STORIES = 0;
     public static final int FILTER_NONE = -1;
 
+    private static final int DEFAULT_LIMIT = 20;
 
-    private FirestoreRecyclerAdapter<Report, ReportViewHolder> adapter() {
-        return filterStories ? storiesAdapter : allAdapter;
-    }
 
-    private InternalAdapter internalAdapter() {
+    private InternalAdapter adapter() {
         return filterStories ? storiesAdapter : allAdapter;
     }
 
@@ -78,20 +94,19 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
                 throw new RuntimeException("Unknown filter passed.");
         }
 
-        refreshItems();
+        notifyDataSetChanged();
     }
 
     /**
      * Refreshes the items currently being displayed.
      * Always called when the adapter changes.
      */
-    public void refreshItems() {
-        adapter().startListening(); // TODO check if this call is actually helpful.
-        notifyDataSetChanged();
+    public void refreshItems(Consumer<Boolean> refreshComplete) {
+        adapter().refresh(refreshComplete);
     }
 
     public String getId(int position) {
-        return internalAdapter().posToId.get(position);
+        return adapter().posToId.get(position);
     }
 
     /**
@@ -99,7 +114,7 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
      */
     @Override
     public void dataLoaded() {
-        refreshItems();
+        notifyDataSetChanged();
     }
 
     /* Wrapper methods around the current adapter (stories or all) */
@@ -107,18 +122,39 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
     @NonNull
     @Override
     public ReportViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+       /* if (viewType == 2) {
+            View loadMoreItemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_load_more_item, parent, false);
+
+            final LoadMoreViewHolder loadMoreViewHolder = new LoadMoreViewHolder(loadMoreItemView);
+
+            loadMoreItemView.setOnClickListener(view -> {
+
+            });
+
+            return loadMoreViewHolder;
+        } else {*/
         return adapter().onCreateViewHolder(parent, viewType);
+        // TODO
+        //}
     }
 
     @Override
     public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
-        adapter().bindViewHolder(holder, position);
+        //if (holder instanceof ReportViewHolder) {
+        adapter().bindViewHolder((ReportViewHolder) holder, position);
+        //}
     }
 
     @Override
     public int getItemCount() {
         return adapter().getItemCount();
     }
+
+//
+    //  @Override
+    //public int getItemViewType(int position) {
+    //  return 1;
+    //}
 
     /**
      * Constructs a SpeakOutAdapter
@@ -131,31 +167,23 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         CollectionReference ref = firestore.collection(ShoutFirestore.REPORTS_COLLECTION);
 
-        Query stories = ref.whereEqualTo(Report.HAS_BODY, true).orderBy(Report.TIMESTAMP, Query.Direction.DESCENDING).limit(100);
-        Query all = ref.orderBy(Report.TIMESTAMP, Query.Direction.DESCENDING).limit(100);
+        Query stories = ref.whereEqualTo(Report.HAS_BODY, true).orderBy(Report.TIMESTAMP, Query.Direction.DESCENDING);
+        Query all = ref.orderBy(Report.TIMESTAMP, Query.Direction.DESCENDING);
 
-        FirestoreRecyclerOptions<Report> storiesOptions = new FirestoreRecyclerOptions.Builder<Report>()
-                .setQuery(stories, Report.class)
-                .setLifecycleOwner(fragment)
-                .build();
-        FirestoreRecyclerOptions<Report> allOptions = new FirestoreRecyclerOptions.Builder<Report>()
-                .setQuery(all, Report.class)
-                .setLifecycleOwner(fragment)
-                .build();
 
         SpeakOutAdapter adapter = new SpeakOutAdapter();
         adapter.storiesAdapter = new InternalAdapter(
                 context,
                 reportViewHolder -> clickListener.apply(adapter, reportViewHolder),
                 adapter,
-                storiesOptions
+                stories
         );
 
         adapter.allAdapter = new InternalAdapter(
                 context,
                 reportViewHolder -> clickListener.apply(adapter, reportViewHolder),
                 adapter,
-                allOptions
+                all
         );
 
         return adapter;
@@ -180,13 +208,22 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
         }
     }
 
-    private static class InternalAdapter extends FirestoreRecyclerAdapter<Report, ReportViewHolder> {
+    private static class InternalAdapter extends RecyclerView.Adapter<ReportViewHolder> implements LifecycleObserver {
 
+        private static final String TAG = "InternalAdapter-SpeakOut";
+
+
+        private final Query mBaseQuery;
+        private Query mCurrentQuery;
         private SparseArray<String> posToId = new SparseArray<>();
 
         private final java.text.DateFormat dateFormatter, timeFormatter;
         private DataLoadedCallback dataLoadedCallback;
         private Consumer<ReportViewHolder> onItemClickListener;
+
+        private SparseArray<Report> mReports = new SparseArray<>();
+        private DocumentSnapshot lastVisible;
+
 
         /**
          * Create storiesAdapter new RecyclerView adapter that listens to storiesAdapter Firestore Query.  See {@link
@@ -196,14 +233,135 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
          * @param dataLoadedCallback - The dataLoadedCallback to call when initial data has been loaded.
          * @param options            - The options to construct this Firestore adapter with.
          */
-        private InternalAdapter(Context context, Consumer<ReportViewHolder> onItemClickListener, DataLoadedCallback dataLoadedCallback, @NonNull FirestoreRecyclerOptions<Report> options) {
-            super(options);
+        private InternalAdapter(Context context, Consumer<ReportViewHolder> onItemClickListener, @NonNull DataLoadedCallback dataLoadedCallback, @NonNull Query query) {
+            mBaseQuery = query;
+
+            mCurrentQuery = mBaseQuery.limit(DEFAULT_LIMIT);
+
+            mCurrentQuery.addSnapshotListener((documentSnapshots, e) -> {
+                if (e == null) {
+                    int position = 0;
+
+                    for (DocumentSnapshot document : documentSnapshots.getDocuments()) {
+                        Report report = document.toObject(Report.class);
+                        posToId.put(position, document.getId());
+                        mReports.put(position++, report);
+
+
+                        lastVisible = document;
+                    }
+
+                    dataLoadedCallback.dataLoaded();
+                }
+            });
 
             this.dataLoadedCallback = dataLoadedCallback;
             this.onItemClickListener = onItemClickListener;
 
             this.dateFormatter = DateFormat.getDateFormat(context);
             this.timeFormatter = DateFormat.getTimeFormat(context);
+        }
+
+        public void refresh() {
+            refresh((success) -> {
+            });
+        }
+
+        public void refresh(@NonNull Consumer<Boolean> refreshComplete) {
+            mCurrentQuery = mBaseQuery.endAt(lastVisible);
+
+            SparseArray<Report> reports = new SparseArray<>();
+            AtomicReference<DocumentSnapshot> lastVisible = new AtomicReference<>();
+
+            mCurrentQuery.addSnapshotListener((documentSnapshots, e) -> {
+                if (e == null) {
+                    int position = 0;
+
+                    List<DocumentSnapshot> documents = documentSnapshots.getDocuments();
+
+                    for (DocumentSnapshot document : documents) {
+                        Report report = document.toObject(Report.class);
+                        posToId.put(position, document.getId());
+                        reports.put(position++, report);
+                    }
+
+                    mReports = reports;
+                    this.lastVisible = documents.get(documents.size() - 1);
+
+                    refreshComplete.apply(true);
+
+                    dataLoadedCallback.dataLoaded();
+
+                    notifyDataSetChanged();
+                } else {
+                    refreshComplete.apply(false);
+                }
+            });
+        }
+
+        public void loadMore(int amount) {
+            mCurrentQuery = mBaseQuery.limit(amount + 1).startAt(lastVisible);
+
+            mCurrentQuery.addSnapshotListener((documentSnapshots, e) -> {
+                if (e == null) {
+                    int position = mReports.size() - 1;
+
+                    List<DocumentSnapshot> documents = documentSnapshots.getDocuments();
+
+                    if (documents.get(0).equals(lastVisible)) {
+                        for (DocumentSnapshot document : documents) {
+                            Report report = document.toObject(Report.class);
+                            posToId.put(position, document.getId());
+                            mReports.put(position++, report);
+
+                            lastVisible = document;
+                        }
+
+                        notifyItemRangeChanged(position, amount + 1);
+
+                        dataLoadedCallback.dataLoaded();
+                    } else {
+                        // TODO print error
+                        refresh();
+                    }
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return mReports.size();
+        }
+
+
+        @Override
+        public void onBindViewHolder(@NonNull ReportViewHolder viewHolder, int position) {
+            Report model = mReports.get(position);
+
+            viewHolder.report = model;
+
+            viewHolder.title.setText(model.getTitle());
+
+            String body = model.getBody();
+
+            if (!TextUtils.isEmpty(body)) {
+                viewHolder.body.setText(body);
+                viewHolder.body.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.body.setVisibility(View.GONE);
+            }
+
+            String location = model.getLocation();
+
+            if (!TextUtils.isEmpty(location)) {
+                viewHolder.location.setText(location);
+                viewHolder.location.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.location.setVisibility(View.GONE);
+            }
+
+            viewHolder.date.setText(dateFormatter.format(model.getTimestamp()));
+            viewHolder.time.setText(timeFormatter.format(model.getTimestamp()));
         }
 
         @NonNull
@@ -216,50 +374,6 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
             feedItemView.setOnClickListener(view -> onItemClickListener.apply(holder));
 
             return holder;
-        }
-
-        @Override
-        protected void onBindViewHolder(@NonNull ReportViewHolder holder, int position, @NonNull Report model) {
-            holder.report = model;
-
-            holder.title.setText(model.getTitle());
-
-            String body = model.getBody();
-
-            if (!TextUtils.isEmpty(body)) {
-                holder.body.setText(body);
-                holder.body.setVisibility(View.VISIBLE);
-            } else {
-                holder.body.setVisibility(View.GONE);
-            }
-
-            String location = model.getLocation();
-
-            if (!TextUtils.isEmpty(location)) {
-                holder.location.setText(location);
-                holder.location.setVisibility(View.VISIBLE);
-            } else {
-                holder.location.setVisibility(View.GONE);
-            }
-
-            holder.date.setText(dateFormatter.format(model.getTimestamp()));
-            holder.time.setText(timeFormatter.format(model.getTimestamp()));
-        }
-
-        @Override
-        public void onChildChanged(@NonNull ChangeEventType type,
-                                   @NonNull DocumentSnapshot snapshot,
-                                   int newIndex,
-                                   int oldIndex) {
-            posToId.put(newIndex, snapshot.getId());
-
-            super.onChildChanged(type, snapshot, newIndex, oldIndex);
-        }
-
-        @Override
-        public void onDataChanged() {
-            this.dataLoadedCallback.dataLoaded();
-            super.onDataChanged();
         }
     }
 }

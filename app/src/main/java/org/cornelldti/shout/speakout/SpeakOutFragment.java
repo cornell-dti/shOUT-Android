@@ -48,53 +48,57 @@ public class SpeakOutFragment extends ShoutTabFragment {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
 
-        final SpeakOutAdapter adapter = SpeakOutAdapter.construct(this, (eventAdapter, reportHolder) -> {
+
+        final SpeakOutAdapter adapter = SpeakOutAdapter.construct(this, (eventAdapter, holder) -> {
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference(ShoutRealtimeDatabase.REPORT_LOCATIONS_KEY);
             GeoFire geoFire = new GeoFire(ref);
 
             if (eventAdapter == null) return;
 
-            String id = eventAdapter.getId(reportHolder.getAdapterPosition());
+            String id = eventAdapter.getId(holder.getAdapterPosition());
 
-            if (id != null) {
-                geoFire.getLocation(id, new LocationCallback() {
-                    @Override
-                    public void onLocationResult(String key, GeoLocation location) {
-                        if (reportHolder.report == null) return;
+            if (holder instanceof SpeakOutAdapter.ReportViewHolder) {
+                SpeakOutAdapter.ReportViewHolder reportHolder = (SpeakOutAdapter.ReportViewHolder) holder;
 
-                        ReportViewDialog dialog = ReportViewDialog.newInstance(
-                                reportHolder.report,
-                                new LatLng(location.latitude, location.longitude),
-                                Page.SPEAK_OUT
-                        );
-                        showDialog(dialog);
-                    }
+                if (id != null) {
+                    geoFire.getLocation(id, new LocationCallback() {
+                        @Override
+                        public void onLocationResult(String key, GeoLocation location) {
+                            if (reportHolder.report == null) return;
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        if (reportHolder.report == null) return;
+                            ReportViewDialog dialog = ReportViewDialog.newInstance(
+                                    reportHolder.report,
+                                    new LatLng(location.latitude, location.longitude),
+                                    Page.SPEAK_OUT
+                            );
+                            showDialog(dialog);
+                        }
 
-                        ReportViewDialog dialog = ReportViewDialog.newInstance(reportHolder.report, Page.SPEAK_OUT);
-                        showDialog(dialog);
-                    }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            if (reportHolder.report == null) return;
 
-                    private void showDialog(ReportViewDialog dialog) {
-                        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                        transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
-                    }
-                });
-            } else {
-                if (reportHolder.report == null) return;
+                            ReportViewDialog dialog = ReportViewDialog.newInstance(reportHolder.report, Page.SPEAK_OUT);
+                            showDialog(dialog);
+                        }
 
-                ReportViewDialog dialog = ReportViewDialog.newInstance(reportHolder.report, Page.SPEAK_OUT);
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+                        private void showDialog(ReportViewDialog dialog) {
+                            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                            transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+                        }
+                    });
+                } else if (reportHolder.report != null) {
+                    ReportViewDialog dialog = ReportViewDialog.newInstance(reportHolder.report, Page.SPEAK_OUT);
+                    FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+                }
             }
 
         }, speakoutFragment.getContext());
 
+        recyclerView.addOnScrollListener(adapter.listener());
         recyclerView.setAdapter(adapter);
 
         ViewCompat.setNestedScrollingEnabled(recyclerView, false); // enables "fast" scrolling
@@ -124,8 +128,9 @@ public class SpeakOutFragment extends ShoutTabFragment {
         mSwipeRefreshLayout = speakoutFragment.findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
             // Refresh items
-            adapter.refreshItems();
-            mSwipeRefreshLayout.setRefreshing(false);
+            adapter.refreshItems((success) -> {
+                mSwipeRefreshLayout.setRefreshing(false);
+            });
         });
 
         /* Setup filtering tabs... */ // TODO Discuss UX with design
