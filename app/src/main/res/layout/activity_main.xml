@@ -18,6 +18,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:clickable="true"
+        app:backgroundTint="@color/colorSecondaryAccent"
         app:fabSize="normal"
         app:layout_anchor="@+id/bottom_sheet"
         app:layout_anchorGravity="top|right"

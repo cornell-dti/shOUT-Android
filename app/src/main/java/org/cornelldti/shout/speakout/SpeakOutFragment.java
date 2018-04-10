@@ -133,7 +133,7 @@ public class SpeakOutFragment extends ShoutTabFragment {
         });
 
         /* Setup filtering tabs... */ // TODO Discuss UX with design
-        final Button button = speakoutFragment.findViewById(R.id.all_reports_button);
+       /* final Button button = speakoutFragment.findViewById(R.id.all_reports_button);
         final Button stories_button = speakoutFragment.findViewById(R.id.stories_button);
 
         final LinearLayout buttonHighlight = speakoutFragment.findViewById(R.id.all_reports_highlight);
@@ -152,9 +152,8 @@ public class SpeakOutFragment extends ShoutTabFragment {
             buttonHighlight.setVisibility(View.INVISIBLE);
 
             adapter.filter(SpeakOutAdapter.FILTER_STORIES);
-        });
-
-
+        });*/
+       
         return speakoutFragment;
     }
 

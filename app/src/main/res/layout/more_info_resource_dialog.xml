@@ -36,7 +36,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/edit_text_separator"
+        android:background="@color/editTextSeparator"
         tools:ignore="Orientation" />
 
     <android.support.constraint.ConstraintLayout
@@ -87,7 +87,7 @@
         android:id="@+id/resource_info_separator_c"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/edit_text_separator"
+        android:background="@color/editTextSeparator"
         tools:ignore="Orientation" />
 
     <android.support.constraint.ConstraintLayout
@@ -137,7 +137,7 @@
         android:id="@+id/resource_info_separator"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/edit_text_separator"
+        android:background="@color/editTextSeparator"
         tools:ignore="Orientation" />
 
     <ListView

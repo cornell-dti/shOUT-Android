@@ -573,8 +573,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
                 break;
             case CURRENT_LOCATION:
-                // mFloatingActionButton.show();
-
                 mFloatingActionButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_my_location));
 
                 mFloatingActionButton.setOnClickListener(view -> {
@@ -587,8 +585,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
                 break;
             case HELP:
-
-                // mFloatingActionButton.show();
                 mFloatingActionButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_help));
                 break;
             case DISABLED:
@@ -612,7 +608,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         Window window = getWindow();
         if (window != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (page == Page.GO_OUT) {
+                if (page == Page.GO_OUT || page == Page.UNKNOWN) {
                     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 
                     window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
@@ -625,7 +621,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
                 }
             } else {
-                // TODO test compatibility code (update the compat code)
+                // TODO CRITICIAL test compatibility code (update the compat code)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     if (page != Page.SPEAK_OUT) {
                         window.setStatusBarColor(Color.TRANSPARENT);

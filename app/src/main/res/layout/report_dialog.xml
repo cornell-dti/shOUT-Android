@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/background_light"
+    android:background="@color/colorPrimary"
     android:orientation="vertical">
-
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/report_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorAccent"
+        android:background="@color/colorSecondaryAccent"
         android:theme="@style/Widget.AppCompat.ActionBar.Solid">
 
         <LinearLayout
@@ -57,13 +56,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-
-        <!-- <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
--->
         <EditText
             android:id="@+id/report_title_edit_text"
             style="@style/EnhancedEditText"
@@ -75,12 +70,11 @@
             android:hint="@string/summary_hint"
             android:inputType="textPersonName"
             android:singleLine="true" />
-        <!-- </android.support.design.widget.TextInputLayout>
--->
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/edit_text_separator" />
+            android:background="@color/editTextSeparator" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -122,7 +116,7 @@
                 <View
                     android:layout_width="1dp"
                     android:layout_height="match_parent"
-                    android:background="@color/edit_text_separator" />
+                    android:background="@color/editTextSeparator" />
 
 
                 <LinearLayout
@@ -158,13 +152,8 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/edit_text_separator" />
+            android:background="@color/editTextSeparator" />
 
-
-        <!-- <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"> -->
 
         <AutoCompleteTextView
             android:id="@+id/report_location_edit_text"
@@ -175,17 +164,12 @@
             android:hint="@string/location_hint"
             android:paddingBottom="15dp"
             android:paddingTop="15dp" />
-        <!--  </android.support.design.widget.TextInputLayout> -->
 
-        <!-- <android.support.design.widget.TextInputLayout
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:layout_marginTop="15dp">-->
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/edit_text_separator" />
+            android:background="@color/editTextSeparator" />
 
 
         <EditText
@@ -203,7 +187,6 @@
 
             tools:ignore="RtlSymmetry" />
 
-        <!--  </android.support.design.widget.TextInputLayout>
- -->
+
     </LinearLayout>
-</LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

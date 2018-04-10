@@ -2,10 +2,14 @@
 <resources>
     <color name="colorPrimary">@android:color/white</color>
     <color name="colorAccent">#0cc9b4</color>
+    <color name="colorSecondaryAccent">#616161</color>
     <color name="colorPrimaryDark">#FF75AB9F</color>
     <color name="selectedTab">@color/colorAccent</color>
     <color name="unselectedTab">@android:color/primary_text_light</color>
-    <color name="shadow_start">#1F000000</color>
-    <color name="subheader">#757575</color>
-    <color name="edit_text_separator">#D3D3D3</color>
+    <color name="shadowStart">#1F000000</color>
+    <color name="editTextSeparator">#D3D3D3</color>
+    <color name="colorMutedAccent">#bdbdbd</color>
+    <color name="colorSecondaryText">#757575</color>
+    <color name="colorPrimaryText">#424242</color>
+    <color name="colorSubheaderText">#757575</color>
 </resources>
