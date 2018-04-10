@@ -11,7 +11,6 @@
     <application xmlns:tools="http://schemas.android.com/tools"
         android:name=".ShoutApplication"
         android:allowBackup="false"
-        android:debuggable="true"
         android:icon="@mipmap/shout_logo"
         android:label="@string/app_name"
         android:supportsRtl="true"

@@ -1,6 +1,5 @@
 package org.cornelldti.shout.reachout;
 
-import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
@@ -18,20 +17,27 @@ import io.github.luizgrp.sectionedrecyclerviewadapter.StatelessSection;
  * Created by Evan Welsh on 4/2/18.
  */
 class ResourceSection extends StatelessSection {
-    private List<Resource> mResourceList = new ArrayList<>();
-    private final Context mContext;
-    private final ReachOutFragment mFragment;
 
+    private final List<Resource> mResourceList = new ArrayList<>();
+    private final ReachOutFragment mFragment;
     private final String mSectionHeader;
 
-    ResourceSection(ReachOutFragment fragment, Context context, String sectionHeader) {
+    ResourceSection(ReachOutFragment fragment, String sectionHeader) {
         super(SectionParameters.builder()
                 .itemResourceId(R.layout.resource_list_item)
                 .headerResourceId(R.layout.resource_header)
                 .build());
-        this.mContext = context;
-        this.mFragment = fragment;
-        this.mSectionHeader = sectionHeader;
+
+        mFragment = fragment;
+        mSectionHeader = sectionHeader;
+    }
+
+    public void addResource(Resource resource) {
+        mResourceList.add(resource);
+    }
+
+    public List<Resource> getResources() {
+        return mResourceList;
     }
 
     @Override
@@ -41,66 +47,59 @@ class ResourceSection extends StatelessSection {
 
     @Override
     public RecyclerView.ViewHolder getItemViewHolder(View view) {
-        return new ResourceListItemHolder(view);
+        return new ResourceItemHolder(view);
     }
 
     public RecyclerView.ViewHolder getHeaderViewHolder(View view) {
         return new HeaderViewHolder(view);
     }
 
-    private class HeaderViewHolder extends RecyclerView.ViewHolder {
-
-        private final TextView titleTxtView;
-
-        HeaderViewHolder(View view) {
-            super(view);
-
-            titleTxtView = view.findViewById(R.id.resource_header_text_view);
-        }
-    }
-
-    public static class ResourceListItemHolder extends RecyclerView.ViewHolder {
-        TextView title, description;
-
-        ResourceListItemHolder(View itemView) {
-            super(itemView);
-            title = itemView.findViewById(R.id.resource_item_title);
-            description = itemView.findViewById(R.id.resource_item_description);
-        }
-    }
-
     @Override
     public void onBindItemViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (holder instanceof ResourceListItemHolder) {
-            ResourceListItemHolder itemHolder = (ResourceListItemHolder) holder;
-            final Resource r = mResourceList.get(position);
+        if (holder instanceof ResourceItemHolder) {
+            ResourceItemHolder itemHolder = (ResourceItemHolder) holder;
 
-            itemHolder.title.setText(r.getName());
+            final Resource resource = mResourceList.get(position);
 
-            String rDescription = r.getDescription();
+            itemHolder.mTitle.setText(resource.getName());
 
-            if (!TextUtils.isEmpty(rDescription)) {
-                itemHolder.description.setText(rDescription);
+            String description = resource.getDescription();
+
+            if (!TextUtils.isEmpty(description)) {
+                itemHolder.mDescription.setText(description);
             } else {
-                itemHolder.description.setVisibility(View.GONE);
+                itemHolder.mDescription.setVisibility(View.GONE);
             }
 
-            holder.itemView.setOnClickListener(v -> this.mFragment.showDialog(r));
+            holder.itemView.setOnClickListener(v -> this.mFragment.showDialog(resource));
         }
     }
 
     @Override
     public void onBindHeaderViewHolder(RecyclerView.ViewHolder holder) {
         if (holder instanceof HeaderViewHolder && this.hasHeader()) {
-            ((HeaderViewHolder) holder).titleTxtView.setText(this.mSectionHeader);
+            ((HeaderViewHolder) holder).mTitle.setText(this.mSectionHeader);
         }
     }
 
-    public void addResource(Resource resource) {
-        mResourceList.add(resource);
+    private static class HeaderViewHolder extends RecyclerView.ViewHolder {
+        private final TextView mTitle;
+
+        HeaderViewHolder(View view) {
+            super(view);
+
+            mTitle = view.findViewById(R.id.resource_header_text_view);
+        }
     }
 
-    public List<Resource> getResources() {
-        return mResourceList;
+    public static class ResourceItemHolder extends RecyclerView.ViewHolder {
+        TextView mTitle, mDescription;
+
+        ResourceItemHolder(View itemView) {
+            super(itemView);
+
+            mTitle = itemView.findViewById(R.id.resource_item_title);
+            mDescription = itemView.findViewById(R.id.resource_item_description);
+        }
     }
 }

@@ -12,8 +12,7 @@
         android:id="@+id/report_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorAccent"
-        android:minHeight="?attr/actionBarSize"
+        android:background="@color/colorAccent"
         android:theme="@style/Widget.AppCompat.ActionBar.Solid">
 
         <LinearLayout
@@ -23,9 +22,11 @@
 
             <ImageButton
                 android:id="@+id/report_button_close"
-                android:layout_width="?attr/actionBarSize"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="32dp"
+
+                android:layout_height="32dp"
+                android:layout_margin="8dp"
                 android:contentDescription="@string/close_button_description"
                 android:tint="@android:color/white"
                 app:srcCompat="@drawable/ic_close" />

@@ -1,12 +1,10 @@
 package org.cornelldti.shout.reachout;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewCompat;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.firebase.ui.firestore.ClassSnapshotParser;
 import com.google.firebase.firestore.CollectionReference;
@@ -25,6 +22,7 @@ import com.google.firebase.firestore.Query;
 import org.cornelldti.shout.R;
 import org.cornelldti.shout.ShoutFirestore;
 import org.cornelldti.shout.ShoutTabFragment;
+import org.cornelldti.shout.util.AndroidUtil;
 import org.cornelldti.shout.util.LayoutUtil;
 import org.cornelldti.shout.util.Util;
 
@@ -38,93 +36,80 @@ public class ReachOutFragment extends ShoutTabFragment {
     private static final String DEFAULT_SECTION = "Resources";
 
     private Map<String, ResourceSection> resourceSections = new HashMap<>();
-
-    private RecyclerView mRecyclerView;
-
-    private FirebaseFirestore db;
-
-    public ReachOutFragment() {
-    }
+    private FirebaseFirestore mFirestore;
+    private ResourceAdapter mResourceAdapter;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.reachout_fragment, container, false);
-        mRecyclerView = view.findViewById(R.id.reachout_recycler_view);
-        db = FirebaseFirestore.getInstance();
+        RecyclerView mRecyclerView = view.findViewById(R.id.reachout_recycler_view);
 
-        Activity activity = getActivity();
+        mResourceAdapter = new ResourceAdapter();
+        mRecyclerView.setAdapter(mResourceAdapter);
 
-        if (activity != null) {
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(mLayoutManager);
 
-            final int statusBarSize = LayoutUtil.getStatusBarHeight(activity);
+        mFirestore = FirebaseFirestore.getInstance();
+
+        Context context = AndroidUtil.getContext(container, this);
+
+        if (context != null) {
+
+            final int statusBarSize = LayoutUtil.getStatusBarHeight(context);
 
             if (statusBarSize > 0) {
                 LinearLayout toolbar = view.findViewById(R.id.reachout_appbar);
                 toolbar.setPadding(0, statusBarSize, 0, 0);
             }
 
-
-            queryResources();
-
-            // DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
-            // mRecyclerView.addItemDecoration(dividerItemDecoration);
+            loadResources();
         }
+
+        ViewCompat.setNestedScrollingEnabled(mRecyclerView, false); // enables "fast" scrolling
 
         return view;
     }
 
-    private void queryResources() {
-        //if (db == null) return;
-
-        CollectionReference ref = db.collection(ShoutFirestore.RESOURCES_COLLECTION); // TODO order by position key
-        final ResourcesAdapter sectionAdapter = new ResourcesAdapter();
-
-        mRecyclerView.setAdapter(sectionAdapter);
-
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(mLayoutManager);
+    private void loadResources() {
+        CollectionReference ref = mFirestore.collection(ShoutFirestore.RESOURCES_COLLECTION);
 
         ref.get().addOnSuccessListener((documentSnapshots -> {
             for (DocumentSnapshot snapshot : documentSnapshots.getDocuments()) {
                 Query query = ref.document(snapshot.getId()).collection(Resource.PHONES);
 
-                ClassSnapshotParser<Resource> parser = new ClassSnapshotParser<>(Resource.class);
-                Resource resource = parser.parseSnapshot(snapshot);
+                Resource resource = new ClassSnapshotParser<>(Resource.class).parseSnapshot(snapshot);
 
                 query.get().addOnSuccessListener(phones -> {
                     for (DocumentSnapshot phoneDocument : phones.getDocuments()) {
                         resource.addPhoneNumber(phoneDocument.toObject(Phone.class));
                     }
-
-                    // TODO technically there is an extremely small time when if the user clicks phone numbers may not be loaded...
-                    // TODO figure out how to "update" the dialog.
-                }).addOnFailureListener(error -> {
-                    Log.d(TAG, error.getMessage());
-                });
+                }).addOnFailureListener(error -> Log.d(TAG, error.getMessage()));
 
                 String sectionHeader = Util.getValueOrDefault(resource.getSection(), DEFAULT_SECTION);
 
-                ResourceSection section1 = Util.getValueOrDefault(resourceSections.get(sectionHeader), () -> new ResourceSection(this, getContext(), sectionHeader));
+                ResourceSection section = Util.getValueOrDefault(
+                        resourceSections.get(sectionHeader),
+                        () -> new ResourceSection(this, sectionHeader)
+                );
 
-                section1.addResource(resource);
-
-                if (resourceSections.put(sectionHeader, section1) == null) {
-                    sectionAdapter.addSection(sectionHeader, section1);
+                if (resourceSections.put(sectionHeader, section) == null) {
+                    mResourceAdapter.addSection(sectionHeader, section);
+                    mResourceAdapter.notifySectionChangedToVisible(section);
                 }
 
-                sectionAdapter.notifyDataSetChanged();
+                section.addResource(resource);
+                mResourceAdapter.notifyItemChangedInSection(section, section.getResources().size() - 1);
             }
         })).addOnFailureListener((error) -> Log.e(TAG, "Could not add resource..." + error.getMessage()));
-
-        ViewCompat.setNestedScrollingEnabled(mRecyclerView, false); // enables "fast" scrolling
     }
 
     void showDialog(Resource resource) {
         FragmentManager manager = getFragmentManager();
 
         if (manager != null) {
-            ResourceInfoDialogFragment dialog = ResourceInfoDialogFragment.newInstance(resource);
-            dialog.show(manager, "ResourceInfoDialogFragment");
+            ResourceMoreInfoDialogFragment dialog = ResourceMoreInfoDialogFragment.newInstance(resource);
+            dialog.show(manager, ResourceMoreInfoDialogFragment.TAG);
         }
     }
 

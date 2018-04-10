@@ -6,7 +6,6 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.location.Address;
 import android.os.Build;
@@ -137,9 +136,13 @@ public class ReportIncidentDialogFragment extends AppCompatDialogFragment {
 
         /* Ensure we don't overlap with the status bar. */
 
-        toolbar.setPadding(0, LayoutUtil.getStatusBarHeight(getContext()), 0, 0);
+        Context context = AndroidUtil.getContext(container, this);
 
-       /* Setup toolbar buttons */
+        if (context != null) {
+            toolbar.setPadding(0, LayoutUtil.getStatusBarHeight(context), 0, 0);
+        }
+
+        /* Setup toolbar buttons */
 
         ImageButton closeButton = reportDialogView.findViewById(R.id.report_button_close);
 
@@ -211,10 +214,8 @@ public class ReportIncidentDialogFragment extends AppCompatDialogFragment {
         /* Setup location selection to autocomplete... */
         // TODO fix this
 
-        Context context = AndroidUtil.getContext(reportDialogView, this);
-
         if (context != null) {
-            final GeoDataClient client = Places.getGeoDataClient(context, null);
+            final GeoDataClient client = Places.getGeoDataClient(context);
             final PlaceAutocompleteAdapter adapter = new PlaceAutocompleteAdapter(context, client, LocationUtil.getIthacaBounds(), null);
 
             locationEdit.setAdapter(adapter);
@@ -236,7 +237,6 @@ public class ReportIncidentDialogFragment extends AppCompatDialogFragment {
         } else {
             // TODO Hide location field or allow user to input anything?
         }
-
 
         /* Setup the location selector if a location was passed to the dialog... */
 
@@ -274,13 +274,16 @@ public class ReportIncidentDialogFragment extends AppCompatDialogFragment {
 
         setStyle(DialogFragment.STYLE_NO_TITLE, R.style.FullScreenDialog);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getActivity().getWindow().setStatusBarColor(Color.TRANSPARENT);
+        Activity activity = getActivity();
+
+        if (activity != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            activity.getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
     }
 
     /* Handles setting the report location after place selection from the autofill list */
     private OnCompleteListener<PlaceBufferResponse> mUpdatePlaceDetailsCallback = new OnCompleteListener<PlaceBufferResponse>() {
+        @SuppressLint("RestrictedApi")
         @Override
         public void onComplete(@NonNull Task<PlaceBufferResponse> task) {
             try {

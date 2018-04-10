@@ -5,5 +5,5 @@ import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapt
 /**
  * Created by Evan Welsh on 4/2/18.
  */
-public class ResourcesAdapter extends SectionedRecyclerViewAdapter {
+class ResourceAdapter extends SectionedRecyclerViewAdapter {
 }

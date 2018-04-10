@@ -13,6 +13,8 @@ import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -52,7 +54,7 @@ import org.cornelldti.shout.FABAction;
 import org.cornelldti.shout.MainActivity;
 import org.cornelldti.shout.Page;
 import org.cornelldti.shout.R;
-import org.cornelldti.shout.ReportViewDialog;
+import org.cornelldti.shout.ReportViewDialogFragment;
 import org.cornelldti.shout.ShoutRealtimeDatabase;
 import org.cornelldti.shout.ShoutTabFragment;
 import org.cornelldti.shout.speakout.ReportIncidentDialogFragment;
@@ -145,20 +147,19 @@ public class GoOutFragment extends ShoutTabFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.goout_fragment, container, false);
+        ConstraintLayout rootView = (ConstraintLayout) inflater.inflate(R.layout.go_out_fragment, container, false);
 
         /* Fix status bar overlap issues */
 
-        final int statusbarSize = LayoutUtil.getStatusBarHeight(getActivity());
+        final int statusBarSize = LayoutUtil.getStatusBarHeight(getActivity());
 
-        if (statusbarSize > 0) {
+        if (statusBarSize > 0) {
             CardView view = rootView.findViewById(R.id.location_search_bar);
-            ConstraintLayout constraintLayout = (ConstraintLayout) view.getParent();
 
-            ConstraintSet constraintSet = new ConstraintSet();
-            constraintSet.clone(constraintLayout);
-            constraintSet.connect(view.getId(), ConstraintSet.TOP, constraintLayout.getId(), ConstraintSet.TOP, statusbarSize + LayoutUtil.getPixelsFromDp(getResources(), 8));
-            constraintSet.applyTo(constraintLayout);
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) view.getLayoutParams();
+            params.topMargin = statusBarSize + LayoutUtil.getPixelsFromDp(getResources(), 8);
+
+            view.setLayoutParams(params);
         }
 
         /* Setup the search bar... */
@@ -201,7 +202,7 @@ public class GoOutFragment extends ShoutTabFragment {
 
         /* Setup the map... */
 
-        mMapView.getMapAsync(instantiateMapHandler(context, statusbarSize));
+        mMapView.getMapAsync(instantiateMapHandler(context, statusBarSize));
 
         return rootView;
     }
@@ -415,7 +416,7 @@ public class GoOutFragment extends ShoutTabFragment {
     private void showReportsByRadius(MainActivity mainActivity, LatLng latLng, double radius, boolean nearby) {
         if (mainActivity != null) {
             mainActivity.updateSheet((sheet, behavior, shadow, nearbyReportsView, addressTextView, numberOfReportsTextView) -> {
-                    /* Setup the recycler view for nearby reports */
+                /* Setup the recycler view for nearby reports */
 
                 final RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(mainActivity);
 
@@ -440,7 +441,7 @@ public class GoOutFragment extends ShoutTabFragment {
                                             public void onLocationResult(String key, GeoLocation location) {
                                                 if (reportHolder.report == null) return;
 
-                                                ReportViewDialog dialog = ReportViewDialog.newInstance(
+                                                ReportViewDialogFragment dialog = ReportViewDialogFragment.newInstance(
                                                         reportHolder.report,
                                                         new LatLng(location.latitude, location.longitude),
                                                         Page.GO_OUT
@@ -452,23 +453,17 @@ public class GoOutFragment extends ShoutTabFragment {
                                             public void onCancelled(DatabaseError databaseError) {
                                                 if (reportHolder.report == null) return;
 
-                                                ReportViewDialog dialog = ReportViewDialog.newInstance(reportHolder.report, Page.GO_OUT);
+                                                ReportViewDialogFragment dialog = ReportViewDialogFragment.newInstance(reportHolder.report, Page.GO_OUT);
                                                 showDialog(dialog);
                                             }
 
-                                            private void showDialog(ReportViewDialog dialog) {
-                                                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                                                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                                                transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
-                                            }
+
                                         });
                                     } else {
                                         if (reportHolder.report == null) return;
 
-                                        ReportViewDialog dialog = ReportViewDialog.newInstance(reportHolder.report, Page.GO_OUT);
-                                        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                                        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                                        transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+                                        ReportViewDialogFragment dialog = ReportViewDialogFragment.newInstance(reportHolder.report, Page.GO_OUT);
+                                        showDialog(dialog);
                                     }
 
                                 }, latLng, mainActivity, radius) // todo radius
@@ -486,11 +481,11 @@ public class GoOutFragment extends ShoutTabFragment {
                 // TODO convert latLng to place *more correctly :p*
                 addressTextView.setText(LocationUtil.getAddressForLocation(mainActivity, latLng).getAddressLine(0));
 
-                    /* Set the FAB Action to edit... */
+                /* Set the FAB Action to edit... */
 
                 mainActivity.setFABAction(FABAction.START_REPORT, latLng, Page.GO_OUT);
 
-                    /* Show the "special location" marker... */
+                /* Show the "special location" marker... */
 
                 // TODO update or recreate?
                 clickedLocationMarker.setPosition(latLng);
@@ -498,9 +493,9 @@ public class GoOutFragment extends ShoutTabFragment {
 
                 final LinearLayout quickView = sheet.findViewById(R.id.quick_view_padding);
 
-                    /* This handles two primary styles... */
-                    /* 1) Clear all data/adapters when the bottom sheet is hidden. */
-                    /* 2) Adjust the top padding to ensure the bottom sheet doesn't go behind the status bar while being animated... */
+                /* This handles two primary styles... */
+                /* 1) Clear all data/adapters when the bottom sheet is hidden. */
+                /* 2) Adjust the top padding to ensure the bottom sheet doesn't go behind the status bar while being animated... */
 
                 behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
                     @Override
@@ -559,7 +554,7 @@ public class GoOutFragment extends ShoutTabFragment {
                     }
                 });
 
-                    /* Show the bottom sheet... */
+                /* Show the bottom sheet... */
                 behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             });
         } else {
@@ -567,7 +562,15 @@ public class GoOutFragment extends ShoutTabFragment {
 
             ReportIncidentDialogFragment dialog = ReportIncidentDialogFragment.newInstance(latLng, Page.GO_OUT);
 
-            FragmentTransaction transaction = getFragmentManager().beginTransaction(); // todo nullpointer
+            showDialog(dialog);
+        }
+    }
+
+    private void showDialog(DialogFragment dialog) {
+        FragmentManager manager = getFragmentManager();
+
+        if (manager != null) {
+            FragmentTransaction transaction = manager.beginTransaction();
             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
         }

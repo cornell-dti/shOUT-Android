@@ -22,8 +22,9 @@ import java.util.List;
  * Created by kaushikr on 3/20/18.
  */
 
-public class ResourceInfoDialogFragment extends BottomSheetDialogFragment {
+public class ResourceMoreInfoDialogFragment extends BottomSheetDialogFragment {
 
+    public static final String TAG = "ResourceMoreInfoDialogFragment";
     private Resource mResource;
 
     /* UI Elements */
@@ -92,7 +93,7 @@ public class ResourceInfoDialogFragment extends BottomSheetDialogFragment {
 
         mPhoneNumberList.setAdapter(new PhoneAdapter(getContext(), mResource));
 
-        // TODO add emergency confirmation popup w/ description
+        // TODO add emergency confirmation popup w/ mDescription
 
         mPhoneNumberList.setOnItemClickListener((parent, view, position, id) -> {
             Intent intent = new Intent(Intent.ACTION_DIAL);
@@ -121,8 +122,8 @@ public class ResourceInfoDialogFragment extends BottomSheetDialogFragment {
         return moreInfoResDialog;
     }
 
-    public static ResourceInfoDialogFragment newInstance(Resource resource) {
-        ResourceInfoDialogFragment dialog = new ResourceInfoDialogFragment();
+    public static ResourceMoreInfoDialogFragment newInstance(Resource resource) {
+        ResourceMoreInfoDialogFragment dialog = new ResourceMoreInfoDialogFragment();
 
         Bundle args = new Bundle();
         args.putSerializable("resource", resource);

@@ -1,6 +1,7 @@
 package org.cornelldti.shout;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
@@ -24,6 +25,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.cornelldti.shout.goout.ZoomLevel;
 import org.cornelldti.shout.speakout.Report;
+import org.cornelldti.shout.util.AndroidUtil;
 import org.cornelldti.shout.util.LayoutUtil;
 
 import java.util.Calendar;
@@ -32,7 +34,7 @@ import java.util.Calendar;
  * Created by Evan Welsh on 3/17/18.
  */
 
-public class ReportViewDialog extends AppCompatDialogFragment {
+public class ReportViewDialogFragment extends AppCompatDialogFragment {
 
     private static final String TAG = "ReportView";
 
@@ -64,8 +66,8 @@ public class ReportViewDialog extends AppCompatDialogFragment {
         super.onAttach(context);
     }
 
-    public static ReportViewDialog newInstance(Report report, LatLng latLng, int returnPage) {
-        ReportViewDialog dialog = new ReportViewDialog();
+    public static ReportViewDialogFragment newInstance(Report report, LatLng latLng, int returnPage) {
+        ReportViewDialogFragment dialog = new ReportViewDialogFragment();
 
         Bundle args = new Bundle();
         args.putDoubleArray("latLng", new double[]{latLng.latitude, latLng.longitude});
@@ -78,8 +80,8 @@ public class ReportViewDialog extends AppCompatDialogFragment {
         return dialog;
     }
 
-    public static ReportViewDialog newInstance(Report report, int returnPage) {
-        ReportViewDialog dialog = new ReportViewDialog();
+    public static ReportViewDialogFragment newInstance(Report report, int returnPage) {
+        ReportViewDialogFragment dialog = new ReportViewDialogFragment();
 
         // Supply num input as an argument.
         Bundle args = new Bundle();
@@ -100,9 +102,9 @@ public class ReportViewDialog extends AppCompatDialogFragment {
 
         /* Ensure we don't overlap with the status bar. */
 
-        appBarLayout.setPadding(0, LayoutUtil.getStatusBarHeight(getContext()), 0, 0);
+        appBarLayout.setPadding(0, LayoutUtil.getStatusBarHeight(AndroidUtil.getContext(container, this)), 0, 0);
 
-       /* Setup toolbar buttons */
+        /* Setup toolbar buttons */
         // TODO add close button
 
         /* Disable options menu (we don't use it) */
@@ -162,7 +164,7 @@ public class ReportViewDialog extends AppCompatDialogFragment {
                 map.addMarker(new MarkerOptions().position(this.latLng));
 
                 map.setOnMapClickListener(latLng -> {
-                    ReportViewDialog.this.dismiss();
+                    ReportViewDialogFragment.this.dismiss();
 
                     showMapCallback.showMap(latLng);
                 });
@@ -200,9 +202,10 @@ public class ReportViewDialog extends AppCompatDialogFragment {
 
         setStyle(DialogFragment.STYLE_NO_TITLE, R.style.FullScreenDialog);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // this.statusBarColor = getActivity().getWindow().getStatusBarColor();
-            getActivity().getWindow().setStatusBarColor(Color.TRANSPARENT);
+        Activity activity = getActivity();
+
+        if (activity != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            activity.getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
     }
 

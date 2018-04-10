@@ -23,14 +23,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.cornelldti.shout.R;
 import org.cornelldti.shout.speakout.Report;
-import org.cornelldti.shout.speakout.SpeakOutAdapter;
 import org.cornelldti.shout.util.function.BiConsumer;
 import org.cornelldti.shout.util.function.Consumer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * An optimized and reloaded version of the original SpeakOutAdapter
@@ -81,9 +78,7 @@ public class GoOutRecentReportsAdapter extends RecyclerView.Adapter<GoOutRecentR
     }
 
     private GoOutRecentReportsAdapter(BiConsumer<GoOutRecentReportsAdapter, ReportViewHolder> clickListener) {
-        mClickListener = (viewHolder) -> {
-            clickListener.apply(this, viewHolder);
-        };
+        mClickListener = (viewHolder) -> clickListener.apply(this, viewHolder);
     }
 
 

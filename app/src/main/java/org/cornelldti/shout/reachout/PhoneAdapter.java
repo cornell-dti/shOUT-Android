@@ -14,9 +14,11 @@ import org.cornelldti.shout.R;
 
 /**
  * Created by kaushikr on 3/21/18.
+ * Updated by Evan Welsh on 4/9/18.
  */
 
 public class PhoneAdapter extends BaseAdapter {
+
     private Context mContext;
     private Resource mResource;
 

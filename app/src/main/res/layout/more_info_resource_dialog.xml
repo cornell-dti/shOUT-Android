@@ -2,11 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/resource_info_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/background_light"
     android:clickable="true"
+    android:focusable="true"
     android:orientation="vertical"
     app:behavior_hideable="true"
     app:behavior_peekHeight="250dp"
@@ -19,9 +19,8 @@
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="Name"
         android:textAlignment="center"
-        android:textSize="20dp" />
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/resource_info_description_text_view"
@@ -31,12 +30,10 @@
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:text="Description"
         android:textAlignment="textStart"
-        android:textSize="18dp" />
+        android:textSize="18sp" />
 
     <LinearLayout
-        android:id="@+id/resource_info_separator_b"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/edit_text_separator"
@@ -63,7 +60,7 @@
             android:layout_height="22dp"
             android:layout_marginStart="72dp"
             android:layout_marginTop="20dp"
-            android:text="Website"
+            android:text="@string/placeholder_text"
             android:textAlignment="textStart"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -76,7 +73,7 @@
             android:layout_marginBottom="20dp"
             android:layout_marginStart="72dp"
             android:layout_marginTop="8dp"
-            android:text="123-456-7890"
+            android:text="@string/placeholder_text"
             android:textAlignment="textStart"
             android:textColor="@android:color/secondary_text_light"
             android:textSize="14sp"
@@ -113,7 +110,7 @@
             android:layout_height="22dp"
             android:layout_marginStart="72dp"
             android:layout_marginTop="20dp"
-            android:text="Directions"
+            android:text="@string/placeholder_text"
             android:textAlignment="textStart"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -126,7 +123,7 @@
             android:layout_marginBottom="20dp"
             android:layout_marginStart="72dp"
             android:layout_marginTop="8dp"
-            android:text="123-456-7890"
+            android:text="@string/placeholder_text"
             android:textAlignment="textStart"
             android:textColor="@android:color/secondary_text_light"
             android:textSize="14sp"

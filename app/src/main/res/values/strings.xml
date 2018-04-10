@@ -7,13 +7,11 @@
     <string name="unknown_location">Unknown Location</string>
     <string name="save">Save</string>
     <string name="report_title">Report</string>
-    <string name="date_time_label"><![CDATA[Date & Time]]></string>
     <string name="date_hint">Date</string>
     <string name="time_hint">Time</string>
     <string name="location_hint">Location</string>
     <string name="details_hint">Details</string>
     <string name="summary_hint">Summary</string>
-    <string name="preferences_button_description">preferences button</string>
     <string name="close_button_description">close button</string>
     <string name="logo_description">Application Logo</string>
     <string name="all_tab_label">All</string>
@@ -22,6 +20,9 @@
     <string name="report_time_date">%s at %s</string>
     <string name="report_time_today">Today at %s</string>
     <string name="report_time_yesterday">Yesterday at %s</string>
+    <string name="placeholder_text">placeholder</string>
+    <string name="authentication_failed_error_message">Unable to connect to Shout servers.</string>
+    <string name="retry_authentication_attempt_message">Try Again</string>
     <plurals name="number_of_reports">
         <item quantity="zero">No reports at this location.</item>
         <item quantity="one">%d report at this location.</item>

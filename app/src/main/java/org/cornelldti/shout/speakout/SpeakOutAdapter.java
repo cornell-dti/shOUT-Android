@@ -141,7 +141,7 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
     @Override
     public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
         //if (holder instanceof ReportViewHolder) {
-        adapter().bindViewHolder((ReportViewHolder) holder, position);
+        adapter().bindViewHolder(holder, position);
         //}
     }
 

@@ -1,9 +1,9 @@
 package org.cornelldti.shout.speakout;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -26,9 +26,10 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import org.cornelldti.shout.Page;
 import org.cornelldti.shout.R;
-import org.cornelldti.shout.ReportViewDialog;
+import org.cornelldti.shout.ReportViewDialogFragment;
 import org.cornelldti.shout.ShoutRealtimeDatabase;
 import org.cornelldti.shout.ShoutTabFragment;
+import org.cornelldti.shout.util.AndroidUtil;
 import org.cornelldti.shout.util.LayoutUtil;
 
 public class SpeakOutFragment extends ShoutTabFragment {
@@ -57,43 +58,39 @@ public class SpeakOutFragment extends ShoutTabFragment {
 
             String id = eventAdapter.getId(holder.getAdapterPosition());
 
-            if (holder instanceof SpeakOutAdapter.ReportViewHolder) {
-                SpeakOutAdapter.ReportViewHolder reportHolder = (SpeakOutAdapter.ReportViewHolder) holder;
+            if (id != null) {
+                geoFire.getLocation(id, new LocationCallback() {
+                    @Override
+                    public void onLocationResult(String key, GeoLocation location) {
+                        if (holder.report == null) return;
 
-                if (id != null) {
-                    geoFire.getLocation(id, new LocationCallback() {
-                        @Override
-                        public void onLocationResult(String key, GeoLocation location) {
-                            if (reportHolder.report == null) return;
+                        ReportViewDialogFragment dialog = ReportViewDialogFragment.newInstance(
+                                holder.report,
+                                new LatLng(location.latitude, location.longitude),
+                                Page.SPEAK_OUT
+                        );
+                        showDialog(dialog);
+                    }
 
-                            ReportViewDialog dialog = ReportViewDialog.newInstance(
-                                    reportHolder.report,
-                                    new LatLng(location.latitude, location.longitude),
-                                    Page.SPEAK_OUT
-                            );
-                            showDialog(dialog);
-                        }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        if (holder.report == null) return;
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                            if (reportHolder.report == null) return;
+                        ReportViewDialogFragment dialog = ReportViewDialogFragment.newInstance(holder.report, Page.SPEAK_OUT);
+                        showDialog(dialog);
+                    }
 
-                            ReportViewDialog dialog = ReportViewDialog.newInstance(reportHolder.report, Page.SPEAK_OUT);
-                            showDialog(dialog);
-                        }
-
-                        private void showDialog(ReportViewDialog dialog) {
-                            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                            transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
-                        }
-                    });
-                } else if (reportHolder.report != null) {
-                    ReportViewDialog dialog = ReportViewDialog.newInstance(reportHolder.report, Page.SPEAK_OUT);
-                    FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                    transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
-                }
+                    private void showDialog(ReportViewDialogFragment dialog) {
+                        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                        transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+                    }
+                });
+            } else if (holder.report != null) {
+                ReportViewDialogFragment dialog = ReportViewDialogFragment.newInstance(holder.report, Page.SPEAK_OUT);
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
             }
 
         }, speakoutFragment.getContext());
@@ -110,15 +107,19 @@ public class SpeakOutFragment extends ShoutTabFragment {
 
         /* Fix padding issues w/ the status bar positioning */
 
-        final int statusbarSize = LayoutUtil.getStatusBarHeight(getActivity());
+        Context context = AndroidUtil.getContext(container, this);
 
-        if (statusbarSize > 0) {
-            AppBarLayout toolbar = speakoutFragment.findViewById(R.id.appbar);
+        if (context != null) {
+            final int statusbarSize = LayoutUtil.getStatusBarHeight(context);
 
-            toolbar.setPadding(0, statusbarSize, 0, 0);
+            if (statusbarSize > 0) {
+                AppBarLayout toolbar = speakoutFragment.findViewById(R.id.appbar);
+
+                toolbar.setPadding(0, statusbarSize, 0, 0);
+            }
         }
 
-        // NOTES ON REFRESH
+        // NOTES ON REFRESH (TODO: Outdated documentation)
         // Essentially the way I've put refresh together is this:
         // 1) Have the firebase data (currently top 100 reports) be constantly synced
         // 2) However, the data doesn't automatically populate the recyclerview (that could get chaotic)
@@ -128,13 +129,10 @@ public class SpeakOutFragment extends ShoutTabFragment {
         mSwipeRefreshLayout = speakoutFragment.findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
             // Refresh items
-            adapter.refreshItems((success) -> {
-                mSwipeRefreshLayout.setRefreshing(false);
-            });
+            adapter.refreshItems(success -> mSwipeRefreshLayout.setRefreshing(false));
         });
 
         /* Setup filtering tabs... */ // TODO Discuss UX with design
-
         final Button button = speakoutFragment.findViewById(R.id.all_reports_button);
         final Button stories_button = speakoutFragment.findViewById(R.id.stories_button);
 

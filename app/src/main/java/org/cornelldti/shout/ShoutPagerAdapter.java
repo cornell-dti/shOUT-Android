@@ -1,6 +1,5 @@
 package org.cornelldti.shout;
 
-import android.arch.core.util.Function;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -11,7 +10,6 @@ import android.view.ViewGroup;
 import org.cornelldti.shout.goout.GoOutFragment;
 import org.cornelldti.shout.reachout.ReachOutFragment;
 import org.cornelldti.shout.speakout.SpeakOutFragment;
-import org.cornelldti.shout.util.function.Producer;
 
 import java.lang.ref.WeakReference;
 

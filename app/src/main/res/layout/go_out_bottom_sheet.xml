@@ -12,7 +12,6 @@
 
 
     <android.support.constraint.ConstraintLayout
-        android:id="@+id/locationQuickView"
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:layout_marginEnd="8dp"

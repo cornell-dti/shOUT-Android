@@ -22,6 +22,10 @@ public class LayoutUtil {
      * @return int - the resulting height in pixels.
      */
     public static int getStatusBarHeight(Context context) {
+        if (context == null) {
+            return 0;
+        }
+
         int result = -1;
 
         Resources res = context.getResources();

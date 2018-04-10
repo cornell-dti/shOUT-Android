@@ -54,7 +54,7 @@ import static com.google.android.gms.common.api.GoogleApiClient.OnConnectionFail
 
 // TODO Migrate away from deprecated FusedLocationApi.
 
-public class MainActivity extends AppCompatActivity implements ConnectionCallbacks, OnConnectionFailedListener, ReportViewDialog.ShowMapCallback, OfflineFragment.RefreshCallback, UnauthenticatedFragment.AuthenticateCallback {
+public class MainActivity extends AppCompatActivity implements ConnectionCallbacks, OnConnectionFailedListener, ReportViewDialogFragment.ShowMapCallback, OfflineFragment.RefreshCallback, UnauthenticatedFragment.AuthenticateCallback {
 
     private static final String TAG = "MainActivity";
 
@@ -468,9 +468,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                 if (mGoogleApiClient.isConnected()) {
                     // duh, we just got the permissions google...
                     @SuppressLint("MissingPermission")
-                    Task task = mLocationClient.getLastLocation().addOnSuccessListener((location) -> {
-                        mLastLocationCallback.apply(location, true);
-                    });
+                    Task task = mLocationClient.getLastLocation().addOnSuccessListener(location -> mLastLocationCallback.apply(location, true));
                 }
             }
         }
@@ -583,9 +581,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                     if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
                     } else {
-                        Task task = mLocationClient.getLastLocation().addOnSuccessListener((lastLocation) -> {
-                            mLastLocationCallback.apply(lastLocation, true);
-                        });
+                        mLocationClient.getLastLocation().addOnSuccessListener(lastLocation -> mLastLocationCallback.apply(lastLocation, true));
                     }
                 });
 
