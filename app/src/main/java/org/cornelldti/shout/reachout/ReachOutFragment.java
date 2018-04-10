@@ -54,7 +54,16 @@ public class ReachOutFragment extends ShoutTabFragment {
 
         Context context = AndroidUtil.getContext(container, this);
 
+<<<<<<< Updated upstream
         if (context != null) {
+=======
+<<<<<<< HEAD
+    private void queryResources() {
+        CollectionReference ref = db.collection(ShoutFirestore.RESOURCES_COLLECTION); // TODO order by position key
+=======
+        if (context != null) {
+>>>>>>> origin/master
+>>>>>>> Stashed changes
 
             final int statusBarSize = LayoutUtil.getStatusBarHeight(context);
 
@@ -62,6 +71,7 @@ public class ReachOutFragment extends ShoutTabFragment {
                 LinearLayout toolbar = view.findViewById(R.id.reachout_appbar);
                 toolbar.setPadding(0, statusBarSize, 0, 0);
             }
+<<<<<<< Updated upstream
 
             loadResources();
         }
@@ -70,6 +80,24 @@ public class ReachOutFragment extends ShoutTabFragment {
 
         return view;
     }
+=======
+
+            loadResources();
+        }
+
+        ViewCompat.setNestedScrollingEnabled(mRecyclerView, false); // enables "fast" scrolling
+
+<<<<<<< HEAD
+
+        mAdapter = new FirestoreRecyclerAdapter<Resource, ResourcesHolder>(response) {
+            @Override
+            public void onBindViewHolder(@NonNull ResourcesHolder holder, int position, @NonNull Resource r) {
+                holder.title.setText(r.getName());
+=======
+        return view;
+    }
+>>>>>>> origin/master
+>>>>>>> Stashed changes
 
     private void loadResources() {
         CollectionReference ref = mFirestore.collection(ShoutFirestore.RESOURCES_COLLECTION);

@@ -2,6 +2,13 @@ package org.cornelldti.shout.reachout;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+import java.util.Collection;
+=======
+>>>>>>> origin/master
+>>>>>>> Stashed changes
 import java.util.List;
 
 /**
@@ -10,7 +17,15 @@ import java.util.List;
  */
 
 public class Resource implements Serializable {
+<<<<<<< Updated upstream
     private String url, name, description, address, section, email;
+=======
+<<<<<<< HEAD
+    private String url, name, description, address, email;
+=======
+    private String url, name, description, address, section, email;
+>>>>>>> origin/master
+>>>>>>> Stashed changes
     private int ordering;
 
     private ArrayList<Phone> phones = new ArrayList<>();
@@ -21,7 +36,15 @@ public class Resource implements Serializable {
     public Resource() {
     }
 
+<<<<<<< Updated upstream
     public Resource(String url, String name, String description, String address, String section, List<Phone> phones, int ordering) {
+=======
+<<<<<<< HEAD
+    public Resource(String url, String name, String description, String address, List<Phone> phones, int ordering, String email) {
+=======
+    public Resource(String url, String name, String description, String address, String section, List<Phone> phones, int ordering) {
+>>>>>>> origin/master
+>>>>>>> Stashed changes
         this.url = url;
         this.name = name;
         this.description = description;
@@ -29,6 +52,7 @@ public class Resource implements Serializable {
         this.section = section;
         this.ordering = ordering;
         this.phones = new ArrayList<>(phones);
+        this.email = email;
     }
 
     public String getUrl() {
@@ -63,9 +87,22 @@ public class Resource implements Serializable {
         return phones;
     }
 
+<<<<<<< Updated upstream
     void addPhoneNumber(Phone number) {
         this.phones.add(number);
+=======
+<<<<<<< HEAD
+    public String getEmail() {
+        return email;
     }
 
+    void setPhoneNumbers(Collection<Phone> numbers) {
+        this.phones = new ArrayList<>(numbers);
+=======
+    void addPhoneNumber(Phone number) {
+        this.phones.add(number);
+>>>>>>> origin/master
+>>>>>>> Stashed changes
+    }
 
 }

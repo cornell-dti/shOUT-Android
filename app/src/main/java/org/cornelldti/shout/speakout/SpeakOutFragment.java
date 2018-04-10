@@ -5,8 +5,16 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
+<<<<<<< Updated upstream
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.FragmentManager;
+=======
+<<<<<<< HEAD
+=======
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.app.FragmentManager;
+>>>>>>> origin/master
+>>>>>>> Stashed changes
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;

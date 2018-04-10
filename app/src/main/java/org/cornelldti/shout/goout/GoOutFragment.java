@@ -249,7 +249,7 @@ public class GoOutFragment extends ShoutTabFragment {
 
             LatLng defaultLocation = defaultLocationOverride != null ? defaultLocationOverride : LocationUtil.CORNELL_CENTER;
 
-            // todo locatino setup?
+            // todo location setup?
 
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(defaultLocation)      // Sets the center of the mGoogleMap to website user
@@ -283,7 +283,6 @@ public class GoOutFragment extends ShoutTabFragment {
                     // TODO error toast
                 }
 
-
                 return false;
             });
 
@@ -307,7 +306,6 @@ public class GoOutFragment extends ShoutTabFragment {
                 if (activity instanceof MainActivity) {
                     googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latAvg, longAvg), zoomLevel), 500, null);
                 }
-
                 return true;
             });
 

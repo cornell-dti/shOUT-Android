@@ -47,13 +47,42 @@ public class ResourceMoreInfoDialogFragment extends BottomSheetDialogFragment {
 
         TextView nameTextView = moreInfoResDialog.findViewById(R.id.resource_info_name_text_view);
         TextView descriptionTextView = moreInfoResDialog.findViewById(R.id.resource_info_description_text_view);
+<<<<<<< Updated upstream:app/src/main/java/org/cornelldti/shout/reachout/ResourceMoreInfoDialogFragment.java
         ConstraintLayout addressButton = moreInfoResDialog.findViewById(R.id.resource_info_directions_button);
         ConstraintLayout websiteButton = moreInfoResDialog.findViewById(R.id.resource_info_url_button);
+=======
+<<<<<<< HEAD:app/src/main/java/org/cornelldti/shout/reachout/ResourceInfoDialogFragment.java
+        Button addressButton = moreInfoResDialog.findViewById(R.id.resource_info_directions_button);
+        Button websiteButton = moreInfoResDialog.findViewById(R.id.resource_info_url_button);
+        Button emailButton = moreInfoResDialog.findViewById(R.id.resource_info_email_button);
+=======
+        ConstraintLayout addressButton = moreInfoResDialog.findViewById(R.id.resource_info_directions_button);
+        ConstraintLayout websiteButton = moreInfoResDialog.findViewById(R.id.resource_info_url_button);
+>>>>>>> origin/master:app/src/main/java/org/cornelldti/shout/reachout/ResourceMoreInfoDialogFragment.java
+>>>>>>> Stashed changes:app/src/main/java/org/cornelldti/shout/reachout/ResourceMoreInfoDialogFragment.java
         ListView mPhoneNumberList = moreInfoResDialog.findViewById(R.id.resource_info_phone_number_list_view);
 
         // SETUP DIALOG UI
         nameTextView.setText(mResource.getName());
         descriptionTextView.setText(mResource.getDescription());
+
+        if(mResource.getEmail() == null)
+        {
+            emailButton.setVisibility(View.GONE);
+        }
+        else
+        {
+            emailButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                            "mailto",mResource.getEmail(), null));
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "");
+                    emailIntent.putExtra(Intent.EXTRA_TEXT, "");
+                    startActivity(Intent.createChooser(emailIntent, "Send email..."));
+                }
+            });
+        }
 
         if (mResource.getUrl() == null) {
             websiteButton.setVisibility(View.GONE);
