@@ -10,7 +10,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
-import android.support.constraint.ConstraintSet;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
@@ -24,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -170,6 +170,12 @@ public class GoOutFragment extends ShoutTabFragment {
             public void onPlaceSelected(Place place) {
                 if (mGoogleMap != null) {
                     mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), ZoomLevel.DEFAULT));
+
+                    Activity activity = getActivity();
+
+                    if (activity instanceof MainActivity) {
+                        showReportsAtLocation((MainActivity) activity, place.getLatLng());
+                    }
                 }
             }
 
@@ -271,8 +277,6 @@ public class GoOutFragment extends ShoutTabFragment {
             mClusterManager = new ClusterManager<>(currentContext, googleMap);
 
             mClusterManager.setOnClusterItemClickListener(item -> {
-                String reportId = item.getReportId();
-
                 if (activity instanceof MainActivity) {
                     showReportsAtLocation((MainActivity) activity, item.getPosition()); // todo
                 } else {
@@ -413,6 +417,7 @@ public class GoOutFragment extends ShoutTabFragment {
         showReportsByRadius(mainActivity, latLng, radius, true);
     }
 
+    // TODO split this code up for readibility
     private void showReportsByRadius(MainActivity mainActivity, LatLng latLng, double radius, boolean nearby) {
         if (mainActivity != null) {
             mainActivity.updateSheet((sheet, behavior, shadow, nearbyReportsView, addressTextView, numberOfReportsTextView) -> {
@@ -476,7 +481,13 @@ public class GoOutFragment extends ShoutTabFragment {
                                 })
                 );
 
-                // TODO (change within 750 feet text too)
+                TextView nearbyReportsHeaderTextView = sheet.findViewById(R.id.nearby_reports_header);
+
+                if (nearby) {
+                    nearbyReportsHeaderTextView.setText(R.string.nearby_reports_header);
+                } else {
+                    nearbyReportsHeaderTextView.setText(R.string.reports_at_location_header);
+                }
 
                 // TODO convert latLng to place *more correctly :p*
                 addressTextView.setText(LocationUtil.getAddressForLocation(mainActivity, latLng).getAddressLine(0));

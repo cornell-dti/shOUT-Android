@@ -3,18 +3,22 @@ package org.cornelldti.shout.speakout;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.ImageButton;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -34,7 +38,9 @@ import org.cornelldti.shout.util.LayoutUtil;
 
 public class SpeakOutFragment extends ShoutTabFragment {
 
+    private static final String TAG = "SpeakOutFragment";
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private FilterOption mFilterOption = FilterOption.ALL_REPORTS;
 
     public SpeakOutFragment() {
     }
@@ -109,51 +115,42 @@ public class SpeakOutFragment extends ShoutTabFragment {
 
         Context context = AndroidUtil.getContext(container, this);
 
+        AppBarLayout toolbar = speakoutFragment.findViewById(R.id.appbar);
+
+
         if (context != null) {
             final int statusbarSize = LayoutUtil.getStatusBarHeight(context);
 
             if (statusbarSize > 0) {
-                AppBarLayout toolbar = speakoutFragment.findViewById(R.id.appbar);
-
                 toolbar.setPadding(0, statusbarSize, 0, 0);
             }
         }
 
-        // NOTES ON REFRESH (TODO: Outdated documentation)
-        // Essentially the way I've put refresh together is this:
-        // 1) Have the firebase data (currently top 100 reports) be constantly synced
-        // 2) However, the data doesn't automatically populate the recyclerview (that could get chaotic)
-        // 3) Refreshing simply brings the latest local data into the view
-        // 4) The initial data is handled by overrided the data loaded method of the Firestore adapter
-
-        mSwipeRefreshLayout = speakoutFragment.findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout = speakoutFragment.findViewById(R.id.swipe_refresh_layout);
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
             // Refresh items
             adapter.refreshItems(success -> mSwipeRefreshLayout.setRefreshing(false));
         });
 
-        /* Setup filtering tabs... */ // TODO Discuss UX with design
-       /* final Button button = speakoutFragment.findViewById(R.id.all_reports_button);
-        final Button stories_button = speakoutFragment.findViewById(R.id.stories_button);
+        ImageButton b = toolbar.findViewById(R.id.filter_reports_button);
 
-        final LinearLayout buttonHighlight = speakoutFragment.findViewById(R.id.all_reports_highlight);
-        final LinearLayout storiesHighlight = speakoutFragment.findViewById(R.id.stories_highlight);
+        if (b != null) {
+            b.setOnClickListener(v2 -> {
+                FilterDialog dialog = FilterDialog.construct(mCurrentFilterOption -> {
+                    mFilterOption = mCurrentFilterOption;
+                    adapter.filter(mFilterOption);
+                }, mFilterOption);
 
-        button.setOnClickListener(v -> {
-            buttonHighlight.setVisibility(View.VISIBLE);
-            storiesHighlight.setVisibility(View.INVISIBLE);
+                FragmentManager manager = getFragmentManager();
 
-            adapter.filter(SpeakOutAdapter.FILTER_NONE);
+                if (manager != null) {
+                    dialog.show(manager, FilterDialog.class.getSimpleName());
+                }
+            });
+        } else {
+            Log.e(TAG, "Unable to find filter button.");
+        }
 
-        });
-
-        stories_button.setOnClickListener(v -> {
-            storiesHighlight.setVisibility(View.VISIBLE);
-            buttonHighlight.setVisibility(View.INVISIBLE);
-
-            adapter.filter(SpeakOutAdapter.FILTER_STORIES);
-        });*/
-       
         return speakoutFragment;
     }
 

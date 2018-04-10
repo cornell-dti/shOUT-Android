@@ -2,7 +2,13 @@ package org.cornelldti.shout.util;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.util.Log;
 import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 /**
  * A basic utility class for common methods needed to manage Android layouts.
@@ -11,6 +17,7 @@ import android.util.TypedValue;
  */
 
 public class LayoutUtil {
+    private static final String TAG = "LayoutUtil";
 
     // TODO no magic strings
 
@@ -48,5 +55,40 @@ public class LayoutUtil {
      */
     public static int getPixelsFromDp(Resources resources, int dp) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, resources.getDisplayMetrics());
+    }
+
+    public static <T extends View> T getChild(ViewGroup parent, int[] id) {
+        int children = parent.getChildCount();
+        ViewGroup currentViewGroup = parent;
+
+        for (int depth = 0, prevDepth = 0; depth < id.length; ) {
+            for (int i = 0; i < children; i++) {
+                View view = currentViewGroup.getChildAt(i);
+
+                if (id[depth] == view.getId()) {
+                    if (depth == id.length - 1) {
+                        return (T) view;
+                    } else if (view instanceof ViewGroup) {
+                        currentViewGroup = (ViewGroup) view;
+                        children = currentViewGroup.getChildCount();
+                    } else {
+                        Log.e(TAG, "Only the last id present can be a non-ViewGroup");
+
+                        return null;
+                    }
+
+                    prevDepth = depth;
+                    depth++;
+
+                    break;
+                }
+            }
+
+            if (prevDepth == depth) {
+                return null; // infinite loop
+            }
+        }
+
+        return null;
     }
 }

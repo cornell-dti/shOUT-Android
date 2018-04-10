@@ -41,8 +41,8 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
 
     private int visibleThreshold = 5;
     private int lastVisibleItem, totalItemCount;
-    boolean isLoading;
-    boolean isAllLoaded = false;
+    private boolean isLoading;
+    private boolean isAllLoaded = false; // todo
 
     public RecyclerView.OnScrollListener listener() {
         return new RecyclerView.OnScrollListener() {
@@ -65,11 +65,6 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
         };
     }
 
-    /* Constants for filtering... */
-
-    public static final int FILTER_STORIES = 0;
-    public static final int FILTER_NONE = -1;
-
     private static final int DEFAULT_LIMIT = 20;
 
 
@@ -82,12 +77,12 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
      *
      * @param flag - Either FILTER_STORIES or FILTER_NONE.
      */
-    public void filter(int flag) {
+    public void filter(FilterOption flag) {
         switch (flag) {
-            case FILTER_NONE:
+            case ALL_REPORTS:
                 filterStories = false;
                 break;
-            case FILTER_STORIES:
+            case STORIES_ONLY:
                 filterStories = true;
                 break;
             default:

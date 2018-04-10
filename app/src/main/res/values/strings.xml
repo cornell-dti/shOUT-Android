@@ -23,6 +23,7 @@
     <string name="placeholder_text">placeholder</string>
     <string name="authentication_failed_error_message">Unable to connect to Shout servers.</string>
     <string name="retry_authentication_attempt_message">Try Again</string>
+    <string name="reports_at_location_header">Reports at this location...</string>
     <plurals name="number_of_reports">
         <item quantity="zero">No reports at this location.</item>
         <item quantity="one">%d report at this location.</item>
