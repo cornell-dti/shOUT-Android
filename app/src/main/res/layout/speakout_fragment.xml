@@ -24,16 +24,19 @@
                 app:title="shOUT"
                 app:titleTextColor="@color/colorAccent">
 
-                <ImageView
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:layout_margin="10dp"
                     android:adjustViewBounds="true"
                     android:contentDescription="@string/logo_description"
                     android:cropToPadding="false"
+                    android:fontFamily="@font/roboto_light"
                     android:scaleType="fitCenter"
-                    android:tint="@color/colorAccent"
-                    app:srcCompat="@drawable/shout_text_logo" />
+                    android:text="Shout"
+                    android:textAlignment="textStart"
+                    android:textSize="30sp"
+                    android:tint="@android:color/black" />
 
 
             </android.support.v7.widget.Toolbar>
