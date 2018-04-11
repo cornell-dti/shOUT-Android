@@ -47,19 +47,12 @@ public class ResourceMoreInfoDialogFragment extends BottomSheetDialogFragment {
 
         TextView nameTextView = moreInfoResDialog.findViewById(R.id.resource_info_name_text_view);
         TextView descriptionTextView = moreInfoResDialog.findViewById(R.id.resource_info_description_text_view);
-<<<<<<< Updated upstream:app/src/main/java/org/cornelldti/shout/reachout/ResourceMoreInfoDialogFragment.java
+        TextView emailTextView = moreInfoResDialog.findViewById(R.id.resource_item_email_label_text_view);
+
+        ConstraintLayout emailButton = moreInfoResDialog.findViewById(R.id.resource_info_email_button);
         ConstraintLayout addressButton = moreInfoResDialog.findViewById(R.id.resource_info_directions_button);
         ConstraintLayout websiteButton = moreInfoResDialog.findViewById(R.id.resource_info_url_button);
-=======
-<<<<<<< HEAD:app/src/main/java/org/cornelldti/shout/reachout/ResourceInfoDialogFragment.java
-        Button addressButton = moreInfoResDialog.findViewById(R.id.resource_info_directions_button);
-        Button websiteButton = moreInfoResDialog.findViewById(R.id.resource_info_url_button);
-        Button emailButton = moreInfoResDialog.findViewById(R.id.resource_info_email_button);
-=======
-        ConstraintLayout addressButton = moreInfoResDialog.findViewById(R.id.resource_info_directions_button);
-        ConstraintLayout websiteButton = moreInfoResDialog.findViewById(R.id.resource_info_url_button);
->>>>>>> origin/master:app/src/main/java/org/cornelldti/shout/reachout/ResourceMoreInfoDialogFragment.java
->>>>>>> Stashed changes:app/src/main/java/org/cornelldti/shout/reachout/ResourceMoreInfoDialogFragment.java
+
         ListView mPhoneNumberList = moreInfoResDialog.findViewById(R.id.resource_info_phone_number_list_view);
 
         // SETUP DIALOG UI
@@ -72,6 +65,7 @@ public class ResourceMoreInfoDialogFragment extends BottomSheetDialogFragment {
         }
         else
         {
+            emailTextView.setText(mResource.getEmail());
             emailButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
