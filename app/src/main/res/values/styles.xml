@@ -9,6 +9,15 @@
         <item name="android:textColor">@color/colorPrimaryText</item>
         <item name="android:textViewStyle">@style/RobotoTextViewStyle</item>
         <item name="buttonStyle">@style/RobotoButtonStyle</item>
+        <item name="android:alertDialogStyle">@style/DialogStyle</item>
+    </style>
+
+    <style name="DialogStyle" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:textColorSecondary">@color/colorPrimaryText</item>
+        <item name="android:textColor">@color/colorPrimaryText</item>
+        <item name="android:textColorPrimary">@color/colorPrimaryText</item>
+        <item name="textColorAlertDialogListItem">@color/colorPrimaryText</item>
+
     </style>
 
     <style name="RobotoTextViewStyle" parent="android:Widget.TextView">
@@ -50,6 +59,10 @@
         <item name="android:paddingEnd">0dp</item>
         <item name="android:paddingTop">15dp</item>
         <item name="android:paddingBottom">15dp</item>
+    </style>
+
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash</item>
     </style>
 
     <style name="ButtonTab" parent="@style/Widget.AppCompat.Button.Borderless.Colored">

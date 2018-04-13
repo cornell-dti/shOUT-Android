@@ -47,7 +47,6 @@ public class ResourceMoreInfoDialogFragment extends BottomSheetDialogFragment {
 
         TextView nameTextView = moreInfoResDialog.findViewById(R.id.resource_info_name_text_view);
         TextView descriptionTextView = moreInfoResDialog.findViewById(R.id.resource_info_description_text_view);
-        TextView emailTextView = moreInfoResDialog.findViewById(R.id.resource_item_email_label_text_view);
 
         ConstraintLayout emailButton = moreInfoResDialog.findViewById(R.id.resource_info_email_button);
         ConstraintLayout addressButton = moreInfoResDialog.findViewById(R.id.resource_info_directions_button);
@@ -59,28 +58,25 @@ public class ResourceMoreInfoDialogFragment extends BottomSheetDialogFragment {
         nameTextView.setText(mResource.getName());
         descriptionTextView.setText(mResource.getDescription());
 
-        if(mResource.getEmail() == null)
-        {
+        if (mResource.getEmail() == null) {
             emailButton.setVisibility(View.GONE);
-        }
-        else
-        {
+        } else {
+
+            TextView emailTextView = moreInfoResDialog.findViewById(R.id.resource_item_email_subtitle_text_view);
+
             emailTextView.setText(mResource.getEmail());
-            emailButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
-                            "mailto",mResource.getEmail(), null));
-                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "");
-                    emailIntent.putExtra(Intent.EXTRA_TEXT, "");
-                    startActivity(Intent.createChooser(emailIntent, "Send email..."));
-                }
+
+            emailButton.setOnClickListener(v -> {
+                Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                        "mailto", mResource.getEmail(), null));
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "");
+                emailIntent.putExtra(Intent.EXTRA_TEXT, "");
+                startActivity(Intent.createChooser(emailIntent, "Send email..."));
             });
         }
 
         if (mResource.getUrl() == null) {
             websiteButton.setVisibility(View.GONE);
-            moreInfoResDialog.findViewById(R.id.resource_info_separator_c).setVisibility(View.INVISIBLE);
         } else {
             String url = mResource.getUrl();
 
@@ -90,8 +86,6 @@ public class ResourceMoreInfoDialogFragment extends BottomSheetDialogFragment {
             website.setText(uri.getHost());
 
             websiteButton.setOnClickListener(v -> {
-
-
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(browserIntent);
             });
@@ -99,7 +93,6 @@ public class ResourceMoreInfoDialogFragment extends BottomSheetDialogFragment {
 
         if (mResource.getAddress() == null) {
             addressButton.setVisibility(View.GONE);
-            moreInfoResDialog.findViewById(R.id.resource_info_separator).setVisibility(View.INVISIBLE);
         } else {
             TextView address = moreInfoResDialog.findViewById(R.id.resource_item_directions_subtitle_text_view);
             address.setText(mResource.getAddress());

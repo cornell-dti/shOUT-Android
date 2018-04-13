@@ -333,7 +333,7 @@ public class GoOutFragment extends ShoutTabFragment {
 
             if (activity instanceof MainActivity) {
                 googleMap.setOnMapLongClickListener((latLng -> {
-                    showReportsByRadius((MainActivity) activity, latLng, 0.2); // todo
+                    showReportsByRadius((MainActivity) activity, latLng, QUERY_RADIUS); // todo
                 }));
             } else {
                 // TODO
@@ -457,9 +457,9 @@ public class GoOutFragment extends ShoutTabFragment {
 
                                                 ReportViewDialogFragment dialog = ReportViewDialogFragment.newInstance(
                                                         reportHolder.report,
-                                                        new LatLng(location.latitude, location.longitude),
-                                                        Page.GO_OUT
+                                                        new LatLng(location.latitude, location.longitude)
                                                 );
+                                                behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                                                 showDialog(dialog);
                                             }
 
@@ -467,7 +467,8 @@ public class GoOutFragment extends ShoutTabFragment {
                                             public void onCancelled(DatabaseError databaseError) {
                                                 if (reportHolder.report == null) return;
 
-                                                ReportViewDialogFragment dialog = ReportViewDialogFragment.newInstance(reportHolder.report, Page.GO_OUT);
+                                                ReportViewDialogFragment dialog = ReportViewDialogFragment.newInstance(reportHolder.report);
+                                                behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                                                 showDialog(dialog);
                                             }
 
@@ -476,7 +477,8 @@ public class GoOutFragment extends ShoutTabFragment {
                                     } else {
                                         if (reportHolder.report == null) return;
 
-                                        ReportViewDialogFragment dialog = ReportViewDialogFragment.newInstance(reportHolder.report, Page.GO_OUT);
+                                        ReportViewDialogFragment dialog = ReportViewDialogFragment.newInstance(reportHolder.report);
+                                        behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                                         showDialog(dialog);
                                     }
 

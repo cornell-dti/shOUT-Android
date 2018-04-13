@@ -91,13 +91,20 @@
 
     </android.support.design.widget.AppBarLayout>
 
-
-    <LinearLayout
+    <ViewFlipper
+        android:id="@+id/speak_out_view_flipper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <ProgressBar
+            android:id="@+id/speak_out_progress_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="100dp" />
 
         <android.support.v4.widget.SwipeRefreshLayout
             android:id="@+id/swipe_refresh_layout"
@@ -115,7 +122,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -132,7 +138,8 @@
                 </RelativeLayout>
             </android.support.v4.widget.NestedScrollView>
         </android.support.v4.widget.SwipeRefreshLayout>
-    </LinearLayout>
+
+    </ViewFlipper>
 
 
 </android.support.design.widget.CoordinatorLayout>

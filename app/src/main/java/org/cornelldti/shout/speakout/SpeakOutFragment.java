@@ -16,6 +16,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
+import android.widget.ViewFlipper;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -33,13 +35,30 @@ import org.cornelldti.shout.ShoutTabFragment;
 import org.cornelldti.shout.util.AndroidUtil;
 import org.cornelldti.shout.util.LayoutUtil;
 
-public class SpeakOutFragment extends ShoutTabFragment {
+public class SpeakOutFragment extends ShoutTabFragment implements AdapterChangedCallback, DataLoadedCallback {
 
     private static final String TAG = "SpeakOutFragment";
+    private static final int PROGRESS_SPINNER_CHILD = 0;
+    private static final int RECYCLER_VIEW_CHILD = 1;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private FilterOption mFilterOption = FilterOption.ALL_REPORTS;
+    private ViewFlipper mViewFlipper;
 
     public SpeakOutFragment() {
+    }
+
+    @Override
+    public void adapterChanged() {
+        if (mViewFlipper != null) {
+            mViewFlipper.setDisplayedChild(PROGRESS_SPINNER_CHILD);
+        }
+    }
+
+    @Override
+    public void dataLoaded() {
+        if (mViewFlipper != null) {
+            mViewFlipper.setDisplayedChild(RECYCLER_VIEW_CHILD);
+        }
     }
 
     @Override
@@ -48,18 +67,20 @@ public class SpeakOutFragment extends ShoutTabFragment {
 
         final View speakoutFragment = inflater.inflate(R.layout.speakout_fragment, container, false);
         final RecyclerView recyclerView = speakoutFragment.findViewById(R.id.recycler_view);
+        final ProgressBar progressSpinner = speakoutFragment.findViewById(R.id.speak_out_progress_spinner);
+        mViewFlipper = speakoutFragment.findViewById(R.id.speak_out_view_flipper);
+        mViewFlipper.setDisplayedChild(PROGRESS_SPINNER_CHILD);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
 
-
-        final SpeakOutAdapter adapter = SpeakOutAdapter.construct(this, (eventAdapter, holder) -> {
+        final SpeakOutAdapter adapter = SpeakOutAdapter.construct(this, this, (eventAdapter, holder) -> {
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference(ShoutRealtimeDatabase.REPORT_LOCATIONS_KEY);
             GeoFire geoFire = new GeoFire(ref);
 
             if (eventAdapter == null) return;
 
-            String id = eventAdapter.getId(holder.getAdapterPosition());
+            String id = eventAdapter.getDocumentId(holder.getAdapterPosition());
 
             if (id != null) {
                 geoFire.getLocation(id, new LocationCallback() {
@@ -69,8 +90,7 @@ public class SpeakOutFragment extends ShoutTabFragment {
 
                         ReportViewDialogFragment dialog = ReportViewDialogFragment.newInstance(
                                 holder.report,
-                                new LatLng(location.latitude, location.longitude),
-                                Page.SPEAK_OUT
+                                new LatLng(location.latitude, location.longitude)
                         );
                         showDialog(dialog);
                     }
@@ -79,7 +99,7 @@ public class SpeakOutFragment extends ShoutTabFragment {
                     public void onCancelled(DatabaseError databaseError) {
                         if (holder.report == null) return;
 
-                        ReportViewDialogFragment dialog = ReportViewDialogFragment.newInstance(holder.report, Page.SPEAK_OUT);
+                        ReportViewDialogFragment dialog = ReportViewDialogFragment.newInstance(holder.report);
                         showDialog(dialog);
                     }
 
@@ -90,7 +110,7 @@ public class SpeakOutFragment extends ShoutTabFragment {
                     }
                 });
             } else if (holder.report != null) {
-                ReportViewDialogFragment dialog = ReportViewDialogFragment.newInstance(holder.report, Page.SPEAK_OUT);
+                ReportViewDialogFragment dialog = ReportViewDialogFragment.newInstance(holder.report);
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
@@ -131,9 +151,9 @@ public class SpeakOutFragment extends ShoutTabFragment {
 
         ImageButton b = toolbar.findViewById(R.id.filter_reports_button);
 
-        if (b != null) {
+        if (context != null && b != null) {
             b.setOnClickListener(v2 -> {
-                FilterDialog dialog = FilterDialog.construct(mCurrentFilterOption -> {
+                FilterDialogFragment dialog = FilterDialogFragment.construct(context, mCurrentFilterOption -> {
                     mFilterOption = mCurrentFilterOption;
                     adapter.filter(mFilterOption);
                 }, mFilterOption);
@@ -141,7 +161,7 @@ public class SpeakOutFragment extends ShoutTabFragment {
                 FragmentManager manager = getFragmentManager();
 
                 if (manager != null) {
-                    dialog.show(manager, FilterDialog.class.getSimpleName());
+                    dialog.show(manager, FilterDialogFragment.class.getSimpleName());
                 }
             });
         } else {
@@ -161,4 +181,6 @@ public class SpeakOutFragment extends ShoutTabFragment {
     public void onRemoved() {
 
     }
+
+
 }

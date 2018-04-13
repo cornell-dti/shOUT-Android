@@ -1,9 +1,9 @@
 package org.cornelldti.shout.speakout;
 
+import android.arch.core.util.Function;
 import android.arch.lifecycle.LifecycleObserver;
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -26,18 +26,42 @@ import org.cornelldti.shout.util.function.BiConsumer;
 import org.cornelldti.shout.util.function.Consumer;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * An optimized and reloaded version of the original SpeakOutAdapter
  */
 
 public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.ReportViewHolder> implements DataLoadedCallback {
-    private InternalAdapter storiesAdapter, allAdapter;
-    private boolean filterStories = false; // TODO Support any filter.
+    private final CollectionReference mFirestore;
+    private final AdapterChangedCallback mAdapterChangedCallback;
+    private final DataLoadedCallback mDataLoadedCallback;
+    private Context mContext;
+    private InternalAdapter mAdapter;
+    private BiConsumer<SpeakOutAdapter, ReportViewHolder> mClickListener;
 
-    private SpeakOutAdapter() {
+    private static final int DEFAULT_LIMIT = 20;
+
+    private static final Function<CollectionReference, Query> ALL_QUERY = ref -> {
+        return ref.orderBy(Report.TIMESTAMP, Query.Direction.DESCENDING);
+    };
+
+    private static final Function<CollectionReference, Query> STORIES_QUERY = ref -> {
+        return ref
+                .whereEqualTo(Report.HAS_BODY, true)
+                .orderBy(Report.TIMESTAMP, Query.Direction.DESCENDING);
+    };
+
+
+    private SpeakOutAdapter(Context context, AdapterChangedCallback adapterChangedCallback, DataLoadedCallback callback, BiConsumer<SpeakOutAdapter, ReportViewHolder> clickListener) {
+        mContext = context;
+        mDataLoadedCallback = callback;
+        mClickListener = clickListener;
+        mAdapterChangedCallback = adapterChangedCallback;
+        mFirestore = FirebaseFirestore.getInstance().collection(ShoutFirestore.REPORTS_COLLECTION);
+
+        mAdapter = constructAdapter(ALL_QUERY.apply(mFirestore));
     }
+
 
     private int visibleThreshold = 5;
     private int lastVisibleItem, totalItemCount;
@@ -65,11 +89,9 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
         };
     }
 
-    private static final int DEFAULT_LIMIT = 20;
-
 
     private InternalAdapter adapter() {
-        return filterStories ? storiesAdapter : allAdapter;
+        return mAdapter;
     }
 
     /**
@@ -78,18 +100,18 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
      * @param flag - Either FILTER_STORIES or FILTER_NONE.
      */
     public void filter(FilterOption flag) {
+        mAdapterChangedCallback.adapterChanged();
+
         switch (flag) {
             case ALL_REPORTS:
-                filterStories = false;
+                mAdapter = constructAdapter(ALL_QUERY.apply(mFirestore));
                 break;
             case STORIES_ONLY:
-                filterStories = true;
+                mAdapter = constructAdapter(STORIES_QUERY.apply(mFirestore));
                 break;
             default:
                 throw new RuntimeException("Unknown filter passed.");
         }
-
-        notifyDataSetChanged();
     }
 
     /**
@@ -100,8 +122,14 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
         adapter().refresh(refreshComplete);
     }
 
-    public String getId(int position) {
-        return adapter().posToId.get(position);
+    /**
+     * Gets the document id for the position in the recycler view.
+     *
+     * @param position
+     * @return
+     */
+    public String getDocumentId(int position) {
+        return adapter().mPosToId.get(position);
     }
 
     /**
@@ -109,6 +137,8 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
      */
     @Override
     public void dataLoaded() {
+        mDataLoadedCallback.dataLoaded();
+
         notifyDataSetChanged();
     }
 
@@ -130,6 +160,15 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
         return adapter().getItemCount();
     }
 
+    private InternalAdapter constructAdapter(Query query) {
+        return new InternalAdapter(
+                mContext,
+                reportViewHolder -> mClickListener.apply(this, reportViewHolder),
+                this,
+                query
+        );
+    }
+
     /**
      * Constructs a SpeakOutAdapter
      *
@@ -137,30 +176,8 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
      * @param context  - The context to determine date/time formatting within.
      * @return - A new SpeakOutAdapter
      */
-    static SpeakOutAdapter construct(Fragment fragment, BiConsumer<SpeakOutAdapter, ReportViewHolder> clickListener, Context context) {
-        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-        CollectionReference ref = firestore.collection(ShoutFirestore.REPORTS_COLLECTION);
-
-        Query stories = ref.whereEqualTo(Report.HAS_BODY, true).orderBy(Report.TIMESTAMP, Query.Direction.DESCENDING);
-        Query all = ref.orderBy(Report.TIMESTAMP, Query.Direction.DESCENDING);
-
-
-        SpeakOutAdapter adapter = new SpeakOutAdapter();
-        adapter.storiesAdapter = new InternalAdapter(
-                context,
-                reportViewHolder -> clickListener.apply(adapter, reportViewHolder),
-                adapter,
-                stories
-        );
-
-        adapter.allAdapter = new InternalAdapter(
-                context,
-                reportViewHolder -> clickListener.apply(adapter, reportViewHolder),
-                adapter,
-                all
-        );
-
-        return adapter;
+    static SpeakOutAdapter construct(AdapterChangedCallback adapterChangedCallback, DataLoadedCallback callback, BiConsumer<SpeakOutAdapter, ReportViewHolder> clickListener, Context context) {
+        return new SpeakOutAdapter(context, adapterChangedCallback, callback, clickListener);
     }
 
 
@@ -182,21 +199,22 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
         }
     }
 
+    // TODO clean this up
+
     private static class InternalAdapter extends RecyclerView.Adapter<ReportViewHolder> implements LifecycleObserver {
 
-        private static final String TAG = "InternalAdapter-SpeakOut";
-
+        private static final String TAG = "InternalAdapterSpeakOut";
 
         private final Query mBaseQuery;
         private Query mCurrentQuery;
-        private SparseArray<String> posToId = new SparseArray<>();
+        private SparseArray<String> mPosToId = new SparseArray<>();
 
-        private final java.text.DateFormat dateFormatter, timeFormatter;
-        private DataLoadedCallback dataLoadedCallback;
-        private Consumer<ReportViewHolder> onItemClickListener;
+        private final java.text.DateFormat mDateFormatter, mTimeFormatter;
+        private DataLoadedCallback mDataLoadedCallback;
+        private Consumer<ReportViewHolder> mOnItemClickListener;
 
         private SparseArray<Report> mReports = new SparseArray<>();
-        private DocumentSnapshot lastVisible;
+        private DocumentSnapshot mLastVisible;
 
 
         /**
@@ -204,7 +222,7 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
          * FirestoreRecyclerOptions} for configuration options.
          *
          * @param context            - The context date/time formatting is decided within.
-         * @param dataLoadedCallback - The dataLoadedCallback to call when initial data has been loaded.
+         * @param dataLoadedCallback - The mDataLoadedCallback to call when initial data has been loaded.
          * @param options            - The options to construct this Firestore adapter with.
          */
         private InternalAdapter(Context context, Consumer<ReportViewHolder> onItemClickListener, @NonNull DataLoadedCallback dataLoadedCallback, @NonNull Query query) {
@@ -218,22 +236,23 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
 
                     for (DocumentSnapshot document : documentSnapshots.getDocuments()) {
                         Report report = document.toObject(Report.class);
-                        posToId.put(position, document.getId());
+
+                        mPosToId.put(position, document.getId());
                         mReports.put(position++, report);
 
 
-                        lastVisible = document;
+                        mLastVisible = document;
                     }
 
                     dataLoadedCallback.dataLoaded();
                 }
             });
 
-            this.dataLoadedCallback = dataLoadedCallback;
-            this.onItemClickListener = onItemClickListener;
+            mDataLoadedCallback = dataLoadedCallback;
+            mOnItemClickListener = onItemClickListener;
 
-            this.dateFormatter = DateFormat.getDateFormat(context);
-            this.timeFormatter = DateFormat.getTimeFormat(context);
+            mDateFormatter = DateFormat.getDateFormat(context);
+            mTimeFormatter = DateFormat.getTimeFormat(context);
         }
 
         void refresh() {
@@ -242,12 +261,12 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
         }
 
         void refresh(@NonNull Consumer<Boolean> refreshComplete) {
-            if (mBaseQuery == null || lastVisible == null) {
+            if (mBaseQuery == null || mLastVisible == null) {
                 refreshComplete.apply(false);
                 return;
             }
 
-            mCurrentQuery = mBaseQuery.endAt(lastVisible);
+            mCurrentQuery = mBaseQuery.endAt(mLastVisible);
 
             SparseArray<Report> reports = new SparseArray<>();
 
@@ -259,16 +278,16 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
 
                     for (DocumentSnapshot document : documents) {
                         Report report = document.toObject(Report.class);
-                        posToId.put(position, document.getId());
+                        mPosToId.put(position, document.getId());
                         reports.put(position++, report);
                     }
 
                     mReports = reports;
-                    this.lastVisible = documents.get(documents.size() - 1);
+                    this.mLastVisible = documents.get(documents.size() - 1);
 
                     refreshComplete.apply(true);
 
-                    dataLoadedCallback.dataLoaded();
+                    mDataLoadedCallback.dataLoaded();
 
                     notifyDataSetChanged();
                 } else {
@@ -278,11 +297,11 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
         }
 
         public void loadMore(int amount) {
-            if (mBaseQuery == null || lastVisible == null) {
+            if (mBaseQuery == null || mLastVisible == null) {
                 return;
             }
 
-            mCurrentQuery = mBaseQuery.limit(amount + 1).startAt(lastVisible);
+            mCurrentQuery = mBaseQuery.limit(amount + 1).startAt(mLastVisible);
 
             mCurrentQuery.addSnapshotListener((documentSnapshots, e) -> {
                 if (e == null) {
@@ -290,18 +309,18 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
 
                     List<DocumentSnapshot> documents = documentSnapshots.getDocuments();
 
-                    if (documents.get(0).equals(lastVisible)) {
+                    if (documents.get(0).equals(mLastVisible)) {
                         for (DocumentSnapshot document : documents) {
                             Report report = document.toObject(Report.class);
-                            posToId.put(position, document.getId());
+                            mPosToId.put(position, document.getId());
                             mReports.put(position++, report);
 
-                            lastVisible = document;
+                            mLastVisible = document;
                         }
 
                         notifyItemRangeChanged(position, amount + 1);
 
-                        dataLoadedCallback.dataLoaded();
+                        mDataLoadedCallback.dataLoaded();
                     } else {
                         // TODO print error
                         refresh();
@@ -342,8 +361,8 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
                 viewHolder.location.setVisibility(View.GONE);
             }
 
-            viewHolder.date.setText(dateFormatter.format(model.getTimestamp()));
-            viewHolder.time.setText(timeFormatter.format(model.getTimestamp()));
+            viewHolder.date.setText(mDateFormatter.format(model.getTimestamp()));
+            viewHolder.time.setText(mTimeFormatter.format(model.getTimestamp()));
         }
 
         @NonNull
@@ -353,7 +372,7 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
 
             final ReportViewHolder holder = new ReportViewHolder(feedItemView);
 
-            feedItemView.setOnClickListener(view -> onItemClickListener.apply(holder));
+            feedItemView.setOnClickListener(view -> mOnItemClickListener.apply(holder));
 
             return holder;
         }

@@ -4,12 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <android.support.design.widget.AppBarLayout
         android:id="@+id/reachout_appbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
         <android.support.v7.widget.Toolbar
             android:layout_width="match_parent"
@@ -18,6 +16,20 @@
             android:elevation="4dp"
             app:title="Resources"
             app:titleTextColor="@android:color/black" />
+    </android.support.design.widget.AppBarLayout>
+
+    <ViewFlipper
+        android:id="@+id/reach_out_view_flipper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:orientation="vertical"
+        app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior">
+
+        <ProgressBar
+            android:id="@+id/reach_out_progress_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
         <android.support.v4.widget.NestedScrollView
             android:layout_width="match_parent"
@@ -36,6 +48,6 @@
                     android:scrollbars="vertical" />
             </RelativeLayout>
         </android.support.v4.widget.NestedScrollView>
-    </LinearLayout>
+    </ViewFlipper>
 
 </android.support.design.widget.CoordinatorLayout>

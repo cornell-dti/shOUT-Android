@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -38,19 +39,15 @@ public class ReportViewDialogFragment extends AppCompatDialogFragment {
 
     private static final String TAG = "ReportView";
 
-    private TextView timeTextView, titleTextView, bodyTextView, locationTextView;
-    private MapView mapView;
+    private static final String REPORT_ARGUMENT = "report";
+    private static final String LATLNG_ARGUMENT = "latLng";
 
-    private Calendar calendar = Calendar.getInstance();
-    private LatLng latLng;
+    private Calendar mCalendar = Calendar.getInstance();
+    private LatLng mLatLng;
+    private Report mReport;
 
-    private java.text.DateFormat timeFormatter;
-    private java.text.DateFormat dateFormatter;
-
-    private int returnPage;
-    private Report report;
-
-    private ShowMapCallback showMapCallback = latLng -> {
+    @NonNull
+    private ShowMapCallback mShowMapCallback = latLng -> {
     };
 
     public interface ShowMapCallback {
@@ -60,33 +57,30 @@ public class ReportViewDialogFragment extends AppCompatDialogFragment {
     @Override
     public void onAttach(Context context) {
         if (context instanceof ShowMapCallback) {
-            showMapCallback = (ShowMapCallback) context;
+            mShowMapCallback = (ShowMapCallback) context;
         }
 
         super.onAttach(context);
     }
 
-    public static ReportViewDialogFragment newInstance(Report report, LatLng latLng, int returnPage) {
+    public static ReportViewDialogFragment newInstance(Report report, LatLng latLng) {
         ReportViewDialogFragment dialog = new ReportViewDialogFragment();
 
         Bundle args = new Bundle();
-        args.putDoubleArray("latLng", new double[]{latLng.latitude, latLng.longitude});
-        args.putInt("returnPage", returnPage); // TODO find a better method to fix this UI issue
-
-        args.putSerializable("report", report);
+        args.putDoubleArray(LATLNG_ARGUMENT, new double[]{latLng.latitude, latLng.longitude});
+        args.putSerializable(REPORT_ARGUMENT, report);
 
         dialog.setArguments(args);
 
         return dialog;
     }
 
-    public static ReportViewDialogFragment newInstance(Report report, int returnPage) {
+    public static ReportViewDialogFragment newInstance(Report report) {
         ReportViewDialogFragment dialog = new ReportViewDialogFragment();
 
         // Supply num input as an argument.
         Bundle args = new Bundle();
-        args.putInt("returnPage", returnPage);
-        args.putSerializable("report", report);
+        args.putSerializable(REPORT_ARGUMENT, report);
 
         dialog.setArguments(args);
 
@@ -105,7 +99,12 @@ public class ReportViewDialogFragment extends AppCompatDialogFragment {
         appBarLayout.setPadding(0, LayoutUtil.getStatusBarHeight(AndroidUtil.getContext(container, this)), 0, 0);
 
         /* Setup toolbar buttons */
-        // TODO add close button
+
+        ImageButton button = reportDialogView.findViewById(R.id.report_view_close_button);
+
+        button.setOnClickListener(v -> {
+            dismiss();
+        });
 
         /* Disable options menu (we don't use it) */
 
@@ -113,60 +112,60 @@ public class ReportViewDialogFragment extends AppCompatDialogFragment {
 
         Context context = getContext();
 
-        this.dateFormatter = DateFormat.getDateFormat(context);
-        this.timeFormatter = DateFormat.getTimeFormat(context);
+        java.text.DateFormat dateFormatter = DateFormat.getDateFormat(context);
+        java.text.DateFormat timeFormatter = DateFormat.getTimeFormat(context);
 
         /* Retrieve miscellaneous views... */
 
-        titleTextView = reportDialogView.findViewById(R.id.report_view_title_text_view);
-        bodyTextView = reportDialogView.findViewById(R.id.report_view_body_text_view);
-        timeTextView = reportDialogView.findViewById(R.id.report_view_time_text_view);
+        TextView titleTextView = reportDialogView.findViewById(R.id.report_view_title_text_view);
+        TextView bodyTextView = reportDialogView.findViewById(R.id.report_view_body_text_view);
+        TextView timeTextView = reportDialogView.findViewById(R.id.report_view_time_text_view);
 
-        locationTextView = reportDialogView.findViewById(R.id.report_view_address_text_view);
-        // timeTextView = reportDialogView.findViewById(R.id.report_time_spinner_text_view);
-        mapView = reportDialogView.findViewById(R.id.report_view_map_view);
+        TextView locationTextView = reportDialogView.findViewById(R.id.report_view_address_text_view);
+
+        MapView mapView = reportDialogView.findViewById(R.id.report_view_map_view);
         mapView.onCreate(savedInstanceState);
         mapView.onResume();
 
-        /* Setup the latLng selector if a latLng was passed to the dialog... */
+        /* Setup the mLatLng selector if a mLatLng was passed to the dialog... */
 
-        if (this.report != null) {
-            this.titleTextView.setText(this.report.getTitle());
-            this.bodyTextView.setText(this.report.getBody());
-            this.locationTextView.setText(this.report.getLocation());
+        if (this.mReport != null) {
+            titleTextView.setText(this.mReport.getTitle());
+            bodyTextView.setText(this.mReport.getBody());
+            locationTextView.setText(this.mReport.getLocation());
 
-            long timestamp = this.report.getTimestamp();
+            long timestamp = this.mReport.getTimestamp();
 
-            String time = this.timeFormatter.format(timestamp);
-            String date = this.dateFormatter.format(timestamp);
+            String time = timeFormatter.format(timestamp);
+            String date = dateFormatter.format(timestamp);
 
-            this.calendar.setTimeInMillis(timestamp);
+            this.mCalendar.setTimeInMillis(timestamp);
 
             Calendar calendar = Calendar.getInstance();
 
-            boolean thisYear = calendar.get(Calendar.YEAR) == this.calendar.get(Calendar.YEAR);
-            boolean today = thisYear && calendar.get(Calendar.DAY_OF_YEAR) == this.calendar.get(Calendar.DAY_OF_YEAR);
-            boolean yesterday = thisYear && calendar.get(Calendar.DAY_OF_YEAR) == this.calendar.get(Calendar.DAY_OF_YEAR) + 1;
+            boolean thisYear = calendar.get(Calendar.YEAR) == this.mCalendar.get(Calendar.YEAR);
+            boolean today = thisYear && calendar.get(Calendar.DAY_OF_YEAR) == this.mCalendar.get(Calendar.DAY_OF_YEAR);
+            boolean yesterday = thisYear && calendar.get(Calendar.DAY_OF_YEAR) == this.mCalendar.get(Calendar.DAY_OF_YEAR) + 1;
 
             if (today) {
-                this.timeTextView.setText(getResources().getString(R.string.report_time_today, time));
+                timeTextView.setText(getResources().getString(R.string.report_time_today, time));
             } else if (yesterday) {
-                this.timeTextView.setText(getResources().getString(R.string.report_time_yesterday, time));
+                timeTextView.setText(getResources().getString(R.string.report_time_yesterday, time));
             } else {
-                this.timeTextView.setText(getResources().getString(R.string.report_time_date, date, time));
+                timeTextView.setText(getResources().getString(R.string.report_time_date, date, time));
             }
         }
 
-        if (this.latLng != null) {
-            this.mapView.getMapAsync((map) -> {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(this.latLng, ZoomLevel.DEFAULT));
+        if (this.mLatLng != null) {
+            mapView.getMapAsync((map) -> {
+                map.addMarker(new MarkerOptions().position(this.mLatLng));
 
-                map.addMarker(new MarkerOptions().position(this.latLng));
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(this.mLatLng, ZoomLevel.DEFAULT));
 
                 map.setOnMapClickListener(latLng -> {
                     ReportViewDialogFragment.this.dismiss();
 
-                    showMapCallback.showMap(latLng);
+                    mShowMapCallback.showMap(latLng);
                 });
             });
 
@@ -185,17 +184,13 @@ public class ReportViewDialogFragment extends AppCompatDialogFragment {
         Bundle bundle = getArguments();
 
         if (bundle != null) {
-            double[] loc = bundle.getDoubleArray("latLng");
+            double[] loc = bundle.getDoubleArray(LATLNG_ARGUMENT);
 
             if (loc != null) {
-                this.latLng = new LatLng(loc[0], loc[1]);
+                this.mLatLng = new LatLng(loc[0], loc[1]);
             }
 
-            this.returnPage = bundle.getInt("returnPage");
-
-            this.report = (Report) bundle.getSerializable("report");
-
-
+            this.mReport = (Report) bundle.getSerializable(REPORT_ARGUMENT);
         }
 
         /* Set the style of this dialog. */

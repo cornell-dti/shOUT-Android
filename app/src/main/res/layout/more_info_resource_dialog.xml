@@ -58,6 +58,18 @@
             app:srcCompat="@drawable/website_icon_small" />
 
         <TextView
+            android:id="@+id/resource_item_website_label_text_view"
+            android:layout_width="0dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="72dp"
+            android:layout_marginTop="20dp"
+            android:text="@string/website"
+            android:textAlignment="textStart"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
             android:id="@+id/resource_item_website_subtitle_text_view"
             android:layout_width="0dp"
             android:layout_height="22dp"
@@ -68,17 +80,20 @@
             android:textAlignment="textStart"
             android:textColor="@android:color/secondary_text_light"
             android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@id/resource_info_separator_c"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/resource_item_website_label_text_view" />
+
+        <LinearLayout
+            android:id="@+id/resource_info_separator_c"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/editTextSeparator"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            tools:ignore="Orientation" />
 
     </android.support.constraint.ConstraintLayout>
 
-    <LinearLayout
-        android:id="@+id/resource_info_separator_c"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/editTextSeparator"
-        tools:ignore="Orientation" />
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/resource_info_directions_button"
@@ -98,6 +113,18 @@
             app:srcCompat="@drawable/directions_icon_small" />
 
         <TextView
+            android:id="@+id/resource_item_directions_label_text_view"
+            android:layout_width="0dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="72dp"
+            android:layout_marginTop="20dp"
+            android:text="@string/directions"
+            android:textAlignment="textStart"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
             android:id="@+id/resource_item_directions_subtitle_text_view"
             android:layout_width="0dp"
             android:layout_height="22dp"
@@ -108,18 +135,21 @@
             android:textAlignment="textStart"
             android:textColor="@android:color/secondary_text_light"
             android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/resource_info_separator_d"
             app:layout_constraintStart_toStartOf="parent"
-           />
+            app:layout_constraintTop_toBottomOf="@+id/resource_item_directions_label_text_view" />
+
+        <LinearLayout
+            android:id="@+id/resource_info_separator_d"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/editTextSeparator"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:ignore="Orientation" />
+
 
     </android.support.constraint.ConstraintLayout>
 
-    <LinearLayout
-        android:id="@+id/resource_info_separator_d"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/editTextSeparator"
-        tools:ignore="Orientation" />
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/resource_info_email_button"
@@ -144,21 +174,34 @@
             android:layout_height="22dp"
             android:layout_marginStart="72dp"
             android:layout_marginTop="20dp"
-            android:text="@string/placeholder_text"
+            android:text="@string/email"
             android:textAlignment="textStart"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <TextView
+            android:id="@+id/resource_item_email_subtitle_text_view"
+            android:layout_width="0dp"
+            android:layout_height="22dp"
+            android:layout_marginBottom="20dp"
+            android:layout_marginStart="72dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/placeholder_text"
+            android:textAlignment="textStart"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@id/resource_info_separator"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/resource_item_email_label_text_view" />
+
+        <LinearLayout
+            android:id="@+id/resource_info_separator"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/editTextSeparator"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:ignore="Orientation" />
     </android.support.constraint.ConstraintLayout>
-
-
-    <LinearLayout
-        android:id="@+id/resource_info_separator"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/editTextSeparator"
-        tools:ignore="Orientation" />
 
     <ListView
         android:id="@+id/resource_info_phone_number_list_view"

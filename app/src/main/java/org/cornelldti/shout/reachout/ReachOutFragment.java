@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ViewFlipper;
 
 import com.firebase.ui.firestore.ClassSnapshotParser;
 import com.google.firebase.firestore.CollectionReference;
@@ -34,14 +35,20 @@ public class ReachOutFragment extends ShoutTabFragment {
 
     private static final String DEFAULT_SECTION = "Resources";
 
+    private static final int PROGRESS_SPINNER_CHILD = 0;
+    private static final int RECYCLER_VIEW_CHILD = 1;
+
     private Map<String, ResourceSection> resourceSections = new HashMap<>();
     private FirebaseFirestore mFirestore;
     private ResourceAdapter mResourceAdapter;
+    private ViewFlipper mViewFlipper;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.reachout_fragment, container, false);
+        View view = inflater.inflate(R.layout.reach_out_fragment, container, false);
         RecyclerView mRecyclerView = view.findViewById(R.id.reachout_recycler_view);
+        mViewFlipper = view.findViewById(R.id.reach_out_view_flipper);
+        mViewFlipper.setDisplayedChild(PROGRESS_SPINNER_CHILD);
 
         mResourceAdapter = new ResourceAdapter();
         mRecyclerView.setAdapter(mResourceAdapter);
@@ -69,6 +76,8 @@ public class ReachOutFragment extends ShoutTabFragment {
 
         return view;
     }
+
+    // TODO cleanup this mess
 
     private void loadResources() {
         CollectionReference ref = mFirestore.collection(ShoutFirestore.RESOURCES_COLLECTION);
@@ -100,6 +109,8 @@ public class ReachOutFragment extends ShoutTabFragment {
                 section.addResource(resource);
                 mResourceAdapter.notifyItemChangedInSection(section, section.getResources().size() - 1);
             }
+
+            mViewFlipper.setDisplayedChild(RECYCLER_VIEW_CHILD);
         })).addOnFailureListener((error) -> Log.e(TAG, "Could not add resource..." + error.getMessage()));
     }
 

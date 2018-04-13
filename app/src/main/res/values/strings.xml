@@ -24,6 +24,14 @@
     <string name="authentication_failed_error_message">Unable to connect to Shout servers.</string>
     <string name="retry_authentication_attempt_message">Try Again</string>
     <string name="reports_at_location_header">Reports at this location...</string>
+    <string name="all_reports">All Reports</string>
+    <string name="stories_only">Stories Only</string>
+    <string name="filter_title">Filter</string>
+    <string name="email">Email</string>
+    <string name="directions">Directions</string>
+    <string name="website">Website</string>
+    <string name="resources_disclaimer">These resources are unaffiliated with Shout or Cornell DTI and it is the user\'s responsibility to properly investigate each resource before use.</string>
+    <string name="resources_disclaimer_title">Resources</string>
     <plurals name="number_of_reports">
         <item quantity="zero">No reports at this location.</item>
         <item quantity="one">%d report at this location.</item>

@@ -19,6 +19,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.RecyclerView;
@@ -126,7 +127,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             mBottomSheetShadow.setVisibility(View.INVISIBLE);
-
 
             Bundle bundle = new Bundle();
 
@@ -585,13 +585,23 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
                 break;
             case HELP:
+                mFloatingActionButton.setOnClickListener(v -> {
+                    AlertDialog dialog = new AlertDialog.Builder(this)
+                            .setTitle(R.string.resources_disclaimer_title)
+                            .setMessage(R.string.resources_disclaimer)
+                            .create();
+                    dialog.show();
+                });
+
                 mFloatingActionButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_help));
                 break;
             case DISABLED:
+                mFloatingActionButton.setOnClickListener(v -> {
+                });
+
                 mFloatingActionButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_help));
                 break;
             default:
-
                 // mFloatingActionButton.setImageDrawable(null);
 
                 break;
