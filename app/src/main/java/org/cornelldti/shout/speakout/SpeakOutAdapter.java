@@ -117,39 +117,18 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
     @NonNull
     @Override
     public ReportViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-       /* if (viewType == 2) {
-            View loadMoreItemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_load_more_item, parent, false);
-
-            final LoadMoreViewHolder loadMoreViewHolder = new LoadMoreViewHolder(loadMoreItemView);
-
-            loadMoreItemView.setOnClickListener(view -> {
-
-            });
-
-            return loadMoreViewHolder;
-        } else {*/
         return adapter().onCreateViewHolder(parent, viewType);
-        // TODO
-        //}
     }
 
     @Override
     public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
-        //if (holder instanceof ReportViewHolder) {
         adapter().bindViewHolder(holder, position);
-        //}
     }
 
     @Override
     public int getItemCount() {
         return adapter().getItemCount();
     }
-
-//
-    //  @Override
-    //public int getItemViewType(int position) {
-    //  return 1;
-    //}
 
     /**
      * Constructs a SpeakOutAdapter
@@ -257,16 +236,20 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
             this.timeFormatter = DateFormat.getTimeFormat(context);
         }
 
-        public void refresh() {
+        void refresh() {
             refresh((success) -> {
             });
         }
 
-        public void refresh(@NonNull Consumer<Boolean> refreshComplete) {
+        void refresh(@NonNull Consumer<Boolean> refreshComplete) {
+            if (mBaseQuery == null || lastVisible == null) {
+                refreshComplete.apply(false);
+                return;
+            }
+
             mCurrentQuery = mBaseQuery.endAt(lastVisible);
 
             SparseArray<Report> reports = new SparseArray<>();
-            AtomicReference<DocumentSnapshot> lastVisible = new AtomicReference<>();
 
             mCurrentQuery.addSnapshotListener((documentSnapshots, e) -> {
                 if (e == null) {
@@ -295,6 +278,10 @@ public class SpeakOutAdapter extends RecyclerView.Adapter<SpeakOutAdapter.Report
         }
 
         public void loadMore(int amount) {
+            if (mBaseQuery == null || lastVisible == null) {
+                return;
+            }
+
             mCurrentQuery = mBaseQuery.limit(amount + 1).startAt(lastVisible);
 
             mCurrentQuery.addSnapshotListener((documentSnapshots, e) -> {

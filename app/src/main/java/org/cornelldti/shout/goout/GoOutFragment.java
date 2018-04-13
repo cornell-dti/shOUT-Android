@@ -43,6 +43,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DatabaseError;
@@ -217,6 +218,16 @@ public class GoOutFragment extends ShoutTabFragment {
     private OnMapReadyCallback instantiateMapHandler(Context context, int statusbarSize) {
         return googleMap -> {
             GoOutFragment.this.mGoogleMap = googleMap;
+
+            try {
+                boolean success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.maps_style));
+
+                if (!success) {
+                    Log.e(TAG, "Failed to apply custom style to map.");
+                }
+            } catch (Resources.NotFoundException e) {
+                Log.e(TAG, "Style not found. Error: ", e);
+            }
 
             // moves all "mGoogleMap drawn" ui elements (buttons, etc)
             // 55 = margins + size of searchbar
