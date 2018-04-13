@@ -32,6 +32,7 @@
     <string name="website">Website</string>
     <string name="resources_disclaimer">These resources are unaffiliated with Shout or Cornell DTI and it is the user\'s responsibility to properly investigate each resource before use.</string>
     <string name="resources_disclaimer_title">Resources</string>
+    <string name="legal_tos">This will contain plenty of legalese once our lawyers finalize it...</string>
     <plurals name="number_of_reports">
         <item quantity="zero">No reports at this location.</item>
         <item quantity="one">%d report at this location.</item>

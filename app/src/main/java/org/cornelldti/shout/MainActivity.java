@@ -74,10 +74,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     private TextView mAddressTextView, mNumOfReportsTextView;
     private FloatingActionButton mFloatingActionButton;
 
-    /* This is just used for connecting to Firebase */
-
-    private ProgressDialog mStartDialog;
-
     /* Utility variable... */
 
     private MenuItem mPrevMenuItem;
@@ -219,14 +215,8 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                     Log.d(TAG, "Failed to sign into Firebase anonymously.");
                     Toast.makeText(MainActivity.this, "Failed to connect to shOUT.", Toast.LENGTH_SHORT).show();
                 }
-
-                /* Remove the start dialog. */
-                mStartDialog.cancel();
             });
         } else {
-            /* If the user is already signed in, remove the blocking dialog... */
-            mStartDialog.cancel();
-
             setPage(Page.SPEAK_OUT);
         }
     }
@@ -256,14 +246,8 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                     Log.d(TAG, "Failed to sign into Firebase anonymously.");
                     Toast.makeText(MainActivity.this, "Failed to connect to shOUT.", Toast.LENGTH_SHORT).show();
                 }
-
-                /* Remove the start dialog. */
-                mStartDialog.cancel();
             });
         } else {
-            /* If the user is already signed in, remove the blocking dialog... */
-            mStartDialog.cancel();
-
             result.success();
 
             setPage(Page.SPEAK_OUT);
@@ -328,16 +312,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         mAuth = FirebaseAuth.getInstance();
 
         /* Setup the dialog which runs until the user is anonymously logged in. */
-
-        // TODO put this somewhere cleaner and use a start screen instead.
-        mStartDialog = new ProgressDialog(this);
-        mStartDialog.setMessage("Connecting to shOUT...");
-        mStartDialog.setCancelable(false);
-        mStartDialog.setInverseBackgroundForced(false);
-
-        /* Start the dialog. */
-
-        mStartDialog.show();
 
         /* Setup the location request. */
 

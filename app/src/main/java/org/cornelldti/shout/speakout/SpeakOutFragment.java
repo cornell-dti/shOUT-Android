@@ -1,6 +1,7 @@
 package org.cornelldti.shout.speakout;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
@@ -8,6 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -149,10 +151,10 @@ public class SpeakOutFragment extends ShoutTabFragment implements AdapterChanged
             adapter.refreshItems(success -> mSwipeRefreshLayout.setRefreshing(false));
         });
 
-        ImageButton b = toolbar.findViewById(R.id.filter_reports_button);
+        ImageButton filterButton = toolbar.findViewById(R.id.filter_reports_button);
 
-        if (context != null && b != null) {
-            b.setOnClickListener(v2 -> {
+        if (context != null && filterButton != null) {
+            filterButton.setOnClickListener(v2 -> {
                 FilterDialogFragment dialog = FilterDialogFragment.construct(context, mCurrentFilterOption -> {
                     mFilterOption = mCurrentFilterOption;
                     adapter.filter(mFilterOption);
@@ -166,6 +168,20 @@ public class SpeakOutFragment extends ShoutTabFragment implements AdapterChanged
             });
         } else {
             Log.e(TAG, "Unable to find filter button.");
+        }
+
+        ImageButton infoButton = toolbar.findViewById(R.id.shout_info_button);
+
+        if (context != null && infoButton != null) {
+            infoButton.setOnClickListener(v2 -> {
+                AlertDialog dialog = new AlertDialog.Builder(context, R.style.DialogStyle)
+                        .setTitle(R.string.app_name)
+                        .setMessage(R.string.legal_tos)
+                        .setPositiveButton(android.R.string.ok, (owner, which) -> owner.dismiss()).create();
+                dialog.show();
+            });
+        } else {
+            Log.e(TAG, "Unable to find info button.");
         }
 
         return speakoutFragment;

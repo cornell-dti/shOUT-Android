@@ -22,6 +22,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.cornelldti.shout.R;
+import org.cornelldti.shout.ShoutFirestore;
 import org.cornelldti.shout.speakout.Report;
 import org.cornelldti.shout.util.function.BiConsumer;
 import org.cornelldti.shout.util.function.Consumer;
@@ -35,6 +36,8 @@ import java.util.List;
 
 public class GoOutRecentReportsAdapter extends RecyclerView.Adapter<GoOutRecentReportsAdapter.ReportViewHolder> {
 
+    // TODO cleanup internal classes, etc.
+
     private Consumer<ReportViewHolder> mClickListener;
     private Reports reports = new Reports();
 
@@ -44,37 +47,29 @@ public class GoOutRecentReportsAdapter extends RecyclerView.Adapter<GoOutRecentR
         private final SparseArray<String> posToId = new SparseArray<>();
 
         private int intendedSize = 0;
-        private boolean locked = false;
 
         private CollectionReference ref;
 
         private Reports() {
             FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-            ref = firestore.collection("reports");
+            ref = firestore.collection(ShoutFirestore.REPORTS_COLLECTION);
         }
 
         private void addByKey(String key) {
-            if (!locked) {
-                intendedSize++;
+            intendedSize++;
 
-
-                ref.document(key).get().addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot snapshot = task.getResult();
-                        Report report = snapshot.toObject(Report.class);
-                        list.add(report);
-                        int index = list.size() - 1;
-                        posToId.put(index, key); // TODO double check list spec to ensure that add always adds to end
-                        notifyItemInserted(index);
-                    }
-                });
-
-            }
+            ref.document(key).get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot snapshot = task.getResult();
+                    Report report = snapshot.toObject(Report.class);
+                    list.add(report);
+                    int index = list.size() - 1;
+                    posToId.put(index, key);
+                    notifyItemInserted(index);
+                }
+            });
         }
 
-        private void lock() {
-            locked = true;
-        }
     }
 
     private GoOutRecentReportsAdapter(BiConsumer<GoOutRecentReportsAdapter, ReportViewHolder> clickListener) {
