@@ -312,6 +312,8 @@ public class GoOutFragment extends ShoutTabFragment {
                     longAvg = ((pos.longitude + longAvg) / 2);
                 }
 
+                showReportsByRadius((MainActivity) activity, first, 0.15); // FIGURE OUT HOW TO IMPROVE THIS TODO
+
                 float zoomLevel = Math.min((googleMap.getCameraPosition().zoom + 4), ZoomLevel.CLOSE_UP);
 
                 if (activity instanceof MainActivity) {

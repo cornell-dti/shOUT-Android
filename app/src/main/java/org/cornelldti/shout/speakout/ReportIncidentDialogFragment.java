@@ -108,14 +108,25 @@ public class ReportIncidentDialogFragment extends AppCompatDialogFragment {
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
                 if (user != null) {
-                    UnapprovedReport m = new UnapprovedReport(
-                            editReportDetails.getText().toString(),
-                            editReportTitle.getText().toString(),
-                            user.getUid(),
-                            locationEdit.getText().toString(),
-                            location, calendar.getTimeInMillis());
-                    String id = FirebaseDatabase.getInstance().getReference("unapproved_reports").push().getKey();
-                    database.child(id).setValue(m).addOnCompleteListener(listener);
+                    if(locationEdit.getText().toString().isEmpty())
+                    {
+                        UnapprovedReport m = new UnapprovedReport(
+                                editReportDetails.getText().toString(),
+                                editReportTitle.getText().toString(), user.getUid(),
+                                calendar.getTimeInMillis());
+                        String id = FirebaseDatabase.getInstance().getReference("unapproved_reports").push().getKey();
+                        database.child(id).setValue(m).addOnCompleteListener(listener);
+                    }
+                    else {
+                        UnapprovedReport m = new UnapprovedReport(
+                                editReportDetails.getText().toString(),
+                                editReportTitle.getText().toString(),
+                                user.getUid(),
+                                locationEdit.getText().toString(),
+                                location, calendar.getTimeInMillis());
+                        String id = FirebaseDatabase.getInstance().getReference("unapproved_reports").push().getKey();
+                        database.child(id).setValue(m).addOnCompleteListener(listener);
+                    }
                 } else {
                     Toast.makeText(getContext(), "Cannot connect to shOUT.", Toast.LENGTH_SHORT).show();
                     dismiss();

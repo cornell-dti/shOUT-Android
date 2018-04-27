@@ -21,6 +21,7 @@
             <ImageButton
                 android:id="@+id/report_view_close_button"
                 style="@style/Widget.AppCompat.Button.Borderless"
+                android:id="@+id/backButton"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_margin="8dp"

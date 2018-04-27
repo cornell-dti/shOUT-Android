@@ -18,17 +18,20 @@ public class Report implements Serializable {
     public transient static final String TITLE = "title";
     public transient static final String LOCATION = "location";
     public transient static final String TIMESTAMP = "timestamp";
+    public transient static final String HAS_LOCATION = "haslocation";
 
     private String body, title, location;
     private long timestamp;
     private boolean hasbody;
+    private boolean hasLocation;
 
-    Report(String body, String title, String location, long timestamp, boolean hasbody) {
+    Report(String body, String title, String location, long timestamp, boolean hasbody, boolean hasLocation) {
         this.body = body;
         this.title = title;
         this.timestamp = timestamp;
         this.location = location;
         this.hasbody = hasbody;
+        this.hasLocation = hasLocation;
     }
 
     public Report() {
@@ -52,6 +55,11 @@ public class Report implements Serializable {
 
     public boolean getHasBody() {
         return hasbody;
+    }
+
+    public boolean getHasLocation()
+    {
+        return hasLocation;
     }
 
 }

@@ -46,8 +46,24 @@ public class ReportViewDialogFragment extends AppCompatDialogFragment {
     private LatLng mLatLng;
     private Report mReport;
 
+<<<<<<< Updated upstream
     @NonNull
     private ShowMapCallback mShowMapCallback = latLng -> {
+=======
+<<<<<<< HEAD
+    private java.text.DateFormat timeFormatter;
+    private java.text.DateFormat dateFormatter;
+
+    private int returnPage;
+    private Report report;
+    private ImageButton backButton;
+
+    private ShowMapCallback showMapCallback = latLng -> {
+=======
+    @NonNull
+    private ShowMapCallback mShowMapCallback = latLng -> {
+>>>>>>> origin/master
+>>>>>>> Stashed changes
     };
 
     public interface ShowMapCallback {
@@ -117,15 +133,45 @@ public class ReportViewDialogFragment extends AppCompatDialogFragment {
 
         /* Retrieve miscellaneous views... */
 
+<<<<<<< Updated upstream
         TextView titleTextView = reportDialogView.findViewById(R.id.report_view_title_text_view);
         TextView bodyTextView = reportDialogView.findViewById(R.id.report_view_body_text_view);
         TextView timeTextView = reportDialogView.findViewById(R.id.report_view_time_text_view);
 
         TextView locationTextView = reportDialogView.findViewById(R.id.report_view_address_text_view);
 
+=======
+<<<<<<< HEAD
+        titleTextView = reportDialogView.findViewById(R.id.report_view_title_text_view);
+        bodyTextView = reportDialogView.findViewById(R.id.report_view_body_text_view);
+        timeTextView = reportDialogView.findViewById(R.id.report_view_time_text_view);
+        backButton = reportDialogView.findViewById(R.id.backButton);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismiss();
+            }
+        });
+
+        locationTextView = reportDialogView.findViewById(R.id.report_view_address_text_view);
+        // timeTextView = reportDialogView.findViewById(R.id.report_time_spinner_text_view);
+        mapView = reportDialogView.findViewById(R.id.report_view_map_view);
+        if(latLng.latitude != 0 && latLng.longitude != 0) {
+            mapView.onCreate(savedInstanceState);
+            mapView.onResume();
+        }
+=======
+        TextView titleTextView = reportDialogView.findViewById(R.id.report_view_title_text_view);
+        TextView bodyTextView = reportDialogView.findViewById(R.id.report_view_body_text_view);
+        TextView timeTextView = reportDialogView.findViewById(R.id.report_view_time_text_view);
+
+        TextView locationTextView = reportDialogView.findViewById(R.id.report_view_address_text_view);
+
+>>>>>>> Stashed changes
         MapView mapView = reportDialogView.findViewById(R.id.report_view_map_view);
         mapView.onCreate(savedInstanceState);
         mapView.onResume();
+>>>>>>> origin/master
 
         /* Setup the mLatLng selector if a mLatLng was passed to the dialog... */
 

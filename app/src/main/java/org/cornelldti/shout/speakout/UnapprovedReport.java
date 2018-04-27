@@ -25,6 +25,17 @@ public class UnapprovedReport {
         this.locationLabel = locationLabel;
     }
 
+    UnapprovedReport(String body, String title, String uid, long timestamp)
+    {
+        this.body = body;
+        this.title = title;
+        this.uid = uid;
+        this.timestamp = timestamp;
+        this.locationLabel = "";
+        this.locationLat = 0;
+        this.locationLong = 0;
+    }
+
     public double getLocationLong() {
         return locationLong;
     }
