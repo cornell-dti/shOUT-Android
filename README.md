@@ -8,10 +8,10 @@
   - [Contributors](#contributors)
 ​
 ## About
-A(n) **[Android, iOS]** app for **purpose**. **additional related repository links**.
+A(n) **Android, iOS** app to help raise awareness of sexual assault on campus and give survivors a voice to share their stories and locate regions on campus where incidents have occurred. **additional related repository links**.
 ​
 ## Getting Started
-You will need **required IDE or platform, version number** to run the latest version of this app, which uses the following **SDKs, extensions, packages**:
+You will need **Android Studio, version number** to run the latest version of this app, which uses the following **SDKs, extensions, packages**:
 ​
  * **api name***
  * Android API 27
@@ -20,8 +20,8 @@ You will need **required IDE or platform, version number** to run the latest ver
 _Last updated **04/27/2018**_.
 ​
 ## Dependencies & Libraries
- * **[Example Library](http://example.com)** - **Why we use this library**
- * [Guava](https://github.com/google/guava) - a Google Library containing lots of helpful classes for Java. Most notably, immutable data structures (like ImmutableList) and EventBus, which provides a way for classes that do not have references to each other to communicate.
+ * **[Google Maps API Android](https://developers.google.com/maps/documentation/android-sdk/intro)** - **We use this library to display report locations and power our map feature.**
+ * [Firebase](https://firebase.google.com/) - We use Firebase, a library owned by Google, to power our app's backend. The backend is used to store data such as resources for victims and annonymous reports.
 ​
 ## External Documentation
 ​
