@@ -29,8 +29,6 @@ _Last updated **04/27/2018**_.
 ​
 ## Screenshots
 ​
-_Screenshots showing major parts of app_
-​
 <img src="https://raw.githubusercontent.com/cornell-dti/shOUT-Android/master/screenshots/mapview.png" width="250px" style="margin: 10px; border: 1px rgba(0,0,0,0.4) solid;"> <img src="https://raw.githubusercontent.com/cornell-dti/shOUT-Android/master/screenshots/newsfeed.png" width="250px" style="margin: 10px; border: 1px rgba(0,0,0,0.4) solid;"> <img src="https://raw.githubusercontent.com/cornell-dti/shOUT-Android/master/screenshots/resources.png" width="250px" style="margin: 10px; border: 1px rgba(0,0,0,0.4) solid;">
 ​
 ## Contributors
